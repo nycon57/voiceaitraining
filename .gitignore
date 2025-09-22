@@ -44,6 +44,6 @@ yarn-error.log*
 next-env.d.ts
 
 #MCPs
-.mcp.json
+.mcp.json 
 
-###
+######
