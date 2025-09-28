@@ -1,6 +1,6 @@
 'use client';
-import { Mic, BarChart3 } from 'lucide-react';
-import Link from 'next/link';
+import { Mic, BarChart3, Building2, Stethoscope, CreditCard, Monitor } from 'lucide-react';
+import { Link } from 'next-view-transitions';
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -26,26 +26,69 @@ import { cn } from '@/lib/utils';
 
 export const NAV_LINKS = [
   {
-    label: 'Platform',
-    href: '/platform',
+    label: 'Product',
+    href: '/product',
     subitems: [
       {
-        label: 'Voice AI Training',
-        href: '/platform',
-        description: 'AI-powered voice simulation for sales training',
+        label: 'Product Overview',
+        href: '/product',
+        description: 'Complete AI voice training platform',
         icon: Mic,
       },
       {
-        label: 'Performance Analytics',
-        href: '/analytics',
-        description: 'Advanced reporting and team insights',
+        label: 'Voice Simulation',
+        href: '/features/voice-simulation',
+        description: 'Realistic AI-powered conversations',
+        icon: Mic,
+      },
+      {
+        label: 'AI Scoring',
+        href: '/features/ai-scoring',
+        description: 'Intelligent performance evaluation',
+        icon: BarChart3,
+      },
+      {
+        label: 'Analytics',
+        href: '/features/analytics',
+        description: 'Advanced reporting and insights',
         icon: BarChart3,
       },
     ],
   },
+  {
+    label: 'Industries',
+    href: '/industries',
+    subitems: [
+      {
+        label: 'Mortgage',
+        href: '/industries/mortgage',
+        description: 'Mortgage and lending sales training',
+        icon: Building2,
+      },
+      {
+        label: 'Insurance',
+        href: '/industries/insurance',
+        description: 'Insurance sales team development',
+        icon: CreditCard,
+      },
+      {
+        label: 'Healthcare',
+        href: '/industries/healthcare',
+        description: 'Healthcare sales excellence',
+        icon: Stethoscope,
+      },
+      {
+        label: 'Tech Sales',
+        href: '/industries/tech-sales',
+        description: 'SaaS and technology sales training',
+        icon: Monitor,
+      },
+    ],
+  },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'About', href: '/about' },
   { label: 'Resources', href: '/resources' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 const ACTION_BUTTONS = [

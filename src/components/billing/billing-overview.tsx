@@ -59,14 +59,16 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CreditCard className="h-6 w-6 text-gray-400" />
               </div>
-              <h3 className="font-semibold mb-2">No Active Subscription</h3>
+              <h3 className="font-headline font-semibold mb-2">No Active Subscription</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Choose a plan to get started with advanced features
               </p>
               <Button asChild>
                 <a href={`/org/${orgId}/billing?tab=plans`}>
-                  Choose Plan
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  <div className="flex items-center gap-2">
+                    Choose Plan
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
                 </a>
               </Button>
             </div>

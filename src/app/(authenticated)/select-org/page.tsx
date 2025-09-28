@@ -84,8 +84,8 @@ export default async function SelectOrgPage() {
               <div className="text-center space-y-2">
                 <p className="text-sm text-muted-foreground">
                   Need help? Contact us at{' '}
-                  <a href="mailto:support@voiceaitraining.com" className="underline">
-                    support@voiceaitraining.com
+                  <a href="mailto:support@speakstride.com" className="underline">
+                    support@speakstride.com
                   </a>
                 </p>
                 <Button variant="outline" asChild>

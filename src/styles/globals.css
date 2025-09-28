@@ -16,22 +16,22 @@
   --card: oklch(0.95 0.01 320);
   --popover-foreground: oklch(0.05 0.02 290);
   --popover: oklch(0.95 0.01 320);
-  --primary: oklch(0.05 0.02 290);
+  --primary: var(--chart-1);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.62 0.18 280);
+  --secondary: var(--chart-2);
   --secondary-foreground: oklch(0.05 0.02 290);
   --muted: oklch(0.15 0.03 50 / 0.08);
   --muted-foreground: oklch(0.35 0.03 50);
-  --accent: oklch(0.96 0.01 320);
+  --accent: oklch(0.97 0.01 285);
   --accent-foreground: oklch(0.08 0.02 290);
   --destructive: oklch(0.604 0.191 22.216);
-  --border: oklch(0.84 0.01 240);
+  --border: oklch(0.90 0.02 285);
   --input: oklch(0.75 0.02 50);
   --ring: oklch(0.84 0.01 50);
 
-  --chart-1: oklch(0.58 0.2 285);
-  --chart-2: oklch(0.65 0.25 320);
-  --chart-3: oklch(0.72 0.15 25);
+  --chart-1: #9259ED;
+  --chart-2: #CF54EE;
+  --chart-3: #FB8684;
   --chart-4: oklch(0.5 0.15 240);
   --chart-5: oklch(0.5 0.15 240);
 
@@ -201,6 +201,38 @@
   .text-gradient {
     @apply bg-gradient-to-r from-[var(--chart-1)] via-[var(--chart-2)] to-[var(--chart-3)] bg-clip-text text-transparent;
   }
+  .font-headline {
+    font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* Enhanced utility classes for auth styling */
+  .bg-size-200 {
+    background-size: 200%;
+  }
+  .bg-pos-100 {
+    background-position: 100%;
+  }
+
+  /* Glass morphism utilities */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+  .backdrop-blur-3xl {
+    backdrop-filter: blur(64px);
+  }
+
+  /* Enhanced shadow utilities */
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Grid pattern backgrounds for better visual hierarchy */
+  .bg-grid-sm {
+    background-size: 20px 20px;
+  }
+  .bg-grid-md {
+    background-size: 30px 30px;
+  }
 }
 
 @utility font-weight-display {
@@ -269,5 +301,203 @@ html.theme-transition::view-transition-new(root) {
   }
   .motion-safe-only {
     display: none !important;
+  }
+}
+
+/* Design System Specific Animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.shimmer {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.4s ease-out;
+}
+
+/* Grid background pattern */
+.bg-grid-black\/\[0\.02\] {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+}
+
+.bg-grid-white\/\[0\.02\] {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Native View Transitions API Support - Anti-Glitch Optimized */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation-fill-mode: both;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  /* Prevent glitching with layer composition */
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+::view-transition-old(root) {
+  animation-name: stable-slide-out;
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  animation-name: stable-slide-in;
+  z-index: 2;
+}
+
+/* Anti-glitch exit animation - more stable */
+@keyframes stable-slide-out {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0) scale3d(1.01, 1.01, 1);
+  }
+}
+
+/* Anti-glitch entrance animation - more stable */
+@keyframes stable-slide-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale3d(0.99, 0.99, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+}
+
+/* Optimize transition root */
+::view-transition-group(root) {
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Prevent subpixel issues */
+  transform: translateZ(0);
+}
+
+/* Enhanced performance optimizations */
+html {
+  view-transition-name: root;
+  /* Force hardware acceleration globally */
+  transform: translateZ(0);
+}
+
+/* Reduce layout shifts during transitions */
+::view-transition-group(*) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Anti-flicker optimizations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Additional anti-glitch measures */
+::view-transition-image-pair(root) {
+  /* Ensure crisp rendering */
+  isolation: isolate;
+  mix-blend-mode: normal;
+}
+
+/* Enhanced performance for page transitions */
+.will-change-transform {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Smooth scrolling for better UX during transitions */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

@@ -29,7 +29,7 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, ExternalLink, Info } from 'lucide-react'
 import { createWebhook, updateWebhook, WEBHOOK_EVENTS } from '@/actions/webhooks'
-import { toast } from '@/components/hooks/use-toast'
+import { toast } from '@/hooks/use-toast'
 
 const webhookFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),

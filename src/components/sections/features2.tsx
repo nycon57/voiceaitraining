@@ -68,7 +68,7 @@ const Features2 = () => {
     <section className="section-padding">
       <div className="container space-y-8">
         {/* Header */}
-        <h2 className="text-4xxl mb-10 max-w-2xl leading-none tracking-tight text-balance md:text-5xl lg:mx-auto lg:mb-15 lg:text-center lg:text-6xl">
+        <h2 className="font-headline text-4xxl mb-10 max-w-2xl leading-none tracking-tight text-balance md:text-5xl lg:mx-auto lg:mb-15 lg:text-center lg:text-6xl">
           Privacy friendly, lightweight visualisation and control
         </h2>
 
@@ -85,7 +85,7 @@ const Features2 = () => {
                 <div className="from-muted/30 via-muted/10 to-card flex aspect-square size-10 items-center justify-center rounded-md border bg-gradient-to-r p-2">
                   <ChartPie className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="text-accent-foreground text-lg font-bold lg:text-xl">
+                <h3 className="font-headline text-accent-foreground text-lg font-bold lg:text-xl">
                   See Everything at a Glance
                 </h3>
                 <p className="text-muted-foreground leading-snug lg:text-lg">
@@ -238,7 +238,7 @@ const Features2 = () => {
                 <div className="from-muted/30 via-muted/10 to-card flex aspect-square size-10 items-center justify-center rounded-md border bg-gradient-to-r p-2">
                   <ChartBar className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="text-accent-foreground text-lg font-bold lg:text-xl">
+                <h3 className="font-headline text-accent-foreground text-lg font-bold lg:text-xl">
                   Build Flows Like You Think
                 </h3>
                 <p className="text-muted-foreground leading-snug lg:text-lg">
@@ -453,7 +453,7 @@ const FeatureCarousel = () => {
                 <CardContent className="flex flex-col gap-2.5">
                   <div className="flex items-center gap-2.5">
                     <IconComponent className={cn('h-4 w-4')} />
-                    <h4 className={cn('text-lg leading-tight')}>
+                    <h4 className={cn('font-headline text-lg leading-tight')}>
                       {card.title}
                     </h4>
                   </div>

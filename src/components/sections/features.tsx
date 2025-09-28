@@ -12,76 +12,76 @@ import { cn } from '@/lib/utils';
 
 const ITEMS = [
   {
-    title: 'Node-Based Automation',
+    title: 'AI Voice Simulations',
     image: {
       src: '/images/home/features/1.webp',
       width: 198,
       height: 133,
     },
-    desc: 'Build powerful workflows by visually connecting triggers.',
+    desc: 'Practice with realistic AI agents that respond like real customers.',
   },
   {
-    title: 'Local Folder Integration',
+    title: 'Instant Feedback & Scoring',
     image: {
       src: '/images/home/features/2.webp',
       width: 148,
       height: 124,
     },
-    desc: 'Connect to local folders and run custom scripts, no cloud needed',
+    desc: 'Get immediate AI-powered analysis of your sales conversations.',
   },
   {
-    title: 'Enhanced Observability',
+    title: 'Performance Analytics',
     image: {
       src: '/images/home/features/3.webp',
       width: 154,
       height: 99,
     },
-    desc: 'Track file changes in real time. Configure what you watch.',
+    desc: 'Track talk-listen ratio, objection handling, and closing techniques.',
   },
   {
-    title: 'AI-Enhanced Suggestions',
+    title: 'Custom Scenarios',
     image: {
       src: '/images/home/features/4.webp',
       width: 171,
       height: 120,
     },
-    desc: 'Recommendations based on your behaviour and setup.',
+    desc: 'Create industry-specific training scenarios for your sales team.',
   },
   {
-    title: 'Detailed Execution Logs',
+    title: 'Team Management',
     image: {
       src: '/images/home/features/5.webp',
       width: 195,
       height: 74.6,
     },
-    desc: "View every run's input, output, and errors.",
+    desc: 'Assign training, track progress, and manage team performance.',
   },
   {
-    title: 'Seamless Integrations',
+    title: 'Enterprise Integration',
     image: {
       src: '/images/home/features/6.webp',
       width: 148,
       height: 124,
     },
-    desc: 'Connect with your favourite desktop apps and local tools',
+    desc: 'Connect with your CRM, Slack, and existing sales tools.',
   },
   {
-    title: 'Node-Based Automation',
+    title: 'Call Recording & Transcripts',
     image: {
       src: '/images/home/features/7.webp',
       width: 186,
       height: 103,
     },
-    desc: 'Build powerful workflows by visually connecting triggers.',
+    desc: 'Review full conversations with AI-highlighted key moments.',
   },
   {
-    title: 'Node-Based Automation',
+    title: 'Leaderboards & Gamification',
     image: {
       src: '/images/home/hero.webp',
       width: 186,
       height: 103,
     },
-    desc: 'Build powerful workflows by visually connecting triggers.',
+    desc: 'Motivate your team with competitive scoring and achievements.',
   },
 ];
 
@@ -91,12 +91,12 @@ const Features = ({ className }: { className?: string }) => {
       <Carousel>
         <div className="container flex flex-col justify-between gap-10 md:flex-row md:items-center">
           <div className="max-w-3xl space-y-3">
-            <h2 className="text-4xxl leading-tight tracking-tight md:text-5xl">
-              Engineered strictly for power users
+            <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
+              Everything you need to excel at sales
             </h2>
             <p className="text-muted-foreground max-w-xl text-lg leading-snug">
-              Every run is tracked in detail - from inputs to outputs to runtime
-              errors. Perfect for debugging and transparency.
+              From AI-powered voice simulations to detailed performance analytics,
+              our platform provides comprehensive sales training tools.
             </p>
           </div>
           <div className="hidden gap-3 md:flex">
@@ -122,7 +122,7 @@ const Features = ({ className }: { className?: string }) => {
                 </Card>
 
                 {/* Text block outside of card */}
-                <h3 className="text-accent-foreground mt-3 mb-2 text-lg font-bold">
+                <h3 className="font-headline text-accent-foreground mt-3 mb-2 text-lg font-bold">
                   {card.title}
                 </h3>
                 <p className="text-muted-foreground">{card.desc}</p>

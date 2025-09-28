@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
+import { motion } from 'framer-motion';
 import {
   Controller,
   FormProvider,
@@ -73,15 +74,46 @@ const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue,
 );
 
-function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
+interface FormItemProps extends React.ComponentProps<'div'> {
+  animated?: boolean;
+}
+
+function FormItem({ className, animated = true, ...props }: FormItemProps) {
+  // Extract animated from props to prevent it from being passed to DOM
+  const { animated: _, ...domProps } = { animated, ...props };
   const id = React.useId();
+
+  const itemVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const formItemClasses = cn('grid gap-2', className);
+
+  if (animated) {
+    return (
+      <FormItemContext.Provider value={{ id }}>
+        <motion.div
+          data-slot="form-item"
+          className={formItemClasses}
+          variants={itemVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          {...domProps}
+        />
+      </FormItemContext.Provider>
+    );
+  }
 
   return (
     <FormItemContext.Provider value={{ id }}>
       <div
         data-slot="form-item"
-        className={cn('grid gap-2', className)}
-        {...props}
+        className={formItemClasses}
+        {...domProps}
       />
     </FormItemContext.Provider>
   );
@@ -123,33 +155,95 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
   );
 }
 
-function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
+interface FormDescriptionProps extends React.ComponentProps<'p'> {
+  animated?: boolean;
+}
+
+function FormDescription({ className, animated = true, ...props }: FormDescriptionProps) {
+  // Extract animated from props to prevent it from being passed to DOM
+  const { animated: _, ...domProps } = { animated, ...props };
   const { formDescriptionId } = useFormField();
+
+  const descriptionVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 }
+  };
+
+  const descriptionClasses = cn('text-muted-foreground text-sm', className);
+
+  if (animated) {
+    return (
+      <motion.p
+        data-slot="form-description"
+        id={formDescriptionId}
+        className={descriptionClasses}
+        variants={descriptionVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={{ duration: 0.2, ease: "easeOut", delay: 0.1 }}
+        {...domProps}
+      />
+    );
+  }
 
   return (
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn('text-muted-foreground text-sm', className)}
-      {...props}
+      className={descriptionClasses}
+      {...domProps}
     />
   );
 }
 
-function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
+interface FormMessageProps extends React.ComponentProps<'p'> {
+  animated?: boolean;
+}
+
+function FormMessage({ className, animated = true, ...props }: FormMessageProps) {
+  // Extract animated from props to prevent it from being passed to DOM
+  const { animated: _, ...domProps } = { animated, ...props };
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message ?? '') : props.children;
+  const body = error ? String(error?.message ?? '') : domProps.children;
 
   if (!body) {
     return null;
+  }
+
+  const messageVariants = {
+    initial: { opacity: 0, y: 10, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -10, scale: 0.95 }
+  };
+
+  const messageClasses = cn('text-destructive text-xs font-medium', className);
+
+  if (animated) {
+    return (
+      <motion.p
+        data-slot="form-message"
+        id={formMessageId}
+        className={messageClasses}
+        variants={messageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        {...domProps}
+      >
+        {body}
+      </motion.p>
+    );
   }
 
   return (
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn('text-destructive text-xs', className)}
-      {...props}
+      className={messageClasses}
+      {...domProps}
     >
       {body}
     </p>

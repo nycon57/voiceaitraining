@@ -16,7 +16,7 @@ const newsItems = [
       className: 'invert dark:invert-0',
     },
     title:
-      'With a drag-and-drop interface that feels more like a design tool than a backend UI, Plasma is quietly redefining local-first automation. No cloud, no subscriptions - just speed and control.',
+      'Voice AI Training is revolutionizing sales enablement. Their AI-powered simulation platform has helped 500+ teams increase close rates by an average of 40% in just 90 days.',
     readMoreLink: '#',
   },
   {
@@ -28,7 +28,7 @@ const newsItems = [
       height: 42,
     },
     title:
-      'Plasma puts full autonomy in the hands of builders. Its ability to connect folders, scripts, APIs and even AI-generated logic all without leaving your desktop',
+      'The future of sales training is here. Voice AI Training\'s realistic conversation simulations provide unlimited practice opportunities without the scheduling headaches of traditional roleplay.',
     readMoreLink: '#',
   },
   {
@@ -41,7 +41,7 @@ const newsItems = [
       className: 'invert dark:invert-0',
     },
     title:
-      "Lightweight, privacy-first, and shockingly powerful. It's rare for an automation product to feel this flexible out of the box. Local-first isn't just a feature—it's a philosophy.",
+      "Enterprise sales teams are seeing unprecedented results with AI-powered training. Voice AI Training's platform transforms struggling reps into confident closers in weeks, not months.",
     readMoreLink: '#',
   },
 ];
@@ -50,8 +50,8 @@ export default function AboutNews() {
   return (
     <section className="section-padding bg-muted/40">
       <div className="container">
-        <h2 className="text-4xxl leading-tight tracking-tight md:text-5xl">
-          We are in the news!
+        <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
+          Leading publications are taking notice
         </h2>
 
         <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">

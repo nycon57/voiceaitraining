@@ -4,36 +4,27 @@ import * as React from "react"
 import {
   AudioWaveform,
   BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
   Users,
   Target,
   BarChart3,
-  Calendar,
-  PlayCircle,
-  History,
   Trophy,
   Webhook,
   CreditCard,
   Shield,
-  UserPlus,
   Clipboard,
   Settings,
   TrendingUp,
   Home,
   Mic,
+  PlayCircle,
+  History,
+  Calendar,
+  UserCheck,
+  FileText,
+  Briefcase,
+  Settings2,
 } from "lucide-react"
 
-import { NavMain } from "@/components/dashboard/nav-main"
-import { NavProjects } from "@/components/dashboard/nav-projects"
-import { NavUser } from "@/components/dashboard/nav-user"
-import { TeamSwitcher } from "@/components/dashboard/team-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -41,229 +32,181 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { NavGroup } from "@/components/layout/nav-group"
+import { NavUser } from "@/components/layout/nav-user"
+import { TeamSwitcher } from "@/components/dashboard/team-switcher"
+import { type SidebarData } from "@/components/layout/types"
+import type { AuthUser } from '@/lib/auth'
 
-// This would come from your auth context/hook
-interface User {
-  id: string
-  email: string
-  name: string
-  role: 'trainee' | 'manager' | 'admin' | 'hr'
-}
+// Navigation data based on user role (WITHOUT org paths)
+const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
+  const teams = [
+    {
+      name: "SpeakStride",
+      logo: AudioWaveform,
+      plan: "Voice AI Training",
+    },
+  ]
 
-interface Team {
-  name: string
-  logo: React.ElementType
-  plan: string
-}
+  const navGroups = []
 
-// Navigation data based on user role
-const getNavigationData = (userRole: User['role'], orgId?: string) => {
-  const baseNavigation = {
-    navMain: [] as any[],
-    projects: [] as any[],
-  }
-
-  const orgPath = orgId ? `/org/${orgId}` : ''
-
-  // Common navigation for all users
-  baseNavigation.navMain.push({
-    title: "Dashboard",
-    url: `${orgPath}/dashboard`,
-    icon: Home,
-    isActive: true,
+  // General navigation for all users
+  navGroups.push({
+    title: "General",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: Home,
+      },
+      {
+        title: "Training Hub",
+        url: "/training",
+        icon: Mic,
+      },
+    ],
   })
 
   // Role-specific navigation
   switch (userRole) {
     case 'trainee':
-      baseNavigation.navMain.push(
-        {
-          title: "My Training",
-          url: `${orgPath}/assignments`,
-          icon: Target,
-          items: [
-            {
-              title: "Assignments",
-              url: `${orgPath}/assignments`,
-            },
-            {
-              title: "Practice",
-              url: `${orgPath}/scenarios`,
-            },
-            {
-              title: "History",
-              url: `${orgPath}/attempts`,
-            },
-          ],
-        },
-        {
-          title: "Voice Simulator",
-          url: `${orgPath}/play`,
-          icon: Mic,
-        },
-        {
-          title: "Leaderboard",
-          url: `${orgPath}/leaderboard`,
-          icon: Trophy,
-        },
-        {
-          title: "My Progress",
-          url: `${orgPath}/progress`,
-          icon: TrendingUp,
-        }
-      )
+      navGroups.push({
+        title: "My Training",
+        items: [
+          {
+            title: "Assignments",
+            url: "/assignments",
+            icon: Target,
+          },
+          {
+            title: "Training History",
+            url: "/attempts",
+            icon: History,
+          },
+          {
+            title: "Leaderboard",
+            url: "/leaderboard",
+            icon: Trophy,
+          },
+          {
+            title: "My Progress",
+            url: "/reports",
+            icon: TrendingUp,
+          },
+        ],
+      })
       break
 
     case 'manager':
-      baseNavigation.navMain.push(
+      navGroups.push(
         {
           title: "Team Management",
-          url: `${orgPath}/team`,
-          icon: Users,
           items: [
             {
               title: "Team Overview",
-              url: `${orgPath}/team`,
+              url: "/team",
+              icon: Users,
             },
             {
               title: "Assign Training",
-              url: `${orgPath}/assignments/new`,
+              icon: UserCheck,
+              items: [
+                {
+                  title: "New Assignment",
+                  url: "/assignments/new",
+                },
+                {
+                  title: "Manage Assignments",
+                  url: "/assignments",
+                },
+              ],
             },
             {
-              title: "Team Performance",
-              url: `${orgPath}/reports/team`,
-            },
-            {
-              title: "Reviews",
-              url: `${orgPath}/attempts`,
+              title: "Team Reports",
+              url: "/reports",
+              icon: BarChart3,
             },
           ],
         },
         {
-          title: "Content Library",
-          url: `${orgPath}/scenarios`,
-          icon: BookOpen,
+          title: "Content",
           items: [
             {
               title: "Scenarios",
-              url: `${orgPath}/scenarios`,
+              url: "/scenarios",
+              icon: FileText,
             },
             {
               title: "Training Tracks",
-              url: `${orgPath}/tracks`,
+              url: "/tracks",
+              icon: Briefcase,
             },
           ],
-        },
-        {
-          title: "Analytics",
-          url: `${orgPath}/reports`,
-          icon: BarChart3,
-          items: [
-            {
-              title: "Team Reports",
-              url: `${orgPath}/reports`,
-            },
-            {
-              title: "Leaderboards",
-              url: `${orgPath}/leaderboard`,
-            },
-            {
-              title: "Performance Trends",
-              url: `${orgPath}/reports/trends`,
-            },
-          ],
-        },
-        {
-          title: "Assignments",
-          url: `${orgPath}/assignments`,
-          icon: Clipboard,
         }
       )
       break
 
     case 'admin':
-      baseNavigation.navMain.push(
-        {
-          title: "Organization",
-          url: `${orgPath}/settings`,
-          icon: Settings2,
-          items: [
-            {
-              title: "User Management",
-              url: `${orgPath}/admin/users`,
-            },
-            {
-              title: "Teams",
-              url: `${orgPath}/settings/teams`,
-            },
-            {
-              title: "Billing",
-              url: `${orgPath}/settings/billing`,
-            },
-            {
-              title: "Settings",
-              url: `${orgPath}/settings`,
-            },
-          ],
-        },
+      navGroups.push(
         {
           title: "Content Management",
-          url: `${orgPath}/scenarios`,
-          icon: BookOpen,
           items: [
             {
               title: "Scenarios",
-              url: `${orgPath}/scenarios`,
+              icon: BookOpen,
+              items: [
+                {
+                  title: "Scenario Library",
+                  url: "/scenarios",
+                },
+                {
+                  title: "Create Scenario",
+                  url: "/scenarios/new",
+                },
+              ],
             },
             {
               title: "Training Tracks",
-              url: `${orgPath}/tracks`,
+              url: "/tracks",
+              icon: Briefcase,
             },
             {
-              title: "AI Content Generator",
-              url: `${orgPath}/scenarios/generate`,
-            },
-          ],
-        },
-        {
-          title: "Analytics & Reports",
-          url: `${orgPath}/reports`,
-          icon: PieChart,
-          items: [
-            {
-              title: "Organization Overview",
-              url: `${orgPath}/reports`,
-            },
-            {
-              title: "Team Performance",
-              url: `${orgPath}/reports/teams`,
-            },
-            {
-              title: "Scenario Analytics",
-              url: `${orgPath}/reports/scenarios`,
-            },
-            {
-              title: "Export Data",
-              url: `${orgPath}/reports/export`,
+              title: "Assignments",
+              url: "/assignments",
+              icon: Clipboard,
             },
           ],
         },
         {
-          title: "Integrations",
-          url: `${orgPath}/settings/webhooks`,
-          icon: Webhook,
+          title: "Organization",
           items: [
             {
-              title: "Webhooks",
-              url: `${orgPath}/settings/webhooks`,
+              title: "Team Management",
+              url: "/team",
+              icon: Users,
             },
             {
-              title: "API Settings",
-              url: `${orgPath}/settings/api`,
+              title: "Analytics",
+              url: "/reports",
+              icon: BarChart3,
             },
             {
-              title: "Third-party Apps",
-              url: `${orgPath}/settings/integrations`,
+              title: "Settings",
+              icon: Settings2,
+              items: [
+                {
+                  title: "Organization",
+                  url: "/settings/organization",
+                },
+                {
+                  title: "Billing",
+                  url: "/settings/billing",
+                },
+                {
+                  title: "Integrations",
+                  url: "/settings/integrations",
+                },
+              ],
             },
           ],
         }
@@ -271,129 +214,98 @@ const getNavigationData = (userRole: User['role'], orgId?: string) => {
       break
 
     case 'hr':
-      baseNavigation.navMain.push(
-        {
-          title: "Compliance",
-          url: `${orgPath}/hr/compliance`,
-          icon: Shield,
-          items: [
-            {
-              title: "Training Completion",
-              url: `${orgPath}/hr/compliance`,
-            },
-            {
-              title: "Certification Status",
-              url: `${orgPath}/hr/certifications`,
-            },
-            {
-              title: "Audit Reports",
-              url: `${orgPath}/hr/audit`,
-            },
-          ],
-        },
-        {
-          title: "Reporting",
-          url: `${orgPath}/hr/reports`,
-          icon: BarChart3,
-          items: [
-            {
-              title: "HR Dashboard",
-              url: `${orgPath}/hr`,
-            },
-            {
-              title: "Employee Performance",
-              url: `${orgPath}/hr/performance`,
-            },
-            {
-              title: "Training Metrics",
-              url: `${orgPath}/hr/metrics`,
-            },
-            {
-              title: "Export Reports",
-              url: `${orgPath}/hr/export`,
-            },
-          ],
-        },
-        {
-          title: "User Directory",
-          url: `${orgPath}/users`,
-          icon: Users,
-        }
-      )
+      navGroups.push({
+        title: "HR & Compliance",
+        items: [
+          {
+            title: "Compliance",
+            icon: Shield,
+            items: [
+              {
+                title: "Training Completion",
+                url: "/hr/compliance",
+              },
+              {
+                title: "Certifications",
+                url: "/hr/certifications",
+              },
+              {
+                title: "Audit Reports",
+                url: "/hr/audit",
+              },
+            ],
+          },
+          {
+            title: "HR Reports",
+            url: "/hr/reports",
+            icon: BarChart3,
+          },
+          {
+            title: "User Directory",
+            url: "/team",
+            icon: Users,
+          },
+        ],
+      })
       break
   }
 
-  // Recent scenarios/tracks as projects
-  baseNavigation.projects = [
-    {
-      name: "Cold Call Mastery",
-      url: `${orgPath}/scenarios/1`,
-      icon: Frame,
-    },
-    {
-      name: "Objection Handling",
-      url: `${orgPath}/scenarios/2`,
-      icon: PieChart,
-    },
-    {
-      name: "Loan Officer Onboarding",
-      url: `${orgPath}/tracks/1`,
-      icon: Map,
-    },
-  ]
+  // Common settings for all users
+  navGroups.push({
+    title: "Account",
+    items: [
+      {
+        title: "Settings",
+        icon: Settings,
+        items: [
+          {
+            title: "Profile",
+            url: "/settings/profile",
+          },
+          {
+            title: "Preferences",
+            url: "/settings/preferences",
+          },
+        ],
+      },
+    ],
+  })
 
-  return baseNavigation
-}
-
-const data = {
-  user: {
-    name: "John Doe", // This would come from Clerk
-    email: "john@example.com",
-    avatar: "/avatars/john.jpg",
-    role: "admin" as const, // This would come from your auth context
-  },
-  teams: [
-    {
-      name: "Voice AI Training",
-      logo: AudioWaveform,
-      plan: "Enterprise",
+  return {
+    user: {
+      name: "User",
+      email: "user@example.com",
+      avatar: "",
+      role: userRole,
     },
-    {
-      name: "Acme Sales Corp",
-      logo: GalleryVerticalEnd,
-      plan: "Professional",
-    },
-    {
-      name: "Global Lending Inc",
-      logo: Command,
-      plan: "Professional",
-    },
-  ] satisfies Team[],
-}
-
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  userRole?: User['role']
-  orgId?: string
-  user?: {
-    name: string
-    email: string
-    role: string
+    teams,
+    navGroups,
   }
 }
 
-export function AppSidebar({ userRole = 'admin', orgId, user, ...props }: AppSidebarProps) {
-  const navigationData = getNavigationData(userRole, orgId)
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  userRole?: AuthUser['role']
+  user?: AuthUser
+}
 
-  const sidebarUser = user || data.user
+export function AppSidebar({ userRole = 'trainee', user, ...props }: AppSidebarProps) {
+  const sidebarData = getSidebarData(userRole)
+
+  const sidebarUser = user ? {
+    name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.emailAddresses[0]?.emailAddress || 'User',
+    email: user.emailAddresses[0]?.emailAddress || '',
+    role: user.role || 'trainee'
+  } : sidebarData.user
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={sidebarData.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navigationData.navMain} />
-        <NavProjects projects={navigationData.projects} />
+        {sidebarData.navGroups.map((group) => (
+          <NavGroup key={group.title} {...group} />
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={sidebarUser} />

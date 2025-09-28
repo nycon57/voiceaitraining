@@ -20,7 +20,7 @@ export default function ProductLogs() {
       {/* Left: Text & Description */}
       <div className="flex flex-col justify-between gap-3">
         <div className="space-y-6">
-          <h2 className="text-4xxl leading-none tracking-tight text-balance md:text-6xl lg:max-w-xs">
+          <h2 className="font-headline text-4xxl leading-none tracking-tight text-balance md:text-6xl lg:max-w-xs">
             Transparent <br className="hidden lg:block" />
             <span className="text-gradient">
               Execution <br className="hidden lg:block" /> Logs
@@ -81,7 +81,7 @@ function TerminalWithHeader() {
       {/* Main card */}
       <Card className="bg-accent relative z-10 gap-0 overflow-hidden rounded-e-none border-r-0 shadow-xl">
         <CardHeader className="border-border gap-3 border-b">
-          <h3 className="text-foreground font-medium">
+          <h3 className="font-headline text-foreground font-medium">
             Error Logs - New leads
             <br />
             automation

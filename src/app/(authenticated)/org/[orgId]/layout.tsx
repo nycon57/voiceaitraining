@@ -1,11 +1,9 @@
 import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { cookies } from "next/headers"
+import { cn } from "@/lib/utils"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from '@/components/dashboard/app-sidebar'
-import { SiteHeader } from '@/components/dashboard/site-header'
-import {
-  SidebarInset,
-  SidebarProvider,
-} from '@/components/ui/sidebar'
 
 interface OrgLayoutProps {
   children: React.ReactNode
@@ -24,31 +22,25 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
     redirect('/select-org')
   }
 
-  const sidebarUser = {
-    name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.emailAddresses[0]?.emailAddress || 'User',
-    email: user.emailAddresses[0]?.emailAddress || '',
-    role: user.role || 'trainee'
-  }
+  const cookieStore = await cookies()
+  const defaultClose = cookieStore.get("sidebar:state")?.value === "false"
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar
-        variant="inset"
-        userRole={user.role || 'trainee'}
-        orgId={orgId}
-        user={sidebarUser}
-      />
-      <SidebarInset>
-        <SiteHeader user={user} />
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="border-grid flex flex-1 flex-col">
+      <SidebarProvider defaultOpen={!defaultClose}>
+        <AppSidebar userRole={user.role || 'trainee'} />
+        <div
+          id="content"
+          className={cn(
+            "flex h-full w-full flex-col",
+            "has-[div[data-layout=fixed]]:h-svh",
+            "group-data-[scroll-locked=1]/body:h-full",
+            "has-[data-layout=fixed]:group-data-[scroll-locked=1]/body:h-svh"
+          )}
+        >
+          {children}
+        </div>
+      </SidebarProvider>
+    </div>
   )
 }

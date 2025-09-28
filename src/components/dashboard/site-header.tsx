@@ -43,7 +43,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
               <BreadcrumbLink href="#">
-                Voice AI Training
+                SpeakStride
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
