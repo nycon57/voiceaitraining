@@ -61,7 +61,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold">Choose Your Plan</h2>
+        <h2 className="font-headline text-2xl font-bold">Choose Your Plan</h2>
         <p className="text-muted-foreground mt-2">
           Select the plan that best fits your organization's training needs
         </p>
@@ -189,12 +189,12 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
       {/* Additional Information */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Plan Information</CardTitle>
+          <CardTitle className="font-headline text-lg">Plan Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <h4 className="font-medium mb-2">💳 Billing</h4>
+              <h4 className="font-headline font-medium mb-2">💳 Billing</h4>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• All plans billed monthly</li>
                 <li>• Cancel anytime</li>
@@ -203,7 +203,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2">🔄 Changes</h4>
+              <h4 className="font-headline font-medium mb-2">🔄 Changes</h4>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Instant plan upgrades</li>
                 <li>• Downgrades at next billing cycle</li>
@@ -212,7 +212,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2">💬 Support</h4>
+              <h4 className="font-headline font-medium mb-2">💬 Support</h4>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Email support (all plans)</li>
                 <li>• Priority support (Pro+)</li>
@@ -221,7 +221,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2">🔒 Security</h4>
+              <h4 className="font-headline font-medium mb-2">🔒 Security</h4>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• SOC 2 Type II compliant</li>
                 <li>• End-to-end encryption</li>
@@ -237,7 +237,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
       <Card className="border-dashed">
         <CardContent className="text-center py-8">
           <Crown className="h-8 w-8 mx-auto mb-4 text-yellow-600" />
-          <h3 className="font-semibold mb-2">Need Something Custom?</h3>
+          <h3 className="font-headline font-semibold mb-2">Need Something Custom?</h3>
           <p className="text-muted-foreground mb-4">
             For large organizations with specific requirements, we offer custom enterprise solutions.
           </p>

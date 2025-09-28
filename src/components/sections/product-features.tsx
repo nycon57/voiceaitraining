@@ -83,7 +83,7 @@ export default function ProductFeatures() {
     <section className="section-padding container max-w-screen-xl">
       {/* Header */}
       <div className="mx-auto max-w-4xl">
-        <h2 className="text-4xxl leading-tight tracking-tight md:text-5xl">
+        <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
           Details Don&apos;t Mean Clarity — Until They Do
         </h2>
         <p className="text-muted-foreground mt-3 text-lg leading-snug">
@@ -152,7 +152,7 @@ function FeatureCard({
     >
       <CardContent className="relative p-0">{children}</CardContent>
       <CardHeader className="card-header p-0">
-        <h3 className="text-accent-foreground text-xl font-bold">{title}</h3>
+        <h3 className="font-headline text-accent-foreground text-xl font-bold">{title}</h3>
         <p className="text-muted-foreground text-lg leading-snug">
           {description}
         </p>
@@ -534,7 +534,7 @@ function Card5() {
             }}
           >
             <Folder className="fill-destructive text-destructive size-3" />
-            <h3 className="text-[0.625rem] font-bold">File Watcher</h3>
+            <h3 className="font-headline text-[0.625rem] font-bold">File Watcher</h3>
           </motion.div>
 
           {/* Description with check icon */}

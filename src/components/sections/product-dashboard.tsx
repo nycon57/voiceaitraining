@@ -53,7 +53,7 @@ export default function ProductDashboard() {
     <section className="section-padding relative container !pt-0">
       {/* Header */}
       <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-        <h2 className="text-4xl leading-none tracking-tight text-balance md:text-5xl lg:text-6xl">
+        <h2 className="font-headline text-4xl leading-none tracking-tight text-balance md:text-5xl lg:text-6xl">
           Privacy friendly, lightweight visualisation and control
         </h2>
       </div>
@@ -68,7 +68,7 @@ export default function ProductDashboard() {
       />
 
       {/* Tagline */}
-      <h3 className="text-muted-foreground mt-4 text-center uppercase">
+      <h3 className="font-headline text-muted-foreground mt-4 text-center uppercase">
         EVERYTHING YOU WANT TO SEE, NOTHING YOU DON&apos;T
       </h3>
 

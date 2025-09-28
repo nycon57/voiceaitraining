@@ -119,7 +119,7 @@ export function DocsOverview() {
           <span className="px-3">Join the next workshop on May 6</span>
         </div>
 
-        <h1 className="!mb-0 text-balance text-4xl leading-none md:text-5xl lg:text-6xl">
+        <h1 className="font-headline !mb-0 text-balance text-4xl leading-none md:text-5xl lg:text-6xl">
           Welcome to the <span className="text-gradient">Plasma Docs</span>
         </h1>
 

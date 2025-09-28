@@ -10,36 +10,36 @@ import { cn } from '@/lib/utils';
 
 const stats = [
   {
-    value: 650,
-    suffix: 'k+',
-    label: 'Users',
+    value: 500,
+    suffix: '+',
+    label: 'Sales Teams',
   },
   {
-    value: 37.2,
+    value: 2.4,
     suffix: 'M+',
-    label: 'Deployments',
+    label: 'Training Sessions',
   },
   {
-    value: 4.8,
-    suffix: 'M+',
-    label: 'Requests',
+    value: 95,
+    suffix: '%',
+    label: 'Improvement Rate',
   },
 ];
 
 const cards = [
   {
-    id: 'profile',
-    title: 'Add new profile to leads',
-    subtitle: 'Check key stakeholder and collect profile',
+    id: 'prospect',
+    title: 'AI Voice Agent',
+    subtitle: 'Responds as realistic customer prospect',
     icon: Users,
     iconColor: 'text-purple-500',
     position: 'absolute top-0 left-0',
     isGenerating: false,
   },
   {
-    id: 'company',
-    title: 'Company information',
-    subtitle: 'Check Crunchbase data for fundraise',
+    id: 'analysis',
+    title: 'Real-time Analysis',
+    subtitle: 'Track talk-listen ratio and sentiment',
     icon: Building2,
     iconColor: 'text-blue-500',
     position: 'absolute top-32 left-0',
@@ -47,7 +47,7 @@ const cards = [
   },
   {
     id: 'generating',
-    title: 'Generating step 4',
+    title: 'Generating feedback',
     subtitle: '',
     icon: null,
     iconColor: '',
@@ -56,9 +56,9 @@ const cards = [
   },
 
   {
-    id: 'fileWatcher',
-    title: 'File Watcher',
-    subtitle: 'New change in file or new file in folder?',
+    id: 'scoring',
+    title: 'Performance Score',
+    subtitle: 'AI-powered scoring with improvement tips',
     icon: Folder,
     iconColor: 'fill-destructive text-destructive',
     position: 'absolute right-0 bottom-0',
@@ -119,21 +119,21 @@ export default function AIAutomation() {
             <div className="relative z-10 flex items-center gap-2 px-5 py-4 text-xs lg:text-sm">
               <Sparkles className="fill-foreground size-3.5 shrink-0" />
               <div>
-                <span className="text-muted-foreground">Ask AI:</span>{' '}
+                <span className="text-muted-foreground">Training scenario:</span>{' '}
                 <span className="text-accent-foreground">
-                  Enrich contact details every time with new profile
+                  Handle mortgage objections with AI customer prospect
                 </span>
               </div>
             </div>
           </motion.div>
-          <h2 className="text-4xxl leading-tight tracking-normal md:text-5xl">
-            Even more control with <br className="hidden md:block" />
-            <span className="text-gradient">AI auto build and trigger</span>
+          <h2 className="font-headline text-4xxl leading-tight tracking-normal md:text-5xl">
+            Complete sales training <br className="hidden md:block" />
+            <span className="text-gradient">AI workflow automation</span>
           </h2>
           <p className="text-muted-foreground mt-2 max-w-xl text-lg leading-snug">
-            From prompt to production in seconds. Just say what you want to
-            automate, and Plasma handles the logic, connections, and triggers -
-            exactly how you&apos;d build it.
+            From conversation to coaching in real-time. Our AI handles voice
+            simulation, performance analysis, and feedback generation -
+            exactly like training with top performers.
           </p>
         </div>
 
@@ -157,7 +157,7 @@ export default function AIAutomation() {
                   <div className="relative z-10 flex items-center gap-1.5">
                     <Sparkles className="fill-foreground size-3" />
 
-                    <h3 className="text-accent-foreground text-[0.625rem] font-semibold lg:text-sm">
+                    <h3 className="font-headline text-accent-foreground text-[0.625rem] font-semibold lg:text-sm">
                       {card.title}
                     </h3>
                   </div>
@@ -169,7 +169,7 @@ export default function AIAutomation() {
                           className={`size-3 lg:size-3.5 ${card.iconColor}`}
                         />
                       )}
-                      <h3 className="text-xs font-bold lg:text-sm">
+                      <h3 className="font-headline text-xs font-bold lg:text-sm">
                         {card.title}
                       </h3>
                     </div>

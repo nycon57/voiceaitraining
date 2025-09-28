@@ -8,37 +8,40 @@ import {
 
 const teamMembers = [
   {
-    name: 'Alex Johnson',
-    role: 'Lead Engineer',
+    name: 'David Mitchell',
+    role: 'CEO & Founder',
     image: '/images/about/team/1.webp',
+    bio: '8+ years in sales management. Built top-performing teams at HubSpot and Salesforce.',
   },
   {
-    name: 'Sarah Chen',
-    role: 'Product Designer',
+    name: 'Sarah Kim',
+    role: 'Head of AI',
     image: '/images/about/team/2.webp',
+    bio: 'Former OpenAI engineer. PhD in Machine Learning from Stanford.',
   },
   {
-    name: 'Marcus Rodriguez',
-    role: 'Backend Developer',
+    name: 'Marcus Chen',
+    role: 'VP of Sales',
     image: '/images/about/team/3.webp',
+    bio: 'Top 1% sales performer at Oracle. Knows what actually closes deals.',
   },
   {
-    name: 'Emily Thompson',
-    role: 'Frontend Developer',
+    name: 'Emily Rodriguez',
+    role: 'Head of Customer Success',
     image: '/images/about/team/4.webp',
+    bio: 'Scaled customer success at Gong. Expert in sales enablement.',
   },
 ];
 
 export default function AboutTeam() {
   return (
     <section className="section-padding container max-w-screen-xl">
-      <h2 className="text-4xxl leading-tight tracking-tight md:text-5xl">
-        Meet the Plasma team!
+      <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
+        Meet the team transforming sales training
       </h2>
       <p className="text-muted-foreground mt-3 max-w-2xl text-lg leading-snug">
-        Plasma is built by a small team of designers, engineers, and open
-        source contributors passionate about developer tooling and local-first
-        software.
+        We're former sales leaders, AI engineers, and customer success experts who understand
+        what it takes to build a world-class sales organization.
       </p>
 
       <Carousel
@@ -60,10 +63,11 @@ export default function AboutTeam() {
                 width={289}
                 height={358}
               />
-              <h3 className="text-accent-foreground mt-4 text-2xl font-bold">
+              <h3 className="font-headline text-accent-foreground mt-4 text-2xl font-bold">
                 {member.name}
               </h3>
-              <p className="text-muted-foreground">{member.role}</p>
+              <p className="text-muted-foreground font-medium">{member.role}</p>
+              <p className="text-muted-foreground text-sm mt-2 leading-snug">{member.bio}</p>
             </CarouselItem>
           ))}
         </CarouselContent>

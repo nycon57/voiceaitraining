@@ -17,40 +17,40 @@ import { cn } from '@/lib/utils';
 
 const REVIEWS = [
   {
-    name: 'Flora Schuler',
-    username: '@floraFlawa',
-    body: "i'm using @plasma to get access to some of the best automation features in the market, you should try it too",
-    img: 'https://avatar.vercel.sh/floraFlawa',
+    name: 'Sarah Mitchell',
+    username: '@sarahmitchell',
+    body: "Our mortgage team's closing rate improved 40% in 3 months using @speakstride. The AI scenarios feel incredibly realistic.",
+    img: 'https://avatar.vercel.sh/sarahmitchell',
   },
   {
-    name: 'OneBadDev',
-    username: '@elidecodes',
-    body: "been using @plasma to automate my podcast post-prod flow. local triggers + ffmpeg scripts = chef's kiss",
-    img: 'https://avatar.vercel.sh/elidecodes',
+    name: 'Mike Rodriguez',
+    username: '@mikerodriguez',
+    body: "The AI feedback is spot on - it caught objection handling mistakes I didn't even know I was making. Game changer for sales training.",
+    img: 'https://avatar.vercel.sh/mikerodriguez',
   },
   {
-    name: 'John Robert',
-    username: '@scripteddev',
-    body: '@plasma is already part of my daily toolkit. Local folder watcher → python script → discord alert. Took 2 mins to set up.',
-    img: 'https://avatar.vercel.sh/scripteddev',
+    name: 'Jessica Chen',
+    username: '@jessicachen',
+    body: '@speakstride helped me prep for difficult client calls. The talk-listen ratio insights alone improved my conversion rate by 25%.',
+    img: 'https://avatar.vercel.sh/jessicachen',
   },
   {
-    name: 'CodeNinja',
-    username: '@sysninja',
-    body: "Can't believe how fast @plasma runs. It's like Zapier if it respected your privacy and your CPU.",
-    img: 'https://avatar.vercel.sh/sysninja',
+    name: 'David Thompson',
+    username: '@davidthompson',
+    body: "Finally, sales training that doesn't waste time. Real scenarios, instant feedback, and measurable improvement. My reps love it.",
+    img: 'https://avatar.vercel.sh/davidthompson',
   },
   {
-    name: 'Tusmah',
-    username: '@ananenu1',
-    body: "Made a Plasma flow that watches my screenshot folder and auto-saves new captures to Notion. Didn't touch the cloud once. 🔥",
-    img: 'https://avatar.vercel.sh/ananenu1',
+    name: 'Amanda Foster',
+    username: '@amandafoster',
+    body: "The leaderboard feature created healthy competition in our team. Everyone's trying to beat their scores and it's driving real results.",
+    img: 'https://avatar.vercel.sh/amandafoster',
   },
   {
-    name: 'Liam Stone',
-    username: '@liam.codes',
-    body: "Plasma completely changed how I debug and monitor workflows. It's like having a second brain for automation.",
-    img: 'https://avatar.vercel.sh/liam.codes',
+    name: 'Robert Kim',
+    username: '@robertkim',
+    body: "@speakstride made onboarding new loan officers 10x easier. They practice difficult scenarios before talking to real clients.",
+    img: 'https://avatar.vercel.sh/robertkim',
   },
 ];
 
@@ -60,13 +60,13 @@ const Testimonials = () => {
   return (
     <section className="container flex flex-col gap-y-10 overflow-x-hidden py-10 md:py-15 lg:flex-row">
       <div className="flex max-w-lg flex-col gap-15 text-balance">
-        <h2 className="text-4xxl leading-tight tracking-tight md:text-5xl">
-          Real automation for control freaks
+        <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
+          Trusted by top sales teams
         </h2>
         <div className="space-y-7.5">
           <p className="text-muted-foreground text-lg leading-snug">
-            Every run is tracked in detail - from inputs to outputs to runtime
-            errors. Perfect for debugging and transparency.
+            Sales professionals across industries trust our AI-powered training
+            platform to improve performance, boost confidence, and drive results.
           </p>
 
           <Button
@@ -75,7 +75,7 @@ const Testimonials = () => {
             className="text-accent-foreground group gap-3 !px-0 hover:!bg-transparent hover:opacity-90"
           >
             <Link href="#">
-              Get started too
+              Join them today
               <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
@@ -141,9 +141,9 @@ const ReviewCard = ({
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <blockquote className="text-sm leading-snug">
-          {body.split(/(@plasma)/g).map((part, index) =>
-            part === '@plasma' ? (
+        <blockquote className="font-headline text-sm leading-snug">
+          {body.split(/(@speakstride)/g).map((part, index) =>
+            part === '@speakstride' ? (
               <span key={index} className="text-chart-1">
                 {part}
               </span>

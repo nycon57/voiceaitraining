@@ -10,14 +10,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 const FeaturesTabsSection = () => {
-  const [activeTab, setActiveTab] = useState('reporting');
+  const [activeTab, setActiveTab] = useState('analytics');
 
   const TABS_DATA = [
     {
-      id: 'reporting',
-      title: 'Explore reporting tools',
+      id: 'analytics',
+      title: 'Advanced Performance Analytics',
       description:
-        'Comprehensive reporting and analytics tools to track your automation performance.',
+        'Deep insights into sales performance with detailed KPI tracking, talk-listen ratios, and improvement metrics.',
       image: {
         src: '/images/home/features-tabs/1.webp',
         width: 550,
@@ -27,10 +27,10 @@ const FeaturesTabsSection = () => {
         'self-end justify-self-end justify-end items-end flex md:mt-16 md:ps-16 mt-10 ps-10 w-full',
     },
     {
-      id: 'stack',
-      title: 'Built to Work With Your Stack',
+      id: 'integrations',
+      title: 'Enterprise CRM Integration',
       description:
-        'Seamlessly integrate with your existing development tools and workflows.',
+        'Connect seamlessly with Salesforce, HubSpot, and your existing sales stack for unified workflow.',
       image: {
         src: '/images/home/features-tabs/2.webp',
         width: 380,
@@ -39,10 +39,10 @@ const FeaturesTabsSection = () => {
       className: 'w-full h-full flex justify-center items-center p-14 lg:p-0',
     },
     {
-      id: 'automations',
-      title: 'Custom Automations',
+      id: 'scenarios',
+      title: 'AI-Generated Training Scenarios',
       description:
-        'Create powerful custom automations tailored to your specific needs.',
+        'Create industry-specific sales scenarios automatically, or build custom training paths for your team.',
       image: {
         src: '/images/home/features-tabs/3.webp',
         width: 550,
@@ -58,17 +58,17 @@ const FeaturesTabsSection = () => {
       {/* Left: Text & Tabs */}
       <div className="flex flex-col justify-between gap-3">
         <div className="space-y-6 text-balance lg:max-w-lg">
-          <h2 className="text-4xxl leading-tight tracking-tight md:text-5xl">
-            Engineered <br className="hidden lg:block" />
-            strictly <br className="hidden lg:block" />
-            for power users
+          <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
+            Built for <br className="hidden lg:block" />
+            sales <br className="hidden lg:block" />
+            excellence
           </h2>
           <span className="text-xl leading-7 font-bold">
-            Transparent Execution Logs
+            AI-Powered Sales Training
           </span>
           <p className="text-muted-foreground mt-3 text-lg leading-snug">
-            Every run is tracked in detail - from inputs to outputs to runtime
-            errors. Perfect for debugging and transparency.
+            Every conversation is analyzed in real-time with detailed performance
+            metrics, feedback, and coaching insights for continuous improvement.
           </p>
         </div>
         {/* Tabs Section */}

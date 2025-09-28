@@ -76,7 +76,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
         <CardContent>
           <div className="text-center py-12">
             <Receipt className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No invoices yet</h3>
+            <h3 className="font-headline text-lg font-semibold mb-2">No invoices yet</h3>
             <p className="text-muted-foreground">
               Your invoice history will appear here once you have an active subscription.
             </p>

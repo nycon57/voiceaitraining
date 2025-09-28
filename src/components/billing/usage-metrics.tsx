@@ -57,7 +57,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Usage Overview</h2>
+        <h2 className="font-headline text-2xl font-bold mb-2">Usage Overview</h2>
         <p className="text-muted-foreground">
           Monitor your current usage against your {currentPlan.name} plan limits
         </p>

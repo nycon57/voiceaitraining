@@ -203,8 +203,10 @@ export default function DemoCredentialsPage() {
         <div className="flex justify-center gap-4">
           <Button size="lg" asChild>
             <Link href="/sign-in">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Access Demo Environment
+              <div className="flex items-center gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Access Demo Environment
+              </div>
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
@@ -228,8 +230,8 @@ export default function DemoCredentialsPage() {
         <div className="text-xs text-muted-foreground">
           <p>
             Questions about the demo? Contact us at{' '}
-            <a href="mailto:demo@voiceaitraining.com" className="underline">
-              demo@voiceaitraining.com
+            <a href="mailto:demo@speakstride.com" className="underline">
+              demo@speakstride.com
             </a>
           </p>
         </div>

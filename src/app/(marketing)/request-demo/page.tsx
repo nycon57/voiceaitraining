@@ -144,8 +144,8 @@ export default function RequestDemoPage() {
       <div className="mt-12 text-center">
         <p className="text-sm text-muted-foreground">
           Have questions? Email us at{' '}
-          <a href="mailto:sales@voiceaitraining.com" className="underline">
-            sales@voiceaitraining.com
+          <a href="mailto:sales@speakstride.com" className="underline">
+            sales@speakstride.com
           </a>{' '}
           or call{' '}
           <a href="tel:+1-555-123-4567" className="underline">

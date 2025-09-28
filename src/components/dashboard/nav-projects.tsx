@@ -44,8 +44,10 @@ export function NavProjects({
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
+                <div className="flex items-center gap-2">
+                  <item.icon />
+                  <span>{item.name}</span>
+                </div>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>

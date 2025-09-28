@@ -8,6 +8,9 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  safelist: [
+    'font-headline',
+  ],
   prefix: "",
   theme: {
   	container: {
@@ -67,6 +70,10 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		fontFamily: {
+  			'sans': ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+  			'headline': ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif'],
   		},
   		keyframes: {
   			'accordion-down': {

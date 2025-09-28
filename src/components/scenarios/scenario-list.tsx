@@ -224,8 +224,10 @@ export function ScenarioList({ scenarios, orgId, userRole }: ScenarioListProps) 
                       {scenario.status === 'active' && (
                         <Button asChild size="sm">
                           <Link href={`/org/${orgId}/play/${scenario.id}`}>
-                            <Play className="h-4 w-4 mr-1" />
-                            Practice
+                            <div className="flex items-center gap-1">
+                              <Play className="h-4 w-4" />
+                              Practice
+                            </div>
                           </Link>
                         </Button>
                       )}
