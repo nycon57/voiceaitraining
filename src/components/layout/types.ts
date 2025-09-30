@@ -2,13 +2,7 @@ interface User {
   name: string
   email: string
   avatar?: string
-  role: string
-}
-
-interface Team {
-  name: string
-  logo: React.ElementType
-  plan: string
+  role?: string
 }
 
 interface BaseNavItem {
@@ -34,7 +28,6 @@ interface NavGroup {
 
 interface SidebarData {
   user: User
-  teams: Team[]
   navGroups: NavGroup[]
 }
 

@@ -57,9 +57,9 @@ function ContactGradient({ ...props }: React.SVGProps<SVGSVGElement>) {
           y2="100%"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#9259ED" />
-          <stop offset="50%" stopColor="#CF54EE" />
-          <stop offset="100%" stopColor="#FB8684" />
+          <stop offset="0%" stopColor="#D97842" />
+          <stop offset="50%" stopColor="#B584F2" />
+          <stop offset="100%" stopColor="#EDD5B8" />
         </linearGradient>
         <linearGradient
           id="contactGrad2"
@@ -69,9 +69,9 @@ function ContactGradient({ ...props }: React.SVGProps<SVGSVGElement>) {
           y2="100%"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#FB07FF" />
-          <stop offset="50%" stopColor="#FF6847" />
-          <stop offset="100%" stopColor="#FF474A" />
+          <stop offset="0%" stopColor="#B584F2" />
+          <stop offset="50%" stopColor="#D97842" />
+          <stop offset="100%" stopColor="#EDD5B8" />
         </linearGradient>
         <linearGradient
           id="contactGrad3"
@@ -81,8 +81,8 @@ function ContactGradient({ ...props }: React.SVGProps<SVGSVGElement>) {
           y2="100%"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#B956EE" />
-          <stop offset="100%" stopColor="#9672FF" />
+          <stop offset="0%" stopColor="#B584F2" />
+          <stop offset="100%" stopColor="#D97842" />
         </linearGradient>
       </defs>
 

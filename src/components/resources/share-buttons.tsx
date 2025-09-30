@@ -124,7 +124,7 @@ export function ShareButtons({ title, url, description, className }: ShareButton
               "w-full flex items-center gap-2 transition-all duration-200",
               copied
                 ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-50"
-                : "hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700"
+                : "hover:bg-chart-1/5 hover:border-chart-2/50 hover:text-chart-2"
             )}
           >
             <motion.div

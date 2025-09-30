@@ -88,7 +88,7 @@ const ITEMS = [
 const Features = ({ className }: { className?: string }) => {
   return (
     <section className={cn('py-10 md:py-20', className)}>
-      <Carousel>
+      <Carousel opts={{ loop: true }}>
         <div className="container flex flex-col justify-between gap-10 md:flex-row md:items-center">
           <div className="max-w-3xl space-y-3">
             <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">

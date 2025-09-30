@@ -5,7 +5,7 @@ import { LucideIcon } from 'lucide-react';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Aurora from '@/components/ui/aurora';
+import PixelBlast from '@/components/ui/pixel-blast';
 
 interface PageHeroProps {
   badge?: {
@@ -35,13 +35,26 @@ const PageHero = ({
 }: PageHeroProps) => {
   return (
     <section className="relative py-16 md:py-32 overflow-hidden">
-      {/* Aurora Background - Full viewport width, 65% height */}
+      {/* PixelBlast Background */}
       <div className="absolute inset-x-0 top-0 -z-10 h-[65%]">
-        <Aurora
-          colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-          blend={0.5}
-          amplitude={1.0}
-          speed={0.5}
+        <PixelBlast
+          variant="circle"
+          pixelSize={6}
+          color="#B19EEF"
+          patternScale={3}
+          patternDensity={1.2}
+          pixelSizeJitter={0.5}
+          enableRipples
+          rippleSpeed={0.4}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.5}
+          liquid
+          liquidStrength={0.12}
+          liquidRadius={1.2}
+          liquidWobbleSpeed={5}
+          speed={0.6}
+          edgeFade={0.25}
+          transparent
         />
       </div>
 

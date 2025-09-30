@@ -93,7 +93,7 @@ export default function VoiceSimulationFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             The Technology Behind{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Perfect Practice
             </span>
           </h2>
@@ -109,15 +109,15 @@ export default function VoiceSimulationFeatures() {
             const Icon = feature.icon;
             return (
               <div key={index} className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all duration-300 group-hover:border-purple-500/30 group-hover:shadow-lg">
+                <div className="absolute inset-0 bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all duration-300 group-hover:border-chart-2/30 group-hover:shadow-lg">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20">
-                      <Icon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <div className="p-3 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-2/20 border border-chart-2/20">
+                      <Icon className="h-6 w-6 text-chart-2 dark:text-chart-2" />
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  <h3 className="text-lg font-semibold mb-3 group-hover:text-chart-2 dark:group-hover:text-chart-2 transition-colors">
                     {feature.title}
                   </h3>
 
@@ -128,7 +128,7 @@ export default function VoiceSimulationFeatures() {
                   <ul className="space-y-2">
                     {feature.benefits.map((benefit, benefitIndex) => (
                       <li key={benefitIndex} className="flex items-start gap-2 text-xs text-muted-foreground">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 mt-2 flex-shrink-0"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 mt-2 flex-shrink-0"></div>
                         <span>{benefit}</span>
                       </li>
                     ))}

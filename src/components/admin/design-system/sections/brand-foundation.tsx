@@ -778,7 +778,7 @@ export function BrandFoundationSection() {
               <div className="flex items-center justify-center h-32 bg-gradient-to-br from-background to-muted rounded-lg border">
                 <div className="font-headline text-xl font-semibold tracking-tight">
                   <span className="text-foreground">Speak</span>
-                  <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent font-medium">Stride</span>
+                  <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent font-medium">Stride</span>
                 </div>
               </div>
               <div className="mt-4 space-y-2">
@@ -799,17 +799,17 @@ export function BrandFoundationSection() {
                 {/* Large */}
                 <div className="font-headline text-2xl font-semibold tracking-tight">
                   <span className="text-foreground">Speak</span>
-                  <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent font-medium">Stride</span>
+                  <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent font-medium">Stride</span>
                 </div>
                 {/* Medium */}
                 <div className="font-headline text-lg font-semibold tracking-tight">
                   <span className="text-foreground">Speak</span>
-                  <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent font-medium">Stride</span>
+                  <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent font-medium">Stride</span>
                 </div>
                 {/* Small */}
                 <div className="font-headline text-sm font-semibold tracking-tight">
                   <span className="text-foreground">Speak</span>
-                  <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent font-medium">Stride</span>
+                  <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent font-medium">Stride</span>
                 </div>
               </div>
             </CardContent>

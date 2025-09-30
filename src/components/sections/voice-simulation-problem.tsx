@@ -42,7 +42,7 @@ export default function VoiceSimulationProblem() {
             <div className="w-full max-w-md">
               <h2 className="my-5 text-4xl md:text-5xl lg:text-6xl font-headline">
                 Traditional{" "}
-                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                   Role-Play Training
                 </span>{" "}
                 Is Broken
@@ -79,8 +79,8 @@ export default function VoiceSimulationProblem() {
 
               {/* AI Voice Training Success */}
               <div className="relative h-full">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-orange-500/20 rounded-lg blur-3xl"></div>
-                <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-lg p-6 text-white h-full flex flex-col">
+                <div className="absolute inset-0 bg-gradient-to-br from-chart-1/20 via-chart-2/20 to-chart-3/20 rounded-lg blur-3xl"></div>
+                <div className="relative bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-lg p-6 text-white h-full flex flex-col">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>

@@ -89,8 +89,8 @@ export function RecommendedArticles({
         className="text-center space-y-4"
       >
         <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="p-2 rounded-full bg-gradient-to-br from-purple-100 via-magenta-100 to-coral-100">
-            <Sparkles className="w-5 h-5 text-purple-600" />
+          <div className="p-2 rounded-full bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10">
+            <Sparkles className="w-5 h-5 text-chart-2" />
           </div>
           <h2 className="text-2xl lg:text-3xl font-bold font-headline">
             Recommended Reading

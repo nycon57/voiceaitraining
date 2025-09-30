@@ -1,0 +1,187 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatCard } from '@/components/dashboard/cards'
+import { OpportunityCarousel } from '@/components/dashboard/opportunity-carousel'
+import { TasksTable } from '@/components/dashboard/tasks-table'
+import { PerformanceTrendChart } from '@/components/charts'
+import { getRecentAttemptStats, getUserAssignments } from '@/actions/assignments'
+import { getLatestActiveScenarios, getLatestActiveTracks } from '@/actions/scenarios'
+import {
+  Trophy,
+  CheckCircle,
+  TrendingUp,
+  BarChart3
+} from 'lucide-react'
+import type { AuthUser } from '@/lib/auth'
+
+interface TraineeOverviewProps {
+  user: AuthUser
+}
+
+export async function TraineeOverview({ user }: TraineeOverviewProps) {
+  // Fetch all data in parallel for performance
+  const [stats, assignments, scenarios, tracks] = await Promise.all([
+    getRecentAttemptStats(user.id).catch(() => null),
+    getUserAssignments(user.id).catch(() => []),
+    getLatestActiveScenarios(10).catch(() => []),
+    getLatestActiveTracks(10).catch(() => [])
+  ])
+
+  // Transform stats for StatCard components
+  const statsData = [
+    {
+      label: "Average Score",
+      value: stats?.average_score ? Math.round(stats.average_score) : 0,
+      icon: Trophy,
+      trend: stats?.performance_trend ? {
+        direction: stats.performance_trend === 'up' ? 'up' as const :
+                   stats.performance_trend === 'down' ? 'down' as const : undefined,
+        value: stats.performance_trend === 'up' ? '+12%' :
+               stats.performance_trend === 'down' ? '-5%' : '0%',
+        isPositive: stats.performance_trend !== 'down'
+      } : undefined,
+      description: "Your average performance score"
+    },
+    {
+      label: "Completed Sessions",
+      value: stats?.total_completed || 0,
+      icon: CheckCircle,
+      trend: stats?.recent_attempts ? {
+        direction: 'up' as const,
+        value: `+${stats.recent_attempts}`,
+        isPositive: true
+      } : undefined,
+      description: "Training sessions this month"
+    },
+    {
+      label: "Current Streak",
+      value: stats?.current_streak || 0,
+      icon: TrendingUp,
+      description: "Consecutive days of training"
+    },
+    {
+      label: "Talk/Listen Ratio",
+      value: stats?.avg_talk_listen_ratio || "N/A",
+      icon: BarChart3,
+      description: "Optimal range: 40-45%"
+    }
+  ]
+
+  // Transform opportunities for carousel
+  const opportunities = [
+    ...scenarios.map(s => ({
+      id: s.id,
+      title: s.title,
+      description: s.description,
+      difficulty: s.difficulty as 'easy' | 'medium' | 'hard' | undefined,
+      type: 'scenario' as const,
+      tags: s.persona?.tags as string[] | undefined
+    })),
+    ...tracks.map(t => ({
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      type: 'track' as const,
+      scenario_count: t.scenario_count
+    }))
+  ].slice(0, 10) // Limit to 10 items total
+
+  // Transform assignments for table
+  const tasks = assignments.map(a => ({
+    id: a.id,
+    title: a.scenario_title || a.track_title || 'Untitled Assignment',
+    type: a.type as 'scenario' | 'track',
+    due_at: a.due_at,
+    status: a.completion_status === 'completed' ? 'completed' as const :
+            a.attempts_count > 0 ? 'in_progress' as const :
+            'not_started' as const,
+    progress: a.progress_percentage || 0,
+    best_score: a.best_score,
+    is_overdue: a.is_overdue,
+    scenario_id: a.scenario_id,
+    track_id: a.track_id
+  }))
+
+  // Transform performance data for chart
+  const performanceData = stats?.recent_performance?.map((attempt, index) => ({
+    date: new Date(attempt.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    score: attempt.score || 0,
+    label: `Session ${stats.recent_performance!.length - index}`
+  })) || []
+
+  return (
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <div className="space-y-2">
+        <h2 className="font-headline text-3xl font-bold tracking-tight">
+          <span className="text-gradient">Welcome back</span>, {user.name}
+        </h2>
+        <p className="text-muted-foreground">
+          Here's an overview of your training progress
+        </p>
+      </div>
+
+      {/* Quick Performance Stats - 4 column grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {statsData.map((stat) => (
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            description={stat.description}
+            icon={stat.icon}
+            trend={stat.trend}
+            headlineTitle={false}
+          />
+        ))}
+      </div>
+
+      {/* New Opportunities Section */}
+      <section className="space-y-4">
+        <div>
+          <h3 className="font-headline text-2xl font-bold tracking-tight">
+            New Training Opportunities
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Latest scenarios and tracks added to your organization
+          </p>
+        </div>
+        <OpportunityCarousel items={opportunities} />
+      </section>
+
+      {/* Your Tasks Section */}
+      <section className="space-y-4">
+        <div>
+          <h3 className="font-headline text-2xl font-bold tracking-tight">
+            Your Assignments
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Track your progress and upcoming deadlines
+          </p>
+        </div>
+        <TasksTable tasks={tasks} />
+      </section>
+
+      {/* Recent Performance Chart - Optional sidebar */}
+      {performanceData.length > 0 && (
+        <section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Recent Performance</CardTitle>
+              <CardDescription>
+                Your last {performanceData.length} training sessions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PerformanceTrendChart
+                data={performanceData}
+                title=""
+                description=""
+                showStats={false}
+              />
+            </CardContent>
+          </Card>
+        </section>
+      )}
+    </div>
+  )
+}

@@ -55,18 +55,18 @@ const features = [
 
 export default function VoiceAIFeatureShowcase() {
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 dark:from-blue-950/20 dark:via-purple-950/10 dark:to-pink-950/20">
+    <section className="py-16 md:py-24 bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10">
       <div className="container">
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 mb-6">
-            <Badge variant="outline" className="border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300">
+            <Badge variant="outline" className="border-chart-2/30 bg-chart-1/5 text-chart-2 dark:border-chart-2/30 dark:bg-chart-2/10 dark:text-chart-2">
               Platform Features
             </Badge>
           </div>
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Everything You Need to{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Transform Your Sales Team
             </span>
           </h2>
@@ -84,7 +84,7 @@ export default function VoiceAIFeatureShowcase() {
               <Card key={index} className="relative group hover:shadow-lg transition-all duration-300 border-border/50 backdrop-blur-sm">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                       <Icon className="h-6 w-6 text-white" />
                     </div>
                     {feature.isCore && (
@@ -108,7 +108,7 @@ export default function VoiceAIFeatureShowcase() {
                 </CardContent>
 
                 {/* Subtle gradient border effect on hover */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </Card>
             );
           })}

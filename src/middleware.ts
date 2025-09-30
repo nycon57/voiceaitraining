@@ -1,13 +1,18 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
-const isPublicRoute = createRouteMatcher([
-  '/',
+// Routes that should always be accessible (webhooks, API endpoints)
+const isWebhookRoute = createRouteMatcher(['/api/webhooks(.*)'])
+
+// Authentication pages
+const isAuthRoute = createRouteMatcher([
   '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/request-demo',
-  '/demo-credentials',
-  '/api/webhooks(.*)',
+  '/sign-up(.*)'
+])
+
+// Marketing/public pages that logged-in users should NOT access
+const isMarketingRoute = createRouteMatcher([
+  '/',
   '/pricing',
   '/product',
   '/features(.*)',
@@ -16,63 +21,37 @@ const isPublicRoute = createRouteMatcher([
   '/contact',
   '/terms',
   '/privacy',
-  '/admin(.*)',
-  '/about'
-])
-
-const isAuthRoute = createRouteMatcher([
-  '/sign-in(.*)'
+  '/about',
+  '/request-demo',
+  '/demo-credentials'
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, orgId } = await auth()
+  const { userId } = await auth()
 
-  // Allow public routes
-  if (isPublicRoute(req)) {
+  // Always allow webhooks
+  if (isWebhookRoute(req)) {
     return NextResponse.next()
   }
 
-  // Redirect unauthenticated users to sign-in
-  if (!userId) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+  // If user is authenticated
+  if (userId) {
+    // Redirect authenticated users away from marketing/auth pages to dashboard
+    if (isMarketingRoute(req) || isAuthRoute(req)) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+    // Allow all authenticated routes
+    return NextResponse.next()
   }
 
-  // If user is authenticated but on auth pages, redirect to app
-  if (isAuthRoute(req) && userId) {
-    if (orgId) {
-      return NextResponse.redirect(new URL(`/org/${orgId}/dashboard`, req.url))
-    } else {
-      return NextResponse.redirect(new URL('/select-org', req.url))
-    }
+  // If user is not authenticated
+  // Allow marketing and auth routes
+  if (isMarketingRoute(req) || isAuthRoute(req)) {
+    return NextResponse.next()
   }
 
-  // If authenticated user visits root, redirect to dashboard
-  if (req.nextUrl.pathname === '/' && userId) {
-    if (orgId) {
-      return NextResponse.redirect(new URL(`/org/${orgId}/dashboard`, req.url))
-    } else {
-      return NextResponse.redirect(new URL('/select-org', req.url))
-    }
-  }
-
-  // Handle org-scoped routes
-  if (req.nextUrl.pathname.startsWith('/org/')) {
-    const pathOrgId = req.nextUrl.pathname.split('/')[2]
-
-    // If no org in session but org route accessed, redirect to org selection
-    if (!orgId) {
-      return NextResponse.redirect(new URL('/select-org', req.url))
-    }
-
-    // If accessing different org than current session, switch org context
-    if (pathOrgId && pathOrgId !== orgId) {
-      const response = NextResponse.next()
-      response.cookies.set('clerk-org-hint', pathOrgId)
-      return response
-    }
-  }
-
-  return NextResponse.next()
+  // Redirect to sign-in for all other routes (authenticated routes)
+  return NextResponse.redirect(new URL('/sign-in', req.url))
 })
 
 export const config = {

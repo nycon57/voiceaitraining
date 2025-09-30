@@ -13,7 +13,7 @@ const createOrgSchema = z.object({
 const updateOrgSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   plan: z.enum(['starter', 'growth', 'enterprise']).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function createOrganization(formData: FormData) {
@@ -58,7 +58,7 @@ export async function updateOrganization(formData: FormData) {
       throw new Error(`Failed to update organization: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/settings', 'page')
+    revalidatePath('/settings', 'page')
     return org
   })
 }

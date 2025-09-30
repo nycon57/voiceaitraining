@@ -196,7 +196,7 @@ export function Terminal({
       </motion.div>
 
       {/* Log entries with fixed height */}
-      <div className="h-80 overflow-hidden bg-[#f2dcdc] pt-2 text-xs dark:bg-[hsl(0,33%,10%)]">
+      <div className="h-80 overflow-hidden bg-muted pt-2 text-xs">
         {logEntries.map((entry, index) => (
           <div
             key={index}
@@ -221,12 +221,11 @@ export function Terminal({
                   </TypingAnimation>
                 )}
                 <span
-                  className={`ml-1 w-2 ${
+                  className={`ml-1 w-2 text-chart-1 ${
                     index === currentLineIndex && typingStarted && showCursor
                       ? 'animate-pulse'
                       : 'opacity-0'
                   }`}
-                  style={{ color: 'var(--chart-1)' }}
                 >
                   |
                 </span>

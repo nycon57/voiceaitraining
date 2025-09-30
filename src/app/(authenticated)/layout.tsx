@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 import { cn } from "@/lib/utils"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from '@/components/dashboard/app-sidebar'
+import { CommandMenu } from '@/components/command-menu'
 
 interface AuthenticatedLayoutProps {
   children: React.ReactNode
@@ -16,30 +17,27 @@ export default async function AuthenticatedLayout({ children }: AuthenticatedLay
     redirect('/sign-in')
   }
 
-  // For now, redirect to select-org if no orgId (we'll remove this later)
-  if (!user.orgId) {
-    redirect('/select-org')
-  }
-
   const cookieStore = await cookies()
   const defaultClose = cookieStore.get("sidebar:state")?.value === "false"
 
+  // Serialize user data for client component (only plain objects allowed)
+  const serializedUser = {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.emailAddresses?.[0]?.emailAddress || '',
+    role: user.role,
+  }
+
   return (
-    <div className="border-grid flex flex-1 flex-col">
+    <div className="flex h-screen w-full overflow-hidden">
       <SidebarProvider defaultOpen={!defaultClose}>
-        <AppSidebar userRole={user.role || 'trainee'} user={user} />
-        <div
-          id="content"
-          className={cn(
-            "flex h-full w-full flex-col",
-            "has-[div[data-layout=fixed]]:h-svh",
-            "group-data-[scroll-locked=1]/body:h-full",
-            "has-[data-layout=fixed]:group-data-[scroll-locked=1]/body:h-svh"
-          )}
-        >
+        <AppSidebar userRole={user.role || 'trainee'} user={serializedUser} />
+        <div className="flex w-full flex-1 flex-col overflow-y-auto">
           {children}
         </div>
       </SidebarProvider>
+      <CommandMenu userRole={user.role || 'trainee'} />
     </div>
   )
 }

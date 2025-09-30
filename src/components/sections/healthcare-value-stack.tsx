@@ -126,7 +126,7 @@ export default function HealthcareValueStack() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-headline mb-4">
               Proven Results for{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                 Healthcare Teams
               </span>
             </h2>
@@ -140,10 +140,10 @@ export default function HealthcareValueStack() {
               const Icon = item.icon;
               return (
                 <div key={index} className="text-center">
-                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mb-4">
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 mb-4">
                     <Icon className="h-8 w-8 text-white" />
                   </div>
-                  <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent mb-2">
                     {item.metric}
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{item.label}</h3>
@@ -160,7 +160,7 @@ export default function HealthcareValueStack() {
           <div className="col-span-4 mb-8 max-w-4xl md:col-span-8 md:mb-12 lg:col-span-10 lg:col-start-2 lg:mb-16">
             <h2 className="mb-4 text-center text-4xl sm:text-left md:text-5xl lg:text-6xl font-headline">
               Everything You Need vs.{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                 Typical Costs
               </span>
             </h2>
@@ -180,7 +180,7 @@ export default function HealthcareValueStack() {
                 </h4>
               </div>
               <div className="col-span-2 ml-0 md:col-span-3 md:ml-32 lg:ml-40 xl:ml-48 2xl:ml-56">
-                <h4 className="text-xs font-bold tracking-wider uppercase md:text-sm bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <h4 className="text-xs font-bold tracking-wider uppercase md:text-sm bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                   Our Platform
                 </h4>
               </div>
@@ -219,7 +219,7 @@ export default function HealthcareValueStack() {
                   {/* Our Platform Value */}
                   <div className="col-span-2 flex flex-col md:col-span-3">
                     <div className="ml-0 transition-colors group-hover:text-accent-foreground md:ml-32 lg:ml-40 xl:ml-48 2xl:ml-56">
-                      <p className="mb-1 flex items-baseline text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent md:mb-2 md:text-4xl">
+                      <p className="mb-1 flex items-baseline text-2xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent md:mb-2 md:text-4xl">
                         {row.ourPlatform.value}
                         {row.ourPlatform.unit && (
                           <sup className="ml-0.5 text-xs md:text-sm">
@@ -239,7 +239,7 @@ export default function HealthcareValueStack() {
 
           {/* PAYOFF SECTION */}
           <div className="col-span-4 md:col-span-8 lg:col-span-10 lg:col-start-2">
-            <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-orange-900 text-white rounded-xl p-8 md:p-12 shadow-xl border border-purple-500/30">
+            <div className="bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 text-white rounded-xl p-8 md:p-12 shadow-xl border border-chart-2/30">
               <div className="grid grid-cols-4 items-center gap-6 md:grid-cols-8">
                 <h3 className="col-span-4 text-xl font-black md:col-span-2 md:text-3xl">
                   YOUR INVESTMENT
@@ -293,7 +293,7 @@ export default function HealthcareValueStack() {
                     </div>
                   </div>
 
-                  <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-3 rounded-full shadow-lg">
+                  <Button className="bg-gradient-to-r from-chart-1 to-chart-1 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-3 rounded-full shadow-lg">
                     Start Training Healthcare Sales
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

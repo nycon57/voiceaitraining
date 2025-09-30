@@ -22,13 +22,13 @@ const updateAttemptSchema = z.object({
   transcript_json: z.string().optional(),
   transcript_path: z.string().optional(),
   score: z.number().optional(),
-  score_breakdown: z.any().optional(),
-  kpis: z.any().optional(),
+  score_breakdown: z.record(z.string(), z.unknown()).optional(),
+  kpis: z.record(z.string(), z.unknown()).optional(),
   feedback_text: z.string().optional(),
-  feedback_json: z.any().optional(),
+  feedback_json: z.record(z.string(), z.unknown()).optional(),
   manager_comments: z.string().optional(),
   status: z.enum(['in_progress', 'completed', 'failed']).optional(),
-  metadata: z.any().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export async function createAttempt(data: z.infer<typeof createAttemptSchema>) {
@@ -69,7 +69,7 @@ export async function createAttempt(data: z.infer<typeof createAttemptSchema>) {
       throw new Error(`Failed to create attempt: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/attempts', 'page')
+    revalidatePath('/attempts', 'page')
     return attempt
   })
 }
@@ -120,8 +120,8 @@ export async function updateAttempt(
       throw new Error(`Failed to update attempt: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/attempts', 'page')
-    revalidatePath(`/org/[orgId]/attempts/${attemptId}`, 'page')
+    revalidatePath('/attempts', 'page')
+    revalidatePath(`/attempts/${attemptId}`, 'page')
     return attempt
   })
 }
@@ -157,23 +157,23 @@ export async function scoreAttempt(attemptId: string) {
     try {
       // Parse transcript
       const transcript = JSON.parse(attempt.transcript_json)
-      const duration = attempt.duration_seconds || 0
+      const duration = attempt.duration_seconds ?? 0
 
       // Calculate KPIs
       const globalKPIs = calculateGlobalKPIs(transcript, duration)
 
       const scenarioConfig = {
-        required_phrases: attempt.scenarios.scoring_rubric?.required_phrases || [],
-        objection_keywords: attempt.scenarios.scoring_rubric?.objection_keywords || [],
+        required_phrases: attempt.scenarios.scoring_rubric?.required_phrases ?? [],
+        objection_keywords: attempt.scenarios.scoring_rubric?.objection_keywords ?? [],
         primary_goal: attempt.scenarios.scoring_rubric?.primary_goal,
-        secondary_goals: attempt.scenarios.scoring_rubric?.secondary_goals || []
+        secondary_goals: attempt.scenarios.scoring_rubric?.secondary_goals ?? []
       }
 
       const scenarioKPIs = calculateScenarioKPIs(transcript, scenarioConfig)
 
       // Calculate score
       const rubric = {
-        global_weights: attempt.scenarios.scoring_rubric?.global_weights || {
+        global_weights: attempt.scenarios.scoring_rubric?.global_weights ?? {
           talk_listen_ratio: 15,
           filler_words: 10,
           interruptions: 10,
@@ -181,7 +181,7 @@ export async function scoreAttempt(attemptId: string) {
           sentiment: 10,
           response_time: 5
         },
-        scenario_weights: attempt.scenarios.scoring_rubric?.scenario_weights || {
+        scenario_weights: attempt.scenarios.scoring_rubric?.scenario_weights ?? {
           required_phrases: 15,
           objection_handling: 10,
           open_questions: 10,
@@ -244,11 +244,12 @@ export async function scoreAttempt(attemptId: string) {
           .eq('user_id', updatedAttempt.user_id)
           .single()
 
-        const webhookUser = userData?.users ? {
-          id: userData.users.id,
-          name: userData.users.name,
-          email: userData.users.email,
-          role: 'trainee' // Default role for webhook payload
+        const users = userData?.users as unknown as { id: string; name: string; email: string } | undefined
+        const webhookUser = users ? {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          role: 'trainee' as const // Default role for webhook payload
         } : null
 
         // Trigger scenario completed webhook
@@ -285,11 +286,11 @@ export async function scoreAttempt(attemptId: string) {
         // Don't fail the scoring process if webhooks fail
       }
 
-      revalidatePath(`/org/[orgId]/attempts/${attemptId}`, 'page')
+      revalidatePath(`/attempts/${attemptId}`, 'page')
       return updatedAttempt
-    } catch (error: any) {
+    } catch (error) {
       console.error('Scoring error:', error)
-      throw new Error(`Failed to score attempt: ${error.message}`)
+      throw new Error(`Failed to score attempt: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   })
 }
@@ -399,7 +400,7 @@ export async function deleteAttempt(attemptId: string) {
       throw new Error(`Failed to delete attempt: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/attempts', 'page')
+    revalidatePath('/attempts', 'page')
     return { success: true }
   })
 }
@@ -423,7 +424,7 @@ export async function addManagerComment(attemptId: string, comment: string) {
       throw new Error(`Failed to add comment: ${error.message}`)
     }
 
-    revalidatePath(`/org/[orgId]/attempts/${attemptId}`, 'page')
+    revalidatePath(`/attempts/${attemptId}`, 'page')
     return attempt
   })
 }

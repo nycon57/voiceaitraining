@@ -15,10 +15,6 @@ const inviteUserSchema = z.object({
   redirectUrl: z.string().url().optional(),
 })
 
-const bulkInviteSchema = z.object({
-  users: z.array(inviteUserSchema),
-})
-
 const updateUserRoleSchema = z.object({
   userId: z.string(),
   role: z.enum(['admin', 'manager', 'trainee', 'hr']),
@@ -38,8 +34,8 @@ export async function inviteUserToOrganization(formData: FormData) {
     role: formData.get('role'),
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
-    department: formData.get('department') || undefined,
-    redirectUrl: formData.get('redirectUrl') || undefined,
+    department: formData.get('department') ?? undefined,
+    redirectUrl: formData.get('redirectUrl') ?? undefined,
   })
 
   try {
@@ -49,12 +45,13 @@ export async function inviteUserToOrganization(formData: FormData) {
                      data.role === 'hr' ? 'org:hr' : 'org:member'
 
     // Create invitation via Clerk
-    const invitation = await clerkClient.organizations.createOrganizationInvitation({
+    const client = await clerkClient()
+    const invitation = await client.organizations.createOrganizationInvitation({
       organizationId: user.orgId,
       emailAddress: data.email,
       role: clerkRole,
       inviterUserId: user.id,
-      redirectUrl: data.redirectUrl || `${process.env.NEXT_PUBLIC_APP_URL}/org/${user.orgId}/dashboard`,
+      redirectUrl: data.redirectUrl ?? `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
       publicMetadata: {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -78,11 +75,11 @@ export async function inviteUserToOrganization(formData: FormData) {
         status: 'pending',
       })
 
-    revalidatePath('/org/[orgId]/admin/users', 'page')
+    revalidatePath('/admin/users', 'page')
     return { success: true, invitationId: invitation.id }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to invite user:', error)
-    throw new Error(`Failed to send invitation: ${error.message}`)
+    throw new Error(`Failed to send invitation: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
@@ -111,22 +108,22 @@ export async function bulkInviteUsers(formData: FormData) {
 
   const users = lines.slice(1).map((line, index) => {
     const values = line.split(',').map(v => v.trim())
-    const user: any = {}
+    const userRecord: Record<string, string> = {}
 
     headers.forEach((header, i) => {
-      user[header] = values[i] || ''
+      userRecord[header] = values[i] ?? ''
     })
 
     try {
       return inviteUserSchema.parse({
-        email: user.email,
-        firstName: user.firstname,
-        lastName: user.lastname,
-        role: user.role,
-        department: user.department,
+        email: userRecord.email,
+        firstName: userRecord.firstname,
+        lastName: userRecord.lastname,
+        role: userRecord.role,
+        department: userRecord.department,
       })
     } catch (error) {
-      throw new Error(`Row ${index + 2}: Invalid data - ${error}`)
+      throw new Error(`Row ${index + 2}: Invalid data - ${String(error)}`)
     }
   })
 
@@ -139,12 +136,13 @@ export async function bulkInviteUsers(formData: FormData) {
                        userData.role === 'manager' ? 'org:manager' :
                        userData.role === 'hr' ? 'org:hr' : 'org:member'
 
-      const invitation = await clerkClient.organizations.createOrganizationInvitation({
+      const client = await clerkClient()
+      const invitation = await client.organizations.createOrganizationInvitation({
         organizationId: user.orgId,
         emailAddress: userData.email,
         role: clerkRole,
         inviterUserId: user.id,
-        redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/org/${user.orgId}/dashboard`,
+        redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
         publicMetadata: {
           firstName: userData.firstName,
           lastName: userData.lastName,
@@ -169,12 +167,12 @@ export async function bulkInviteUsers(formData: FormData) {
         })
 
       results.push({ email: userData.email, success: true, invitationId: invitation.id })
-    } catch (error: any) {
-      errors.push({ email: userData.email, error: error.message })
+    } catch (error) {
+      errors.push({ email: userData.email, error: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
-  revalidatePath('/org/[orgId]/admin/users', 'page')
+  revalidatePath('/admin/users', 'page')
   return { results, errors, total: users.length }
 }
 
@@ -198,7 +196,8 @@ export async function updateUserRole(formData: FormData) {
                      data.role === 'hr' ? 'org:hr' : 'org:member'
 
     // Update role in Clerk
-    await clerkClient.organizations.updateOrganizationMembership({
+    const client = await clerkClient()
+    await client.organizations.updateOrganizationMembership({
       organizationId: user.orgId,
       userId: data.userId,
       role: clerkRole,
@@ -206,11 +205,11 @@ export async function updateUserRole(formData: FormData) {
 
     // The webhook will handle updating our database
 
-    revalidatePath('/org/[orgId]/admin/users', 'page')
+    revalidatePath('/admin/users', 'page')
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to update user role:', error)
-    throw new Error(`Failed to update role: ${error.message}`)
+    throw new Error(`Failed to update role: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
@@ -234,18 +233,19 @@ export async function removeUserFromOrganization(formData: FormData) {
 
   try {
     // Remove from Clerk organization
-    await clerkClient.organizations.deleteOrganizationMembership({
+    const client = await clerkClient()
+    await client.organizations.deleteOrganizationMembership({
       organizationId: user.orgId,
       userId: userId,
     })
 
     // The webhook will handle updating our database
 
-    revalidatePath('/org/[orgId]/admin/users', 'page')
+    revalidatePath('/admin/users', 'page')
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to remove user:', error)
-    throw new Error(`Failed to remove user: ${error.message}`)
+    throw new Error(`Failed to remove user: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 
@@ -264,7 +264,8 @@ export async function revokeInvitation(formData: FormData) {
 
   try {
     // Revoke invitation in Clerk
-    await clerkClient.organizations.revokeOrganizationInvitation({
+    const client = await clerkClient()
+    await client.organizations.revokeOrganizationInvitation({
       organizationId: user.orgId,
       invitationId: invitationId,
       requestingUserId: user.id,
@@ -280,11 +281,11 @@ export async function revokeInvitation(formData: FormData) {
       })
       .eq('clerk_invitation_id', invitationId)
 
-    revalidatePath('/org/[orgId]/admin/users', 'page')
+    revalidatePath('/admin/users', 'page')
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to revoke invitation:', error)
-    throw new Error(`Failed to revoke invitation: ${error.message}`)
+    throw new Error(`Failed to revoke invitation: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 

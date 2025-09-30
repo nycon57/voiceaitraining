@@ -36,7 +36,7 @@ export default function AnalyticsProblem() {
             <div className="w-full max-w-md">
               <h2 className="my-5 text-4xl md:text-5xl lg:text-6xl font-headline">
                 Sales managers are{" "}
-                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                   flying blind
                 </span>{" "}
                 without proper data
@@ -71,8 +71,8 @@ export default function AnalyticsProblem() {
 
               {/* Analytics Clarity */}
               <div className="relative h-full">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-orange-500/20 rounded-lg blur-3xl"></div>
-                <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-lg p-6 text-white h-full flex flex-col">
+                <div className="absolute inset-0 bg-gradient-to-br from-chart-1/20 via-chart-2/20 to-chart-3/20 rounded-lg blur-3xl"></div>
+                <div className="relative bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-lg p-6 text-white h-full flex flex-col">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>
@@ -97,7 +97,7 @@ export default function AnalyticsProblem() {
           <div className="mt-24 grid grid-cols-1 justify-between gap-8 sm:grid-cols-2 md:grid-cols-4">
             {problemStats.map((item) => (
               <div key={item.title} className="text-center md:text-left">
-                <p className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+                <p className="text-4xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                   {item.number}{item.suffix}
                 </p>
                 <h6 className="text-lg mt-3 mb-2 font-semibold">{item.title}</h6>

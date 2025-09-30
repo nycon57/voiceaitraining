@@ -56,7 +56,7 @@ export async function createWebhook(data: z.infer<typeof createWebhookSchema>) {
       throw new Error(`Failed to create webhook: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/settings/webhooks', 'page')
+    revalidatePath('/settings/webhooks', 'page')
     return webhook
   })
 }
@@ -85,7 +85,7 @@ export async function updateWebhook(
       throw new Error(`Failed to update webhook: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/settings/webhooks', 'page')
+    revalidatePath('/settings/webhooks', 'page')
     return webhook
   })
 }
@@ -104,7 +104,7 @@ export async function deleteWebhook(webhookId: string) {
       throw new Error(`Failed to delete webhook: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/settings/webhooks', 'page')
+    revalidatePath('/settings/webhooks', 'page')
     return { success: true }
   })
 }
@@ -260,7 +260,7 @@ export async function regenerateWebhookSecret(webhookId: string) {
       throw new Error(`Failed to regenerate webhook secret: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/settings/webhooks', 'page')
+    revalidatePath('/settings/webhooks', 'page')
     return webhook
   })
 }

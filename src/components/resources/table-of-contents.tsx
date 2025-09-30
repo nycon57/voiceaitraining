@@ -81,9 +81,9 @@ export function TableOfContents({ headings, className }: TableOfContentsProps) {
               onClick={() => scrollToHeading(heading.id)}
               className={cn(
                 "group flex items-start gap-2 w-full text-left p-2 rounded-lg transition-all duration-200 text-sm",
-                "hover:bg-purple-50 hover:text-purple-700",
+                "hover:bg-chart-1/5 hover:text-chart-2",
                 activeId === heading.id
-                  ? "bg-gradient-to-r from-purple-50 to-magenta-50 text-purple-700 font-medium border-l-2 border-purple-500"
+                  ? "bg-gradient-to-r from-chart-1/5 to-chart-2/5 text-chart-2 font-medium border-l-2 border-chart-2"
                   : "text-muted-foreground hover:text-foreground",
                 heading.level > 2 && "ml-4"
               )}
@@ -98,8 +98,8 @@ export function TableOfContents({ headings, className }: TableOfContentsProps) {
                 className={cn(
                   "w-3 h-3 mt-0.5 transition-transform shrink-0",
                   activeId === heading.id
-                    ? "rotate-90 text-purple-600"
-                    : "group-hover:rotate-90 group-hover:text-purple-600"
+                    ? "rotate-90 text-chart-2"
+                    : "group-hover:rotate-90 group-hover:text-chart-2"
                 )}
               />
               <span className="leading-relaxed break-words">

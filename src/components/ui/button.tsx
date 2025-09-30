@@ -21,6 +21,8 @@ const buttonVariants = cva(
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
         muted: 'bg-muted text-accent-foreground shadow-xs hover:bg-muted/80',
+        gradient:
+          'bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200',
       },
       size: {
         default: 'h-14.5 px-4 py-2 has-[>svg]:px-3',

@@ -90,14 +90,14 @@ const sampleMetrics = [
     label: "Overall Score",
     value: "87",
     trend: "+12%",
-    color: "from-purple-500 to-pink-500"
+    color: "from-chart-1 via-chart-2 to-chart-3"
   },
   {
     icon: TrendingUp,
     label: "Talk Ratio",
     value: "42%",
     trend: "Optimal",
-    color: "from-blue-500 to-cyan-500"
+    color: "from-chart-1 to-chart-2"
   },
   {
     icon: Users,
@@ -111,7 +111,7 @@ const sampleMetrics = [
     label: "Close Rate",
     value: "73%",
     trend: "+18%",
-    color: "from-orange-500 to-red-500"
+    color: "from-chart-1 to-chart-1"
   }
 ];
 
@@ -128,7 +128,7 @@ export default function AIScoringValueStack() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Complete AI Scoring Platform vs.{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Typical Costs
             </span>
           </h2>
@@ -145,7 +145,7 @@ export default function AIScoringValueStack() {
             <p className="text-muted-foreground">See exactly what managers and reps get after every scored call</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-orange-900 rounded-2xl p-8 text-white">
+          <div className="bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-2xl p-8 text-white">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {sampleMetrics.map((metric, index) => {
                 const Icon = metric.icon;
@@ -212,7 +212,7 @@ export default function AIScoringValueStack() {
                 </h4>
               </div>
               <div className="col-span-2 ml-0 md:col-span-3 md:ml-32 lg:ml-40 xl:ml-48 2xl:ml-56">
-                <h4 className="text-xs font-bold tracking-wider uppercase md:text-sm bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <h4 className="text-xs font-bold tracking-wider uppercase md:text-sm bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                   Our Platform
                 </h4>
               </div>
@@ -251,7 +251,7 @@ export default function AIScoringValueStack() {
                   {/* Our Platform Value */}
                   <div className="col-span-2 flex flex-col md:col-span-3">
                     <div className="ml-0 transition-colors group-hover:text-accent-foreground md:ml-32 lg:ml-40 xl:ml-48 2xl:ml-56">
-                      <p className="mb-1 flex items-baseline text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent md:mb-2 md:text-4xl">
+                      <p className="mb-1 flex items-baseline text-2xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent md:mb-2 md:text-4xl">
                         {row.ourPlatform.value}
                         {row.ourPlatform.unit && (
                           <sup className="ml-0.5 text-xs md:text-sm">
@@ -271,7 +271,7 @@ export default function AIScoringValueStack() {
 
           {/* PAYOFF SECTION */}
           <div className="col-span-4 md:col-span-8 lg:col-span-10 lg:col-start-2">
-            <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-orange-900 text-white rounded-xl p-8 md:p-12 shadow-xl border border-purple-500/30">
+            <div className="bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 text-white rounded-xl p-8 md:p-12 shadow-xl border border-chart-2/30">
               <div className="grid grid-cols-4 items-center gap-6 md:grid-cols-8">
                 <h3 className="col-span-4 text-xl font-black md:col-span-2 md:text-3xl">
                   YOUR INVESTMENT
@@ -325,7 +325,7 @@ export default function AIScoringValueStack() {
                     </div>
                   </div>
 
-                  <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-3 rounded-full shadow-lg">
+                  <Button className="bg-gradient-to-r from-chart-1 to-chart-1 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-3 rounded-full shadow-lg">
                     Start Free Trial
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

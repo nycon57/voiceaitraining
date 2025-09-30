@@ -49,7 +49,7 @@ export default function HealthcareFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Master{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Healthcare-Specific
             </span>{" "}
             Sales Scenarios
@@ -68,14 +68,14 @@ export default function HealthcareFeatures() {
             return (
               <div
                 key={index}
-                className="group relative rounded-2xl border border-border bg-card p-6 transition-all hover:border-purple-200 hover:shadow-lg dark:hover:border-purple-800"
+                className="group relative rounded-2xl border border-border bg-card p-6 transition-all hover:border-chart-2/50 hover:shadow-lg dark:hover:border-chart-2/50"
               >
                 {/* Gradient background on hover */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-orange-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 opacity-0 transition-opacity group-hover:opacity-100" />
 
                 <div className="relative">
                   {/* Icon */}
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
                     <Icon className="h-6 w-6 text-white" />
                   </div>
 
@@ -91,7 +91,7 @@ export default function HealthcareFeatures() {
                     <ul className="space-y-1">
                       {feature.benefits.map((benefit, benefitIndex) => (
                         <li key={benefitIndex} className="flex items-center text-sm text-muted-foreground">
-                          <div className="mr-2 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
+                          <div className="mr-2 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3" />
                           {benefit}
                         </li>
                       ))}
@@ -105,7 +105,7 @@ export default function HealthcareFeatures() {
 
         {/* Bottom CTA */}
         <div className="mt-16 text-center">
-          <div className="rounded-2xl border border-border bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-orange-50/50 p-8 dark:from-purple-950/20 dark:via-pink-950/10 dark:to-orange-950/20">
+          <div className="rounded-2xl border border-border bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 p-8 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10">
             <h3 className="mb-4 text-2xl font-bold">Ready to Transform Your Healthcare Sales Team?</h3>
             <p className="mb-6 text-muted-foreground max-w-2xl mx-auto">
               Join healthcare companies that trust AI voice training to build clinical credibility,
@@ -114,7 +114,7 @@ export default function HealthcareFeatures() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
                 href="/request-demo"
-                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-medium text-white transition-colors hover:from-purple-700 hover:to-pink-700"
+                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 px-6 py-3 font-medium text-white transition-colors hover:opacity-90"
               >
                 Start Healthcare Training
               </a>

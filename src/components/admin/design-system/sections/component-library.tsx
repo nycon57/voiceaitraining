@@ -49,6 +49,11 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { cn } from "@/lib/utils"
 
 const componentCategories = {
+  brand: {
+    title: "Brand Components",
+    description: "Premium branded variants with gradient styling for featured content",
+    components: ["Gradient Button", "Featured Card", "Brand Badge", "Component Combinations"]
+  },
   buttons: {
     title: "Buttons & Actions",
     description: "Interactive elements for user actions and navigation",
@@ -1701,6 +1706,268 @@ function DataExamples() {
   )
 }
 
+function BrandExamples() {
+  return (
+    <div className="space-y-8">
+      <ComponentShowcase
+        title="Gradient Button Variants"
+        usage="Branded gradient button for primary CTAs and featured actions"
+        animated
+        code={`<Button variant="gradient" size="sm">
+  Small Gradient
+</Button>
+<Button variant="gradient">
+  Start Training
+</Button>
+<Button variant="gradient" size="lg">
+  <Play className="mr-2 h-5 w-5" />
+  Large with Icon
+</Button>`}
+        guidelines={{
+          dos: [
+            "Use for primary CTAs and hero actions",
+            "Apply to key conversion points",
+            "Maintain white text for contrast",
+            "Limit to 1-2 per screen for impact"
+          ],
+          donts: [
+            "Overuse gradient buttons",
+            "Use for secondary actions",
+            "Combine with other gradients nearby",
+            "Use on busy backgrounds"
+          ]
+        }}
+      >
+        <div className="flex flex-wrap items-center gap-4">
+          <Button variant="gradient" size="sm">
+            Small Gradient
+          </Button>
+          <Button variant="gradient">
+            Start Training
+          </Button>
+          <Button variant="gradient" size="lg">
+            <Play className="mr-2 h-5 w-5" />
+            Begin Session
+          </Button>
+        </div>
+      </ComponentShowcase>
+
+      <ComponentShowcase
+        title="Featured Card Variant"
+        usage="Premium card design with gradient border for highlighting special content"
+        animated
+        code={`<Card variant="featured" animated>
+  <CardHeader>
+    <CardTitle isHeadline>Premium Feature</CardTitle>
+    <CardDescription>
+      This card stands out with a gradient border
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <p>Featured content goes here...</p>
+  </CardContent>
+</Card>`}
+        guidelines={{
+          dos: [
+            "Highlight premium or featured content",
+            "Use for special announcements",
+            "Maintain proper spacing and hierarchy",
+            "Test in both light and dark modes"
+          ],
+          donts: [
+            "Use for every card on the page",
+            "Combine with too many other effects",
+            "Make content too dense",
+            "Forget to test accessibility"
+          ]
+        }}
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card variant="default" animated>
+            <CardHeader>
+              <CardTitle isHeadline>Standard Card</CardTitle>
+              <CardDescription>
+                Regular card design for comparison
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">
+                This is a standard card with default styling. Use this for most content areas.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card variant="featured" animated>
+            <CardHeader>
+              <CardTitle isHeadline>Featured Training</CardTitle>
+              <CardDescription>
+                New premium scenario available now
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <p className="text-sm">
+                  This featured card draws attention with its gradient border and enhanced shadow.
+                </p>
+                <Button variant="gradient" size="sm">
+                  Start Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </ComponentShowcase>
+
+      <ComponentShowcase
+        title="Brand Badge Variant"
+        usage="Gradient badge for highlighting premium features and special status"
+        animated
+        code={`<Badge variant="brand">Featured</Badge>
+<Badge variant="brand" size="lg">
+  <Star className="h-3 w-3" />
+  Premium
+</Badge>
+<Badge variant="brand">New</Badge>`}
+        guidelines={{
+          dos: [
+            "Use for premium indicators",
+            "Apply to featured content labels",
+            "Maintain consistent sizing",
+            "Test contrast in all themes"
+          ],
+          donts: [
+            "Overuse on a single page",
+            "Use for regular status indicators",
+            "Make them too large",
+            "Pair with too many other badges"
+          ]
+        }}
+      >
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <Badge variant="brand">Featured</Badge>
+            <Badge variant="brand" animated>
+              <Star className="h-3 w-3" />
+              Premium
+            </Badge>
+            <Badge variant="brand" size="lg">
+              New Release
+            </Badge>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm">Brand Badge Examples in Context</h4>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Advanced Sales Training</span>
+              <Badge variant="brand" size="sm">Featured</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">AI Voice Coaching</span>
+              <Badge variant="brand" size="sm">Premium</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Objection Handling Master</span>
+              <Badge variant="brand" size="sm">New</Badge>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <h4 className="font-medium text-sm">Comparison with Other Variants</h4>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="brand" animated>Brand</Badge>
+              <Badge variant="default" animated>Default</Badge>
+              <Badge variant="secondary" animated>Secondary</Badge>
+              <Badge variant="success" animated>Success</Badge>
+              <Badge variant="info" animated>Info</Badge>
+            </div>
+          </div>
+        </div>
+      </ComponentShowcase>
+
+      <ComponentShowcase
+        title="Brand Component Combinations"
+        usage="Effective combinations of branded components for maximum impact"
+        animated
+        code={`<Card variant="featured" animated>
+  <CardHeader>
+    <div className="flex items-center justify-between">
+      <CardTitle isHeadline>Premium Training</CardTitle>
+      <Badge variant="brand">Featured</Badge>
+    </div>
+    <CardDescription>
+      Unlock advanced sales techniques
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <Button variant="gradient" className="w-full">
+      Start Training
+    </Button>
+  </CardContent>
+</Card>`}
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card variant="featured" animated>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle isHeadline>Premium Training</CardTitle>
+                <Badge variant="brand" animated>Featured</Badge>
+              </div>
+              <CardDescription>
+                Master advanced objection handling techniques
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span>75%</span>
+                  </div>
+                  <Progress value={75} animated />
+                </div>
+                <Button variant="gradient" className="w-full">
+                  <Play className="mr-2 h-4 w-4" />
+                  Continue Training
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card animated>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle isHeadline>Special Offer</CardTitle>
+                <Badge variant="brand" animated>
+                  <Zap className="h-3 w-3" />
+                  Limited Time
+                </Badge>
+              </div>
+              <CardDescription>
+                Unlock premium features with our special offer
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="rounded-lg bg-gradient-to-br from-chart-1/10 to-chart-3/10 p-4">
+                  <div className="text-3xl font-bold">50% Off</div>
+                  <div className="text-sm text-muted-foreground">First 3 months</div>
+                </div>
+                <Button variant="gradient" className="w-full">
+                  Get Started
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </ComponentShowcase>
+    </div>
+  )
+}
+
 function FeedbackExamples() {
   return (
     <div className="space-y-8">
@@ -1878,11 +2145,13 @@ toast.warning("Session expires in 5 minutes")`}
 }
 
 export function ComponentLibrarySection() {
-  const [activeCategory, setActiveCategory] = useState("buttons")
+  const [activeCategory, setActiveCategory] = useState("brand")
   const [searchQuery, setSearchQuery] = useState("")
 
   const renderCategoryContent = () => {
     switch (activeCategory) {
+      case "brand":
+        return <BrandExamples />
       case "buttons":
         return <ButtonExamples />
       case "forms":
@@ -1898,7 +2167,7 @@ export function ComponentLibrarySection() {
       case "feedback":
         return <FeedbackExamples />
       default:
-        return <ButtonExamples />
+        return <BrandExamples />
     }
   }
 
@@ -1943,7 +2212,7 @@ export function ComponentLibrarySection() {
       {/* Component Categories */}
       <section id="components" className="space-y-8">
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full" animated>
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 mb-8">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 mb-8">
             {filteredCategories.map(([key, category]) => (
               <TabsTrigger key={key} value={key} className="text-xs">
                 {category.title}
