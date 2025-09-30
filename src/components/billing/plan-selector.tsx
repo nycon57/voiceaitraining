@@ -46,7 +46,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
       case 'STARTER':
         return 'border-blue-200 bg-blue-50'
       case 'PROFESSIONAL':
-        return 'border-purple-200 bg-purple-50'
+        return 'border-chart-2/30 bg-chart-1/5'
       case 'ENTERPRISE':
         return 'border-gold-200 bg-gradient-to-br from-yellow-50 to-orange-50'
       default:
@@ -78,11 +78,11 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
               key={planId}
               className={`relative transition-all duration-200 hover:shadow-lg ${
                 isCurrentPlan ? 'ring-2 ring-blue-500' : ''
-              } ${isPopular ? 'scale-105 border-purple-300' : ''}`}
+              } ${isPopular ? 'scale-105 border-chart-2/50' : ''}`}
             >
               {isPopular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-purple-500 text-white px-3 py-1">
+                  <Badge className="bg-chart-1/50 text-white px-3 py-1">
                     Most Popular
                   </Badge>
                 </div>
@@ -162,7 +162,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
                       disabled={loading === planId}
                       className={`w-full ${
                         isPopular
-                          ? 'bg-purple-600 hover:bg-purple-700'
+                          ? 'bg-chart-2 hover:opacity-90'
                           : ''
                       }`}
                     >

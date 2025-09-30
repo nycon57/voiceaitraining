@@ -64,7 +64,7 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
                 Choose a plan to get started with advanced features
               </p>
               <Button asChild>
-                <a href={`/org/${orgId}/billing?tab=plans`}>
+                <a href="/billing?tab=plans">
                   <div className="flex items-center gap-2">
                     Choose Plan
                     <ArrowRight className="h-4 w-4" />

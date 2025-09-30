@@ -2,23 +2,18 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
   BookOpen,
   Users,
   Target,
   BarChart3,
   Trophy,
-  Webhook,
-  CreditCard,
   Shield,
   Clipboard,
   Settings,
   TrendingUp,
   Home,
   Mic,
-  PlayCircle,
   History,
-  Calendar,
   UserCheck,
   FileText,
   Briefcase,
@@ -34,20 +29,12 @@ import {
 } from "@/components/ui/sidebar"
 import { NavGroup } from "@/components/layout/nav-group"
 import { NavUser } from "@/components/layout/nav-user"
-import { TeamSwitcher } from "@/components/dashboard/team-switcher"
+import Logo from "@/components/layout/logo"
 import { type SidebarData } from "@/components/layout/types"
 import type { AuthUser } from '@/lib/auth'
 
 // Navigation data based on user role (WITHOUT org paths)
 const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
-  const teams = [
-    {
-      name: "SpeakStride",
-      logo: AudioWaveform,
-      plan: "Voice AI Training",
-    },
-  ]
-
   const navGroups = []
 
   // General navigation for all users
@@ -77,20 +64,23 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
             title: "Assignments",
             url: "/assignments",
             icon: Target,
+            badge: "Soon",
           },
           {
             title: "Training History",
-            url: "/attempts",
+            url: "/training", // Redirect to training hub until attempts list is built
             icon: History,
+            badge: "Soon",
           },
           {
             title: "Leaderboard",
             url: "/leaderboard",
             icon: Trophy,
+            badge: "Soon",
           },
           {
             title: "My Progress",
-            url: "/reports",
+            url: "/analytics", // Map to existing analytics page
             icon: TrendingUp,
           },
         ],
@@ -110,10 +100,11 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
             {
               title: "Assign Training",
               icon: UserCheck,
+              badge: "Soon",
               items: [
                 {
                   title: "New Assignment",
-                  url: "/assignments/new",
+                  url: "/scenarios", // Redirect to scenarios until assignments built
                 },
                 {
                   title: "Manage Assignments",
@@ -123,7 +114,7 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
             },
             {
               title: "Team Reports",
-              url: "/reports",
+              url: "/analytics", // Map to existing analytics page
               icon: BarChart3,
             },
           ],
@@ -140,6 +131,7 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
               title: "Training Tracks",
               url: "/tracks",
               icon: Briefcase,
+              badge: "Soon",
             },
           ],
         }
@@ -169,11 +161,13 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
               title: "Training Tracks",
               url: "/tracks",
               icon: Briefcase,
+              badge: "Soon",
             },
             {
               title: "Assignments",
               url: "/assignments",
               icon: Clipboard,
+              badge: "Soon",
             },
           ],
         },
@@ -187,7 +181,7 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
             },
             {
               title: "Analytics",
-              url: "/reports",
+              url: "/analytics", // Fixed: use /analytics not /reports
               icon: BarChart3,
             },
             {
@@ -195,16 +189,16 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
               icon: Settings2,
               items: [
                 {
-                  title: "Organization",
-                  url: "/settings/organization",
+                  title: "Design System",
+                  url: "/admin/design-system", // Added existing page
                 },
                 {
                   title: "Billing",
-                  url: "/settings/billing",
+                  url: "/billing", // Fixed: use /billing not /settings/billing
                 },
                 {
-                  title: "Integrations",
-                  url: "/settings/integrations",
+                  title: "Webhooks",
+                  url: "/settings/webhooks", // Fixed: use existing webhooks page
                 },
               ],
             },
@@ -218,32 +212,33 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
         title: "HR & Compliance",
         items: [
           {
-            title: "Compliance",
-            icon: Shield,
-            items: [
-              {
-                title: "Training Completion",
-                url: "/hr/compliance",
-              },
-              {
-                title: "Certifications",
-                url: "/hr/certifications",
-              },
-              {
-                title: "Audit Reports",
-                url: "/hr/audit",
-              },
-            ],
+            title: "User Directory",
+            url: "/admin/users", // Use existing users page
+            icon: Users,
           },
           {
-            title: "HR Reports",
-            url: "/hr/reports",
+            title: "Analytics",
+            url: "/analytics", // Use existing analytics page
             icon: BarChart3,
           },
           {
-            title: "User Directory",
-            url: "/team",
-            icon: Users,
+            title: "Compliance",
+            icon: Shield,
+            badge: "Soon",
+            items: [
+              {
+                title: "Training Completion",
+                url: "/analytics", // Redirect to analytics
+              },
+              {
+                title: "Certifications",
+                url: "/dashboard", // TODO: Create compliance pages
+              },
+              {
+                title: "Audit Reports",
+                url: "/dashboard", // TODO: Create compliance pages
+              },
+            ],
           },
         ],
       })
@@ -257,6 +252,7 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
       {
         title: "Settings",
         icon: Settings,
+        badge: "Soon",
         items: [
           {
             title: "Profile",
@@ -278,29 +274,38 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
       avatar: "",
       role: userRole,
     },
-    teams,
     navGroups,
   }
 }
 
+interface SerializedUser {
+  id: string
+  firstName?: string | null
+  lastName?: string | null
+  email: string
+  role?: AuthUser['role']
+}
+
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   userRole?: AuthUser['role']
-  user?: AuthUser
+  user?: SerializedUser
 }
 
 export function AppSidebar({ userRole = 'trainee', user, ...props }: AppSidebarProps) {
   const sidebarData = getSidebarData(userRole)
 
   const sidebarUser = user ? {
-    name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.emailAddresses[0]?.emailAddress || 'User',
-    email: user.emailAddresses[0]?.emailAddress || '',
+    name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email || 'User',
+    email: user.email || '',
     role: user.role || 'trainee'
   } : sidebarData.user
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={sidebarData.teams} />
+        <div className="flex h-16 items-center px-4">
+          <Logo href="/dashboard" className="text-base" />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         {sidebarData.navGroups.map((group) => (

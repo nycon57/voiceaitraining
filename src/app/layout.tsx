@@ -32,7 +32,10 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
         <body className="relative flex min-h-screen flex-col antialiased font-sans" suppressHydrationWarning>
-          <ClerkProvider>
+          <ClerkProvider
+            signInFallbackRedirectUrl="/dashboard"
+            signUpFallbackRedirectUrl="/dashboard"
+          >
             <ThemeProvider
               attribute="class"
               defaultTheme="system"

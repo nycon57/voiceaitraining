@@ -49,7 +49,7 @@ export default function TechSalesFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Industry-Specific{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Tech Sales Training
             </span>
           </h2>
@@ -66,7 +66,7 @@ export default function TechSalesFeatures() {
             return (
               <div key={index} className="rounded-lg border bg-card p-8 shadow-sm hover:shadow-md transition-shadow">
                 <div className="mb-4">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center mb-4">
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -78,7 +78,7 @@ export default function TechSalesFeatures() {
                   <ul className="space-y-1">
                     {feature.benefits.map((benefit, benefitIndex) => (
                       <li key={benefitIndex} className="text-sm text-muted-foreground flex items-center">
-                        <div className="w-1.5 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-2"></div>
+                        <div className="w-1.5 h-1.5 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 rounded-full mr-2"></div>
                         {benefit}
                       </li>
                     ))}
@@ -91,7 +91,7 @@ export default function TechSalesFeatures() {
 
         {/* CTA Section */}
         <div className="mt-20 text-center">
-          <div className="rounded-lg border bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-orange-50/50 dark:from-purple-950/20 dark:via-pink-950/10 dark:to-orange-950/20 p-8 md:p-12">
+          <div className="rounded-lg border bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10 p-8 md:p-12">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               Ready to Transform Your Tech Sales Team?
             </h3>
@@ -102,7 +102,7 @@ export default function TechSalesFeatures() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/request-demo"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold hover:from-purple-700 hover:to-pink-600 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white font-semibold hover:opacity-90 transition-colors"
               >
                 Start Free Trial
               </a>

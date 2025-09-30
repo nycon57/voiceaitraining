@@ -2,18 +2,31 @@
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
-import Aurora from '@/components/ui/aurora';
+import PixelBlast from '@/components/ui/pixel-blast';
 
 export default function Hero() {
   return (
     <section className="section-padding relative">
-      {/* Aurora Background - Full viewport width, 65% height */}
-      <div className="absolute inset-x-0 top-0 -z-10 h-[65%] overflow-hidden">
-        <Aurora
-          colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-          blend={0.5}
-          amplitude={1.0}
-          speed={0.5}
+      {/* PixelBlast Background */}
+      <div className="absolute inset-x-0 top-0 -z-10 h-[65%]">
+        <PixelBlast
+          variant="circle"
+          pixelSize={6}
+          color="#B19EEF"
+          patternScale={3}
+          patternDensity={1.2}
+          pixelSizeJitter={0.5}
+          enableRipples
+          rippleSpeed={0.4}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.5}
+          liquid
+          liquidStrength={0.12}
+          liquidRadius={1.2}
+          liquidWobbleSpeed={5}
+          speed={0.6}
+          edgeFade={0.25}
+          transparent
         />
       </div>
 

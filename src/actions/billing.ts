@@ -46,9 +46,14 @@ export async function createSubscriptionCheckout(
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
+      const email = user.emailAddresses?.[0]?.emailAddress || ''
+      const name = user.firstName && user.lastName
+        ? `${user.firstName} ${user.lastName}`
+        : user.firstName || user.lastName || 'Unknown'
+
       const customer = await createStripeCustomer(
-        user.email,
-        user.name || 'Unknown',
+        email,
+        name,
         orgId,
         user.id
       )
@@ -67,8 +72,8 @@ export async function createSubscriptionCheckout(
       customerId,
       plan.priceId,
       orgId,
-      `${process.env.NEXT_PUBLIC_APP_URL}/org/${orgId}/billing?success=true`,
-      `${process.env.NEXT_PUBLIC_APP_URL}/org/${orgId}/billing?canceled=true`
+      `${process.env.NEXT_PUBLIC_APP_URL}/billing?success=true`,
+      `${process.env.NEXT_PUBLIC_APP_URL}/billing?canceled=true`
     )
 
     if (!session.url) {
@@ -92,7 +97,7 @@ export async function createBillingPortal(orgId: string) {
 
     const session = await createBillingPortalSession(
       customer.id,
-      `${process.env.NEXT_PUBLIC_APP_URL}/org/${orgId}/billing`
+      `${process.env.NEXT_PUBLIC_APP_URL}/billing`
     )
 
     redirect(session.url)
@@ -162,8 +167,10 @@ export async function getBillingInfo(orgId?: string) {
       subscription: subscription ? {
         id: subscription.id,
         status: subscription.status,
-        current_period_start: new Date(subscription.current_period_start * 1000),
-        current_period_end: new Date(subscription.current_period_end * 1000),
+        // @ts-expect-error - Stripe types may vary by version
+        current_period_start: new Date((subscription.current_period_start ?? subscription.currentPeriodStart) * 1000),
+        // @ts-expect-error - Stripe types may vary by version
+        current_period_end: new Date((subscription.current_period_end ?? subscription.currentPeriodEnd) * 1000),
         cancel_at_period_end: subscription.cancel_at_period_end,
         plan: currentPlan
       } : null,
@@ -194,7 +201,7 @@ export async function updateOrgPlan(orgId: string, planId: SubscriptionPlan) {
       throw new Error(`Failed to update organization plan: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/billing', 'page')
+    revalidatePath('/billing', 'page')
     return { success: true }
   })
 }

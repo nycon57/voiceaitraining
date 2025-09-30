@@ -33,7 +33,7 @@ export default function AboutGuarantee() {
             <div className="flex flex-col items-center gap-3 text-center lg:items-start lg:text-left">
               <h2 className="mb-5 text-4xl md:text-5xl lg:text-6xl font-headline text-pretty">
                 Our{" "}
-                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                   Iron-Clad
                 </span>{" "}
                 Guarantees
@@ -67,9 +67,9 @@ export default function AboutGuarantee() {
             </div>
 
             {/* Main Guarantee */}
-            <div className="mt-12 rounded-xl bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-orange-50/50 dark:from-purple-950/20 dark:via-pink-950/10 dark:to-orange-950/20 p-8 border border-purple-200/50 dark:border-purple-800/50">
+            <div className="mt-12 rounded-xl bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10 p-8 border border-chart-2/50 dark:border-chart-2/50">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -92,7 +92,7 @@ export default function AboutGuarantee() {
               const Icon = guarantee.icon;
               return (
                 <div key={index} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
-                  <div className="mx-0 h-12 w-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                  <div className="mx-0 h-12 w-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex flex-col gap-1">

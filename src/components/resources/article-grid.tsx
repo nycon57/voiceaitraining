@@ -14,8 +14,8 @@ export function ArticleGrid({ articles, className }: ArticleGridProps) {
     return (
       <div className="text-center py-20">
         <div className="mx-auto max-w-md">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-100 via-magenta-100 to-coral-100 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-magenta-500 to-coral-500 opacity-20" />
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
           </div>
           <h3 className="text-xl font-semibold font-headline mb-2">No articles found</h3>
           <p className="text-muted-foreground">

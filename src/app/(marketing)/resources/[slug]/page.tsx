@@ -8,9 +8,9 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { headers } from 'next/headers'
 
 interface ArticlePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 async function getArticle(slug: string) {

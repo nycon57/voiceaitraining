@@ -36,9 +36,9 @@ export function ArticleCard({
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
-              <div className="flex items-center justify-center h-full bg-gradient-to-br from-purple-50 via-magenta-50 to-coral-50">
+              <div className="flex items-center justify-center h-full bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5">
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500 via-magenta-500 to-coral-500 opacity-20" />
+                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
                   <span className="text-sm font-medium text-muted-foreground font-headline">
                     {article.title.slice(0, 20)}...
                   </span>
@@ -54,7 +54,7 @@ export function ArticleCard({
               <div className="absolute top-3 left-3">
                 <Badge
                   variant="secondary"
-                  className="bg-white/90 backdrop-blur-sm text-purple-700 border-purple-200/20"
+                  className="bg-white/90 backdrop-blur-sm text-chart-2 border-chart-2/30/20"
                 >
                   {article.tags[0]}
                 </Badge>
@@ -72,7 +72,7 @@ export function ArticleCard({
 
           <CardHeader className="pb-3">
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold font-headline leading-tight line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
+              <h3 className="text-lg font-semibold font-headline leading-tight line-clamp-2 group-hover:text-chart-2 transition-colors duration-200">
                 {article.title}
               </h3>
 
@@ -114,7 +114,7 @@ export function ArticleCard({
                   <Badge
                     key={tag}
                     variant="outline"
-                    className="text-xs border-border/40 hover:border-purple-200 hover:text-purple-600 transition-colors"
+                    className="text-xs border-border/40 hover:border-chart-2/50 hover:text-chart-2 transition-colors"
                   >
                     {tag}
                   </Badge>
@@ -130,7 +130,7 @@ export function ArticleCard({
 
           {/* Hover Effect */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-magenta-500/5 to-coral-500/5" />
+            <div className="absolute inset-0 bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5" />
           </div>
         </Link>
       </Card>

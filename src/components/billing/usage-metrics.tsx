@@ -19,15 +19,15 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
   const currentPlan = plans[plan]
 
   const getUsageColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-red-600'
-    if (percentage >= 75) return 'text-yellow-600'
-    return 'text-green-600'
+    if (percentage >= 90) return 'text-destructive'
+    if (percentage >= 75) return 'text-warning'
+    return 'text-success'
   }
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 90) return 'bg-red-500'
-    if (percentage >= 75) return 'bg-yellow-500'
-    return 'bg-green-500'
+    if (percentage >= 90) return 'bg-destructive'
+    if (percentage >= 75) return 'bg-warning'
+    return 'bg-success'
   }
 
   const calculateUsagePercentage = (current: number, limit: number) => {
@@ -74,7 +74,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
           const Icon = metric.icon
 
           return (
-            <Card key={metric.title} className={isOverLimit ? 'border-red-200' : ''}>
+            <Card key={metric.title} className={isOverLimit ? 'border-destructive/20' : ''}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -110,19 +110,16 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
                     <Progress
                       value={percentage}
                       className="h-2"
-                      style={{
-                        background: percentage >= 90 ? '#fee2e2' : percentage >= 75 ? '#fef3c7' : '#f0fdf4'
-                      }}
                     />
                   </div>
                 )}
 
                 {isOverLimit && (
-                  <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                    <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+                  <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                    <AlertTriangle className="h-4 w-4 text-destructive mt-0.5" />
                     <div className="text-sm">
-                      <div className="font-medium text-red-800">Usage Limit Exceeded</div>
-                      <div className="text-red-700">
+                      <div className="font-medium text-destructive">Usage Limit Exceeded</div>
+                      <div className="text-destructive/90">
                         Consider upgrading your plan to avoid service limitations.
                       </div>
                     </div>
@@ -130,11 +127,11 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
                 )}
 
                 {isNearLimit && !isOverLimit && !isUnlimited && (
-                  <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/20 rounded-md">
+                    <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
                     <div className="text-sm">
-                      <div className="font-medium text-yellow-800">Approaching Limit</div>
-                      <div className="text-yellow-700">
+                      <div className="font-medium text-warning">Approaching Limit</div>
+                      <div className="text-warning/90">
                         You're using {Math.round(percentage)}% of your monthly allocation.
                       </div>
                     </div>

@@ -80,7 +80,7 @@ export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
         await createScenario(form)
       }
 
-      router.push(`/org/${orgId}/scenarios`)
+      router.push('/scenarios')
     } catch (error) {
       console.error('Failed to save scenario:', error)
     } finally {

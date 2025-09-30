@@ -8,21 +8,21 @@ const features = [
     title: "Talk-to-Listen Ratio Analysis",
     description: "Measure the perfect balance between speaking and listening. AI tracks when reps talk too much or fail to ask enough questions.",
     metrics: ["Target ratio: 45%", "Optimal range tracking", "Time segment analysis"],
-    gradient: "from-blue-500 to-cyan-500"
+    gradient: "from-chart-1 to-chart-2"
   },
   {
     icon: MessageSquare,
     title: "Objection Handling Assessment",
     description: "Analyze how effectively reps acknowledge, empathize, and address customer concerns. Get specific scoring on objection response techniques.",
     metrics: ["Response time tracking", "Empathy statement detection", "Resolution success rate"],
-    gradient: "from-purple-500 to-pink-500"
+    gradient: "from-chart-1 via-chart-2 to-chart-3"
   },
   {
     icon: Target,
     title: "Closing Technique Evaluation",
     description: "Score the effectiveness of closing attempts, timing, and follow-through. Identify missed opportunities and successful close patterns.",
     metrics: ["Close attempt timing", "Technique effectiveness", "Follow-up quality"],
-    gradient: "from-orange-500 to-red-500"
+    gradient: "from-chart-1 to-chart-1"
   },
   {
     icon: Heart,
@@ -36,14 +36,14 @@ const features = [
     title: "Key Message Tracking",
     description: "Ensure reps hit all required talking points and value propositions. Track which messages resonate most with prospects.",
     metrics: ["Message completion rate", "Value prop delivery", "Positioning accuracy"],
-    gradient: "from-indigo-500 to-purple-500"
+    gradient: "from-chart-2 to-chart-1"
   },
   {
     icon: TrendingUp,
     title: "Conversation Flow Scoring",
     description: "Analyze the natural progression of the sales conversation. Identify awkward transitions, pacing issues, and momentum building.",
     metrics: ["Transition quality", "Pacing optimization", "Momentum tracking"],
-    gradient: "from-pink-500 to-rose-500"
+    gradient: "from-chart-2 to-chart-1"
   }
 ];
 
@@ -55,7 +55,7 @@ export default function AIScoringFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Six Core Metrics That{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Drive Sales Success
             </span>
           </h2>
@@ -104,10 +104,10 @@ export default function AIScoringFeatures() {
 
         {/* Bottom CTA Section */}
         <div className="mt-20 text-center">
-          <div className="rounded-2xl border bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-8 md:p-12">
+          <div className="rounded-2xl border bg-gradient-to-br from-chart-1/5 to-chart-2/5 dark:from-chart-1/10 dark:to-chart-2/10 p-8 md:p-12">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
               All Metrics Work Together for{" "}
-              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
                 Complete Performance Insights
               </span>
             </h3>
@@ -118,7 +118,7 @@ export default function AIScoringFeatures() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/50 dark:bg-black/20 rounded-lg p-6 border">
-                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-2">95%</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent mb-2">95%</div>
                 <div className="text-sm font-semibold mb-1">Scoring Accuracy</div>
                 <div className="text-xs text-muted-foreground">Consistent across all calls</div>
               </div>

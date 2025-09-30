@@ -1,7 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Header } from "@/components/layout/header"
-import { TrainingHub } from './_components/training-hub'
+import { TrainingHub } from '@/components/training/training-hub'
 
 export default async function TrainingPage() {
   const user = await getCurrentUser()

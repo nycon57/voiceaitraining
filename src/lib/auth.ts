@@ -1,5 +1,5 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { createClient } from './supabase/server'
+import { createClient, createAdminClient } from './supabase/server'
 import type { User } from '@clerk/nextjs/server'
 
 export type UserRole = 'trainee' | 'manager' | 'admin' | 'hr'
@@ -10,6 +10,8 @@ export interface AuthUser {
   orgId?: string
   firstName?: string | null
   lastName?: string | null
+  email?: string | null
+  name?: string
   emailAddresses: { emailAddress: string }[]
 }
 
@@ -17,25 +19,36 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   const user = await currentUser()
   if (!user) return null
 
-  const { orgId } = await auth()
-  if (!orgId) return user as AuthUser
-
-  // Get user role from org membership
-  const supabase = await createClient()
-  const { data: member } = await supabase
-    .from('org_members')
-    .select('role')
-    .eq('org_id', orgId)
-    .eq('user_id', user.id)
+  // Use admin client to bypass RLS - we need org_id to set RLS context,
+  // but we're querying to GET the org_id (chicken-and-egg problem)
+  const supabase = await createAdminClient()
+  const { data: dbUser, error } = await supabase
+    .from('users')
+    .select('role, org_id, first_name, last_name, email')
+    .eq('clerk_user_id', user.id)
+    .limit(1)
     .single()
+
+  if (error) {
+    console.error('Error fetching user from database:', error)
+  }
+
+  // Fallback to Clerk data if Supabase user not found
+  const firstName = dbUser?.first_name || user.firstName
+  const lastName = dbUser?.last_name || user.lastName
+  const email = dbUser?.email || user.emailAddresses[0]?.emailAddress
 
   return {
     id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    emailAddresses: user.emailAddresses,
-    role: member?.role as UserRole,
-    orgId
+    firstName,
+    lastName,
+    email,
+    name: firstName || user.firstName || 'User',
+    emailAddresses: user.emailAddresses.map(email => ({
+      emailAddress: email.emailAddress
+    })),
+    role: dbUser?.role as UserRole,
+    orgId: dbUser?.org_id
   }
 }
 

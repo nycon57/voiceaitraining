@@ -22,12 +22,14 @@ const badgeVariants = cva(
           "text-foreground border-border/50 bg-background/80 [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [a&]:hover:scale-105",
         muted:
           "bg-muted/80 text-muted-foreground border-transparent [a&]:hover:bg-muted [a&]:hover:scale-105",
-        info:
-          "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400 [a&]:hover:bg-amber-500/20 [a&]:hover:scale-105",
         success:
-          "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 [a&]:hover:bg-emerald-500/20 [a&]:hover:scale-105",
+          "border-success/20 bg-success/10 text-success dark:text-success [a&]:hover:bg-success/20 [a&]:hover:scale-105",
         warning:
-          "border-orange-500/20 bg-orange-500/10 text-orange-600 dark:text-orange-400 [a&]:hover:bg-orange-500/20 [a&]:hover:scale-105",
+          "border-warning/20 bg-warning/10 text-warning dark:text-warning [a&]:hover:bg-warning/20 [a&]:hover:scale-105",
+        info:
+          "border-info/20 bg-info/10 text-info dark:text-info [a&]:hover:bg-info/20 [a&]:hover:scale-105",
+        brand:
+          "border-transparent bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white shadow-md [a&]:hover:shadow-lg [a&]:hover:scale-105",
       },
       size: {
         default: "px-2.5 py-1 text-xs",

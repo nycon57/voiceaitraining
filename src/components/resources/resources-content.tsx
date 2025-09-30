@@ -143,9 +143,9 @@ export function ResourcesContent() {
                     className="aspect-video rounded-lg object-cover hover:opacity-90 transition-opacity"
                   />
                 ) : (
-                  <div className="aspect-video rounded-lg bg-gradient-to-br from-purple-100 via-magenta-100 to-coral-100 flex items-center justify-center">
+                  <div className="aspect-video rounded-lg bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500 via-magenta-500 to-coral-500 opacity-20" />
+                      <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
                       <span className="text-sm font-medium text-muted-foreground font-headline">
                         Featured Article
                       </span>
@@ -167,7 +167,7 @@ export function ResourcesContent() {
                 </div>
 
                 <Link href={`/resources/${featuredArticle.slug}`}>
-                  <h2 className="text-2xl font-semibold text-balance md:max-w-lg lg:text-3xl hover:text-purple-600 transition-colors">
+                  <h2 className="text-2xl font-semibold text-balance md:max-w-lg lg:text-3xl hover:text-chart-2 transition-colors">
                     {featuredArticle.title}
                   </h2>
                 </Link>
@@ -214,9 +214,9 @@ export function ResourcesContent() {
                       className="aspect-video rounded-lg object-cover hover:opacity-90 transition-opacity w-full"
                     />
                   ) : (
-                    <div className="aspect-video rounded-lg bg-gradient-to-br from-purple-50 via-magenta-50 to-coral-50 flex items-center justify-center w-full">
+                    <div className="aspect-video rounded-lg bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 flex items-center justify-center w-full">
                       <div className="text-center">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-500 via-magenta-500 to-coral-500 opacity-20" />
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
                         <span className="text-xs font-medium text-muted-foreground font-headline">
                           {article.title.slice(0, 20)}...
                         </span>
@@ -234,7 +234,7 @@ export function ResourcesContent() {
                 </div>
 
                 <Link href={`/resources/${article.slug}`}>
-                  <h3 className="text-xl font-semibold text-balance md:max-w-md hover:text-purple-600 transition-colors">
+                  <h3 className="text-xl font-semibold text-balance md:max-w-md hover:text-chart-2 transition-colors">
                     {article.title}
                   </h3>
                 </Link>

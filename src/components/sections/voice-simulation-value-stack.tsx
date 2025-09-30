@@ -77,13 +77,13 @@ const ROI_BENEFITS = [
 
 export default function VoiceSimulationValueStack() {
   return (
-    <section className="py-16 md:py-32 bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-orange-50/50 dark:from-purple-950/20 dark:via-pink-950/10 dark:to-orange-950/20">
+    <section className="py-16 md:py-32 bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10">
       <div className="container">
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             The ROI of{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
               Perfect Practice
             </span>
           </h2>
@@ -99,11 +99,11 @@ export default function VoiceSimulationValueStack() {
             const Icon = metric.icon;
             return (
               <div key={index} className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-orange-500/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all duration-300 group-hover:border-purple-500/30 group-hover:shadow-lg">
+                <div className="absolute inset-0 bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all duration-300 group-hover:border-chart-2/30 group-hover:shadow-lg">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-                      <Icon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-2/20">
+                      <Icon className="h-5 w-5 text-chart-2 dark:text-chart-2" />
                     </div>
                     <h3 className="text-sm font-semibold">{metric.title}</h3>
                   </div>
@@ -128,7 +128,7 @@ export default function VoiceSimulationValueStack() {
 
                   {/* Improvement */}
                   <div className="text-center">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white text-xs font-semibold rounded-full">
                       <TrendingUp className="h-3 w-3" />
                       {metric.improvement}
                     </span>
@@ -156,9 +156,9 @@ export default function VoiceSimulationValueStack() {
                   <span className="font-bold text-green-600">$497/user/month</span>
                 </div>
 
-                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-800/30">
+                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-chart-1/10 to-chart-2/10 dark:from-chart-1/20 dark:to-chart-2/20 rounded-lg border border-chart-2/30 dark:border-chart-2/30/30">
                   <span className="font-bold">Monthly Savings (10 users)</span>
-                  <span className="font-bold text-purple-600 text-xl">$10,030</span>
+                  <span className="font-bold text-chart-2 text-xl">$10,030</span>
                 </div>
 
                 <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800/30">
@@ -183,11 +183,11 @@ export default function VoiceSimulationValueStack() {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-orange-900 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-purple-500/30 text-center">
+        <div className="bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-chart-2/30 text-center">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">
             Start Transforming Your Sales Training Today
           </h3>
-          <p className="text-purple-200 mb-8 max-w-2xl mx-auto">
+          <p className="text-chart-3 mb-8 max-w-2xl mx-auto">
             Join hundreds of sales teams already using voice simulation to build confidence,
             improve performance, and close more deals.
           </p>
@@ -210,7 +210,7 @@ export default function VoiceSimulationValueStack() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-4 rounded-full shadow-lg"
+              className="bg-gradient-to-r from-chart-1 to-chart-1 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-4 rounded-full shadow-lg"
               asChild
             >
               <a href="/request-demo" className="flex items-center">

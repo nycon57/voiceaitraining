@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { EmptyStateSearch } from "@/components/ui/empty-state"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,16 +57,21 @@ interface Scenario {
 
 interface ScenarioListProps {
   scenarios: Scenario[]
-  orgId: string
   userRole?: string
 }
 
-export function ScenarioList({ scenarios, orgId, userRole }: ScenarioListProps) {
+export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all')
 
   const canManageScenarios = userRole === 'admin' || userRole === 'manager'
+
+  const clearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+    setDifficultyFilter('all')
+  }
 
   const filteredScenarios = scenarios.filter(scenario => {
     const matchesSearch = scenario.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -223,7 +229,7 @@ export function ScenarioList({ scenarios, orgId, userRole }: ScenarioListProps) 
                     <div className="flex items-center justify-end gap-2">
                       {scenario.status === 'active' && (
                         <Button asChild size="sm">
-                          <Link href={`/org/${orgId}/play/${scenario.id}`}>
+                          <Link href={`/play/${scenario.id}`}>
                             <div className="flex items-center gap-1">
                               <Play className="h-4 w-4" />
                               Practice
@@ -241,7 +247,7 @@ export function ScenarioList({ scenarios, orgId, userRole }: ScenarioListProps) 
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
-                              <Link href={`/org/${orgId}/scenarios/${scenario.id}`}>
+                              <Link href={`/scenarios/${scenario.id}`}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </Link>
@@ -272,9 +278,10 @@ export function ScenarioList({ scenarios, orgId, userRole }: ScenarioListProps) 
             </TableBody>
           </Table>
           {filteredScenarios.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground">
-              No scenarios found matching your filters.
-            </div>
+            <EmptyStateSearch
+              searchQuery={searchTerm || "your filters"}
+              onClear={clearFilters}
+            />
           )}
         </CardContent>
       </Card>

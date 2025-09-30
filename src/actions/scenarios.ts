@@ -47,7 +47,7 @@ export async function createScenario(formData: FormData) {
       throw new Error(`Failed to create scenario: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/scenarios', 'page')
+    revalidatePath('/scenarios', 'page')
     return scenario
   })
 }
@@ -78,8 +78,8 @@ export async function updateScenario(scenarioId: string, formData: FormData) {
       throw new Error(`Failed to update scenario: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/scenarios', 'page')
-    revalidatePath(`/org/[orgId]/scenarios/${scenarioId}`, 'page')
+    revalidatePath('/scenarios', 'page')
+    revalidatePath(`/scenarios/${scenarioId}`, 'page')
     return scenario
   })
 }
@@ -137,8 +137,8 @@ export async function publishScenario(scenarioId: string) {
       throw new Error(`Failed to publish scenario: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/scenarios', 'page')
-    revalidatePath(`/org/[orgId]/scenarios/${scenarioId}`, 'page')
+    revalidatePath('/scenarios', 'page')
+    revalidatePath(`/scenarios/${scenarioId}`, 'page')
     return scenario
   })
 }
@@ -159,8 +159,62 @@ export async function archiveScenario(scenarioId: string) {
       throw new Error(`Failed to archive scenario: ${error.message}`)
     }
 
-    revalidatePath('/org/[orgId]/scenarios', 'page')
-    revalidatePath(`/org/[orgId]/scenarios/${scenarioId}`, 'page')
+    revalidatePath('/scenarios', 'page')
+    revalidatePath(`/scenarios/${scenarioId}`, 'page')
     return scenario
+  })
+}
+
+export async function getLatestActiveScenarios(limit: number = 10) {
+  return withOrgGuard(async (user, orgId) => {
+    const supabase = await createClient()
+
+    const { data: scenarios, error } = await supabase
+      .from('scenarios')
+      .select('id, title, description, difficulty, status, created_at, persona')
+      .eq('org_id', orgId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      throw new Error(`Failed to get latest scenarios: ${error.message}`)
+    }
+
+    return scenarios
+  })
+}
+
+export async function getLatestActiveTracks(limit: number = 10) {
+  return withOrgGuard(async (user, orgId) => {
+    const supabase = await createClient()
+
+    const { data: tracks, error } = await supabase
+      .from('tracks')
+      .select(`
+        id,
+        title,
+        description,
+        status,
+        created_at,
+        track_scenarios (
+          scenario_id
+        )
+      `)
+      .eq('org_id', orgId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      throw new Error(`Failed to get latest tracks: ${error.message}`)
+    }
+
+    // Transform to include scenario count
+    return tracks.map(track => ({
+      ...track,
+      scenario_count: track.track_scenarios?.length || 0,
+      track_scenarios: undefined // Remove the raw join data
+    }))
   })
 }

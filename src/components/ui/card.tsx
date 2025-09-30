@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 
 interface CardProps extends React.ComponentProps<'div'> {
   animated?: boolean;
+  variant?: 'default' | 'featured';
 }
 
-function Card({ className, animated = true, ...props }: CardProps) {
+function Card({ className, animated = true, variant = 'default', ...props }: CardProps) {
   const cardVariants = {
     initial: { opacity: 0, y: 20, scale: 0.95 },
     animate: { opacity: 1, y: 0, scale: 1 },
@@ -21,6 +22,14 @@ function Card({ className, animated = true, ...props }: CardProps) {
     'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
     'hover:shadow-md transition-shadow duration-200',
     'backdrop-blur-sm bg-card/90',
+    variant === 'featured' && [
+      'border-transparent bg-gradient-to-br from-chart-1/10 via-transparent to-chart-3/10',
+      'shadow-xl hover:shadow-2xl',
+      'relative before:absolute before:inset-0 before:rounded-xl',
+      'before:bg-gradient-to-r before:from-chart-1 before:via-chart-2 before:to-chart-3',
+      'before:p-[2px] before:-z-10 before:content-[""]',
+      'before:mask-composite:exclude before:[mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)]',
+    ],
     className,
   );
 

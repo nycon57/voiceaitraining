@@ -30,7 +30,7 @@ export default function Logo({
     >
       <span className={cn('', wordmarkClassName)}>
         <span className="text-foreground">Speak</span>
-        <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent font-medium">Stride</span>
+        <span className="text-gradient font-medium">Stride</span>
       </span>
     </Element>
   );

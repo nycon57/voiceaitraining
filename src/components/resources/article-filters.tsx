@@ -128,7 +128,7 @@ export function ArticleFilters({
             placeholder="Search articles..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="pl-9 bg-background/60 backdrop-blur-sm border-border/40 focus:border-purple-200 focus:ring-purple-200/20"
+            className="pl-9 bg-background/60 backdrop-blur-sm border-border/40 focus:border-chart-2/30 focus:ring-chart-2/20"
           />
         </div>
 
@@ -168,7 +168,7 @@ export function ArticleFilters({
               {activeFiltersCount > 0 && (
                 <Badge
                   variant="secondary"
-                  className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-purple-100 text-purple-700 text-xs"
+                  className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-chart-2/10 text-chart-2 text-xs"
                 >
                   {activeFiltersCount}
                 </Badge>
@@ -205,8 +205,8 @@ export function ArticleFilters({
                           className={cn(
                             "cursor-pointer transition-all hover:scale-105",
                             filters.tags?.includes(tag)
-                              ? "bg-gradient-to-r from-purple-500 to-magenta-500 text-white"
-                              : "hover:border-purple-200 hover:text-purple-600"
+                              ? "bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white"
+                              : "hover:border-chart-2/50 hover:text-chart-2"
                           )}
                           onClick={() => handleTagToggle(tag)}
                         >

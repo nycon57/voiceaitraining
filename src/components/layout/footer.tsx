@@ -184,7 +184,7 @@ export default function Footer() {
                 14-day free trial
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500" />
+                <div className="w-2 h-2 rounded-full bg-chart-1/50" />
                 Setup in 5 minutes
               </div>
             </motion.div>

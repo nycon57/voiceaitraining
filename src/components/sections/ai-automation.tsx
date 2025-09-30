@@ -32,7 +32,7 @@ const cards = [
     title: 'AI Voice Agent',
     subtitle: 'Responds as realistic customer prospect',
     icon: Users,
-    iconColor: 'text-purple-500',
+    iconColor: 'text-chart-2',
     position: 'absolute top-0 left-0',
     isGenerating: false,
   },
