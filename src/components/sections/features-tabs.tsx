@@ -19,7 +19,7 @@ const FeaturesTabsSection = () => {
       description:
         'Deep insights into sales performance with detailed KPI tracking, talk-listen ratios, and improvement metrics.',
       image: {
-        src: '/images/home/features-tabs/1.webp',
+        src: '/images/product/plasma.webp',
         width: 550,
         height: 544,
       },
@@ -32,7 +32,7 @@ const FeaturesTabsSection = () => {
       description:
         'Connect seamlessly with Salesforce, HubSpot, and your existing sales stack for unified workflow.',
       image: {
-        src: '/images/home/features-tabs/2.webp',
+        src: '/images/product/plasma.webp',
         width: 380,
         height: 525,
       },
@@ -44,7 +44,7 @@ const FeaturesTabsSection = () => {
       description:
         'Create industry-specific sales scenarios automatically, or build custom training paths for your team.',
       image: {
-        src: '/images/home/features-tabs/3.webp',
+        src: '/images/product/plasma.webp',
         width: 550,
         height: 544,
       },

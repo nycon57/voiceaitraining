@@ -34,10 +34,74 @@ import { type SidebarData } from "@/components/layout/types"
 import type { AuthUser } from '@/lib/auth'
 
 // Navigation data based on user role (WITHOUT org paths)
-const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
+const getSidebarData = (userRole: AuthUser['role'], isPersonalOrg: boolean = false): SidebarData => {
   const navGroups = []
 
-  // General navigation for all users
+  // Personal org users get a simplified navigation
+  if (isPersonalOrg) {
+    navGroups.push({
+      title: "Training",
+      items: [
+        {
+          title: "Dashboard",
+          url: "/dashboard",
+          icon: Home,
+        },
+        {
+          title: "Training Hub",
+          url: "/training",
+          icon: Mic,
+        },
+        {
+          title: "Scenarios",
+          url: "/scenarios",
+          icon: FileText,
+        },
+        {
+          title: "Analytics",
+          url: "/analytics",
+          icon: BarChart3,
+        },
+      ],
+    })
+
+    navGroups.push({
+      title: "Account",
+      items: [
+        {
+          title: "Settings",
+          icon: Settings,
+          items: [
+            {
+              title: "Profile",
+              url: "/settings/profile",
+            },
+            {
+              title: "Preferences",
+              url: "/settings/preferences",
+            },
+          ],
+        },
+        {
+          title: "Billing",
+          url: "/billing",
+          icon: Settings2,
+        },
+      ],
+    })
+
+    return {
+      user: {
+        name: "User",
+        email: "user@example.com",
+        avatar: "",
+        role: 'trainee',
+      },
+      navGroups,
+    }
+  }
+
+  // General navigation for all team users
   navGroups.push({
     title: "General",
     items: [
@@ -54,7 +118,7 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
     ],
   })
 
-  // Role-specific navigation
+  // Role-specific navigation for team users
   switch (userRole) {
     case 'trainee':
       navGroups.push({
@@ -64,19 +128,16 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
             title: "Assignments",
             url: "/assignments",
             icon: Target,
-            badge: "Soon",
           },
           {
             title: "Training History",
-            url: "/training", // Redirect to training hub until attempts list is built
+            url: "/training/history",
             icon: History,
-            badge: "Soon",
           },
           {
             title: "Leaderboard",
             url: "/leaderboard",
             icon: Trophy,
-            badge: "Soon",
           },
           {
             title: "My Progress",
@@ -100,7 +161,6 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
             {
               title: "Assign Training",
               icon: UserCheck,
-              badge: "Soon",
               items: [
                 {
                   title: "New Assignment",
@@ -131,7 +191,6 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
               title: "Training Tracks",
               url: "/tracks",
               icon: Briefcase,
-              badge: "Soon",
             },
           ],
         }
@@ -161,13 +220,11 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
               title: "Training Tracks",
               url: "/tracks",
               icon: Briefcase,
-              badge: "Soon",
             },
             {
               title: "Assignments",
               url: "/assignments",
               icon: Clipboard,
-              badge: "Soon",
             },
           ],
         },
@@ -224,7 +281,6 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
           {
             title: "Compliance",
             icon: Shield,
-            badge: "Soon",
             items: [
               {
                 title: "Training Completion",
@@ -252,7 +308,6 @@ const getSidebarData = (userRole: AuthUser['role']): SidebarData => {
       {
         title: "Settings",
         icon: Settings,
-        badge: "Soon",
         items: [
           {
             title: "Profile",
@@ -284,15 +339,17 @@ interface SerializedUser {
   lastName?: string | null
   email: string
   role?: AuthUser['role']
+  isPersonalOrg?: boolean
 }
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   userRole?: AuthUser['role']
   user?: SerializedUser
+  isPersonalOrg?: boolean
 }
 
-export function AppSidebar({ userRole = 'trainee', user, ...props }: AppSidebarProps) {
-  const sidebarData = getSidebarData(userRole)
+export function AppSidebar({ userRole = 'trainee', user, isPersonalOrg = false, ...props }: AppSidebarProps) {
+  const sidebarData = getSidebarData(userRole, user?.isPersonalOrg || isPersonalOrg)
 
   const sidebarUser = user ? {
     name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email || 'User',

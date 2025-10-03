@@ -35,9 +35,9 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
       <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/scenarios`}>
+            <Link href={`/training`}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Scenarios
+              Back to Training
             </Link>
           </Button>
         </div>
@@ -49,7 +49,7 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
               This scenario is currently in {scenario.status} status and cannot be practiced.
             </p>
             <Button asChild>
-              <Link href={`/scenarios`}>
+              <Link href={`/training`}>
                 View Available Scenarios
               </Link>
             </Button>
@@ -77,9 +77,9 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/scenarios">
+          <Link href="/training">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Scenarios
+            Back to Training
           </Link>
         </Button>
         <div>

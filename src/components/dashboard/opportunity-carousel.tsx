@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { Mic, BookOpen, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
 
 import { cn } from "@/lib/utils";
@@ -13,128 +12,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
-interface OpportunityItem {
-  id: string;
-  title: string;
-  description: string | null;
-  difficulty?: "easy" | "medium" | "hard";
-  type: "scenario" | "track";
-  tags?: string[];
-  scenario_count?: number; // for tracks
-}
+import { ScenarioCard, TrackCard } from "@/components/training";
+import type { ScenarioCardData, TrackCardData } from "@/components/training";
 
 interface OpportunityCarouselProps {
-  items?: OpportunityItem[];
+  scenarios?: ScenarioCardData[];
+  tracks?: TrackCardData[];
   className?: string;
-}
-
-const difficultyConfig = {
-  easy: {
-    gradient: "from-green-500/10 to-green-600/5",
-    border: "border-green-500/20",
-    badge: "success",
-  },
-  medium: {
-    gradient: "from-amber-500/10 to-amber-600/5",
-    border: "border-amber-500/20",
-    badge: "warning",
-  },
-  hard: {
-    gradient: "from-red-500/10 to-red-600/5",
-    border: "border-red-500/20",
-    badge: "destructive",
-  },
-} as const;
-
-function OpportunityCard({ item }: { item: OpportunityItem }) {
-  const difficulty = item.difficulty || "medium";
-  const config = difficultyConfig[difficulty];
-
-  return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-xl border p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg",
-        "bg-gradient-to-br backdrop-blur-sm",
-        config.gradient,
-        config.border
-      )}
-    >
-      {/* Difficulty Badge - Top Right */}
-      <div className="absolute top-4 right-4">
-        <Badge variant={config.badge as any} size="sm" className="capitalize">
-          {difficulty}
-        </Badge>
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-col h-full">
-        {/* Title */}
-        <h3 className="font-headline text-xl font-bold mb-2 pr-20 line-clamp-2">
-          {item.title}
-        </h3>
-
-        {/* Description */}
-        {item.description && (
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
-            {item.description}
-          </p>
-        )}
-
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {item.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="outline" size="sm">
-                {tag}
-              </Badge>
-            ))}
-            {item.tags.length > 3 && (
-              <Badge variant="muted" size="sm">
-                +{item.tags.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
-
-        {/* Scenario Count for Tracks */}
-        {item.type === "track" && item.scenario_count !== undefined && (
-          <p className="text-xs text-muted-foreground mb-4">
-            {item.scenario_count} scenario{item.scenario_count !== 1 ? "s" : ""}
-          </p>
-        )}
-
-        {/* CTA Button */}
-        <Link
-          href={
-            item.type === "scenario"
-              ? `/play/${item.id}`
-              : `/tracks/${item.id}`
-          }
-          className="w-full mt-auto"
-        >
-          <Button
-            variant="default"
-            className="w-full group-hover:scale-[1.02] transition-transform"
-          >
-            {item.type === "scenario" ? (
-              <>
-                <Mic className="size-4" />
-                Start Training
-              </>
-            ) : (
-              <>
-                <BookOpen className="size-4" />
-                Explore Track
-              </>
-            )}
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
 }
 
 function EmptyState() {
@@ -176,15 +60,22 @@ function LoadingState() {
 }
 
 export function OpportunityCarousel({
-  items,
+  scenarios = [],
+  tracks = [],
   className,
 }: OpportunityCarouselProps) {
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true, stopOnMouseEnter: true })
   );
 
+  // Combine scenarios and tracks with type indicator
+  const allItems = [
+    ...scenarios.map(s => ({ ...s, itemType: 'scenario' as const })),
+    ...tracks.map(t => ({ ...t, itemType: 'track' as const })),
+  ];
+
   // Loading state
-  if (items === undefined) {
+  if (scenarios === undefined && tracks === undefined) {
     return (
       <div className={cn("w-full", className)}>
         <LoadingState />
@@ -193,7 +84,7 @@ export function OpportunityCarousel({
   }
 
   // Empty state
-  if (items.length === 0) {
+  if (allItems.length === 0) {
     return (
       <div className={cn("w-full", className)}>
         <EmptyState />
@@ -202,7 +93,7 @@ export function OpportunityCarousel({
   }
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full relative px-12", className)}>
       <Carousel
         opts={{
           align: "start",
@@ -214,12 +105,16 @@ export function OpportunityCarousel({
         onMouseLeave={() => autoplayPlugin.current.play()}
       >
         <CarouselContent className="-ml-4">
-          {items.map((item) => (
+          {allItems.map((item) => (
             <CarouselItem
               key={item.id}
               className="pl-4 md:basis-1/2 lg:basis-1/3"
             >
-              <OpportunityCard item={item} />
+              {item.itemType === 'scenario' ? (
+                <ScenarioCard scenario={item} />
+              ) : (
+                <TrackCard track={item} />
+              )}
             </CarouselItem>
           ))}
         </CarouselContent>

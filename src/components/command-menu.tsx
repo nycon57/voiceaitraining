@@ -127,7 +127,7 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
     {
       label: "New Assignment (Coming Soon)",
       icon: UserCheck,
-      onSelect: () => navigate("/scenarios"),
+      onSelect: () => navigate("/training"),
       keywords: ["assign", "new", "create"],
     },
     {
@@ -145,24 +145,24 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
     {
       label: "Scenarios",
       icon: FileText,
-      onSelect: () => navigate("/scenarios"),
-      keywords: ["scenarios", "content"],
+      onSelect: () => navigate("/training"),
+      keywords: ["scenarios", "content", "training"],
     },
     {
-      label: "Training Tracks (Coming Soon)",
+      label: "Training Tracks",
       icon: Briefcase,
-      onSelect: () => navigate("/tracks"),
-      keywords: ["tracks", "courses", "curriculum"],
+      onSelect: () => navigate("/training"),
+      keywords: ["tracks", "courses", "curriculum", "training"],
     },
   ]
 
   // Admin-specific items
   const adminItems: CommandMenuItem[] = [
     {
-      label: "Scenario Library",
+      label: "Training Library",
       icon: BookOpen,
-      onSelect: () => navigate("/scenarios"),
-      keywords: ["scenarios", "library", "content"],
+      onSelect: () => navigate("/training"),
+      keywords: ["scenarios", "library", "content", "training", "tracks"],
     },
     {
       label: "Create Scenario",
@@ -171,10 +171,10 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
       keywords: ["create", "new", "scenario"],
     },
     {
-      label: "Training Tracks (Coming Soon)",
+      label: "Training Tracks",
       icon: Briefcase,
-      onSelect: () => navigate("/tracks"),
-      keywords: ["tracks", "courses"],
+      onSelect: () => navigate("/training"),
+      keywords: ["tracks", "courses", "training"],
     },
     {
       label: "All Assignments (Coming Soon)",

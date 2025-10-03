@@ -71,21 +71,23 @@ export function StatCard({
     : trend
 
   return (
-    <Card className={cn("relative overflow-hidden", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className={cn(
-          "text-sm font-medium",
-          headlineTitle && "font-headline"
-        )}>
-          {label}
-        </CardTitle>
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+    <Card animated={false} className={cn("relative overflow-hidden", className)}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className={cn(
+            "text-sm font-medium text-muted-foreground",
+            headlineTitle && "font-headline"
+          )}>
+            {label}
+          </CardTitle>
+          {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        </div>
+        <div className="text-3xl font-headline font-bold">{value}</div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
 
-        {(description || calculatedTrend) && (
-          <div className="mt-1 flex items-center gap-2">
+      {(description || calculatedTrend) && (
+        <CardContent className="pt-0">
+          <div className="flex items-center gap-2">
             {calculatedTrend && showTrendIcon && (
               <div className={cn(
                 "flex items-center gap-1",
@@ -122,8 +124,8 @@ export function StatCard({
               </>
             )}
           </div>
-        )}
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   )
 }

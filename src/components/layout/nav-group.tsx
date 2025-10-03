@@ -4,10 +4,10 @@ import { ReactNode } from "react"
 import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import {
   SidebarGroup,
@@ -57,12 +57,12 @@ export function NavGroup({ title, items }: NavGroup) {
             >
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={item.title}>
-                  <CollapsibleTrigger showIcon={false}>
+                  <CollapsiblePrimitive.CollapsibleTrigger className="w-full">
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     {item.badge && <NavBadge>{item.badge}</NavBadge>}
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </CollapsibleTrigger>
+                  </CollapsiblePrimitive.CollapsibleTrigger>
                 </SidebarMenuButton>
                 <CollapsibleContent className="CollapsibleContent">
                   <SidebarMenuSub>

@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCard } from '@/components/dashboard/cards'
 import { OpportunityCarousel } from '@/components/dashboard/opportunity-carousel'
-import { TasksTable } from '@/components/dashboard/tasks-table'
+import { MyTrainingView } from '@/components/dashboard/my-training-view'
 import { PerformanceTrendChart } from '@/components/charts'
 import { getRecentAttemptStats, getUserAssignments } from '@/actions/assignments'
 import { getLatestActiveScenarios, getLatestActiveTracks } from '@/actions/scenarios'
+import { getUserEnrollments } from '@/actions/enrollments'
 import {
   Trophy,
   CheckCircle,
@@ -19,9 +20,10 @@ interface TraineeOverviewProps {
 
 export async function TraineeOverview({ user }: TraineeOverviewProps) {
   // Fetch all data in parallel for performance
-  const [stats, assignments, scenarios, tracks] = await Promise.all([
+  const [stats, assignments, enrollments, scenarios, tracks] = await Promise.all([
     getRecentAttemptStats(user.id).catch(() => null),
     getUserAssignments(user.id).catch(() => []),
+    getUserEnrollments(user.id).catch(() => []),
     getLatestActiveScenarios(10).catch(() => []),
     getLatestActiveTracks(10).catch(() => [])
   ])
@@ -66,40 +68,39 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
     }
   ]
 
-  // Transform opportunities for carousel
-  const opportunities = [
-    ...scenarios.map(s => ({
-      id: s.id,
-      title: s.title,
-      description: s.description,
-      difficulty: s.difficulty as 'easy' | 'medium' | 'hard' | undefined,
-      type: 'scenario' as const,
-      tags: s.persona?.tags as string[] | undefined
-    })),
-    ...tracks.map(t => ({
-      id: t.id,
-      title: t.title,
-      description: t.description,
-      type: 'track' as const,
-      scenario_count: t.scenario_count
-    }))
-  ].slice(0, 10) // Limit to 10 items total
-
-  // Transform assignments for table
-  const tasks = assignments.map(a => ({
-    id: a.id,
-    title: a.scenario_title || a.track_title || 'Untitled Assignment',
-    type: a.type as 'scenario' | 'track',
-    due_at: a.due_at,
-    status: a.completion_status === 'completed' ? 'completed' as const :
-            a.attempts_count > 0 ? 'in_progress' as const :
-            'not_started' as const,
-    progress: a.progress_percentage || 0,
-    best_score: a.best_score,
-    is_overdue: a.is_overdue,
-    scenario_id: a.scenario_id,
-    track_id: a.track_id
+  // Transform scenarios and tracks for carousel using standardized card formats
+  const scenariosForCarousel = scenarios.slice(0, 6).map(s => ({
+    id: s.id,
+    title: s.title,
+    description: s.description || '',
+    category: s.category || 'General',
+    industry: s.industry || 'General',
+    difficulty: (s.difficulty as 'easy' | 'medium' | 'hard') || 'medium',
+    durationMin: Math.floor((s.estimated_duration || 300) / 60),
+    durationMax: Math.ceil((s.estimated_duration || 300) / 60) + 5,
+    thumbnailUrl: s.image_url,
+    tags: s.metadata?.tags as string[] || [],
+    averageScore: s.avg_score,
+    attemptCount: s.attempt_count || 0,
+    isEnrolled: false,
   }))
+
+  const tracksForCarousel = tracks.slice(0, 4).map(t => ({
+    id: t.id,
+    title: t.title,
+    description: t.description || '',
+    scenarioCount: t.scenario_count || 0,
+    totalDurationMin: 60, // Default 1 hour
+    totalDurationMax: 120, // Default 2 hours
+    industry: 'General',
+    thumbnailUrl: undefined,
+    tags: [],
+    enrolledCount: 0,
+    isEnrolled: false,
+  }))
+
+  // Count active training (both assigned and self-enrolled)
+  const activeTrainingCount = enrollments.filter(e => e.status !== 'completed').length
 
   // Transform performance data for chart
   const performanceData = stats?.recent_performance?.map((attempt, index) => ({
@@ -122,17 +123,26 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
 
       {/* Quick Performance Stats - 4 column grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsData.map((stat) => (
-          <StatCard
-            key={stat.label}
-            label={stat.label}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
-            trend={stat.trend}
-            headlineTitle={false}
-          />
-        ))}
+        {statsData.map((stat, index) => {
+          const borderColors = [
+            'border-l-chart-1',
+            'border-l-chart-2',
+            'border-l-chart-3',
+            'border-l-chart-4'
+          ]
+          return (
+            <StatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value}
+              description={stat.description}
+              icon={stat.icon}
+              trend={stat.trend}
+              headlineTitle={false}
+              className={`border-l-4 ${borderColors[index]}`}
+            />
+          )
+        })}
       </div>
 
       {/* New Opportunities Section */}
@@ -145,20 +155,28 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
             Latest scenarios and tracks added to your organization
           </p>
         </div>
-        <OpportunityCarousel items={opportunities} />
+        <OpportunityCarousel scenarios={scenariosForCarousel} tracks={tracksForCarousel} />
       </section>
 
-      {/* Your Tasks Section */}
+      {/* My Training - Unified view of assignments and self-enrolled training */}
       <section className="space-y-4">
-        <div>
-          <h3 className="font-headline text-2xl font-bold tracking-tight">
-            Your Assignments
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Track your progress and upcoming deadlines
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-headline text-2xl font-bold tracking-tight">
+              My Training
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {activeTrainingCount} active training session{activeTrainingCount !== 1 ? 's' : ''}
+              {assignments.length > 0 && ` • ${assignments.length} assigned`}
+            </p>
+          </div>
         </div>
-        <TasksTable tasks={tasks} />
+
+        <MyTrainingView
+          enrollments={enrollments}
+          assignments={assignments}
+          maxItems={6}
+        />
       </section>
 
       {/* Recent Performance Chart - Optional sidebar */}

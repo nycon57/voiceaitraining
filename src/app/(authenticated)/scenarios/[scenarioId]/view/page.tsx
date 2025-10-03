@@ -56,7 +56,7 @@ export default async function ScenarioDetailPage({ params }: ScenarioDetailPageP
   try {
     const attempts = await getAttempts({
       scenario_id: scenarioId,
-      user_id: user.id,
+      clerk_user_id: user.id,
       status: 'completed',
       limit: 10
     })
@@ -103,9 +103,9 @@ export default async function ScenarioDetailPage({ params }: ScenarioDetailPageP
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/scenarios">
+          <Link href="/training">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Scenarios
+            Back to Training
           </Link>
         </Button>
       </div>

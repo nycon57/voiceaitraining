@@ -7,6 +7,7 @@ import { TraineeOverview } from '@/components/dashboard/trainee-overview'
 import { AdminOverview } from '@/components/dashboard/admin-overview'
 import { ManagerOverview } from '@/components/dashboard/manager-overview'
 import { HROverview } from '@/components/dashboard/hr-overview'
+import { PersonalOverview } from '@/components/dashboard/personal-overview'
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()
@@ -15,6 +16,21 @@ export default async function DashboardPage() {
     redirect('/sign-in')
   }
 
+  // Personal org users get a simplified dashboard
+  if (user.isPersonalOrg) {
+    return (
+      <>
+        <Header />
+        <div className="space-y-6 p-4 md:p-6 lg:p-8">
+          <Suspense fallback={<SkeletonDashboard />}>
+            <PersonalOverview user={user} />
+          </Suspense>
+        </div>
+      </>
+    )
+  }
+
+  // Team org users get role-based dashboards
   return (
     <>
       <Header />

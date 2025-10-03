@@ -610,11 +610,3 @@ Webhooks
 	•	SSO SAML for Enterprise
 	•	Custom report builder for admins
 
-⸻
-
-If you want, I can turn this into:
-	•	A Notion project with epics, sprints, and tickets
-	•	A DB migration pack and Prisma schema
-	•	A ShadCN component checklist with routes and file tree
-
-Say the word and I will drop those assets in-line.

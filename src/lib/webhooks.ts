@@ -1,4 +1,5 @@
-import { triggerWebhookEvent, WebhookEvent } from '@/actions/webhooks'
+import { triggerWebhookEvent } from '@/actions/webhooks'
+import type { WebhookEvent } from '@/lib/webhooks-types'
 
 // Helper functions to build webhook payloads
 

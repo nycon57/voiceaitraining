@@ -1,14 +1,13 @@
 'use server'
 
 import { withOrgGuard, withRoleGuard } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 const createAttemptSchema = z.object({
   scenario_id: z.string().uuid(),
   assignment_id: z.string().uuid().optional(),
-  user_id: z.string(),
+  clerk_user_id: z.string(),
   org_id: z.string().uuid(),
 })
 
@@ -34,8 +33,7 @@ const updateAttemptSchema = z.object({
 export async function createAttempt(data: z.infer<typeof createAttemptSchema>) {
   const validatedData = createAttemptSchema.parse(data)
 
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     // Verify the scenario exists and user has access
     const { data: scenario, error: scenarioError } = await supabase
@@ -80,13 +78,12 @@ export async function updateAttempt(
 ) {
   const validatedData = updateAttemptSchema.parse(data)
 
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     // Verify the attempt exists and user has access
     const { data: existingAttempt, error: attemptError } = await supabase
       .from('scenario_attempts')
-      .select('id, user_id, org_id')
+      .select('id, clerk_user_id, org_id')
       .eq('id', attemptId)
       .eq('org_id', orgId)
       .single()
@@ -96,7 +93,7 @@ export async function updateAttempt(
     }
 
     // Check if user can update this attempt
-    const canUpdate = existingAttempt.user_id === user.id ||
+    const canUpdate = existingAttempt.clerk_user_id === user.id ||
                      user.role === 'admin' ||
                      user.role === 'manager'
 
@@ -129,8 +126,7 @@ export async function updateAttempt(
 export async function scoreAttempt(attemptId: string) {
   const { calculateGlobalKPIs, calculateScenarioKPIs, calculateOverallScore, generateAIFeedback } = await import('@/lib/ai/scoring')
 
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     // Get the attempt with scenario data
     const { data: attempt, error: attemptError } = await supabase
@@ -236,20 +232,17 @@ export async function scoreAttempt(attemptId: string) {
           .single()
 
         const { data: userData } = await supabase
-          .from('org_members')
-          .select(`
-            users!inner(id, name, email)
-          `)
+          .from('users')
+          .select('clerk_user_id, first_name, last_name, email, role')
           .eq('org_id', orgId)
-          .eq('user_id', updatedAttempt.user_id)
+          .eq('clerk_user_id', updatedAttempt.clerk_user_id)
           .single()
 
-        const users = userData?.users as unknown as { id: string; name: string; email: string } | undefined
-        const webhookUser = users ? {
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          role: 'trainee' as const // Default role for webhook payload
+        const webhookUser = userData ? {
+          id: userData.clerk_user_id,
+          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || userData.email,
+          email: userData.email,
+          role: (userData.role || 'trainee') as 'trainee' | 'manager' | 'admin' | 'hr'
         } : null
 
         // Trigger scenario completed webhook
@@ -296,14 +289,13 @@ export async function scoreAttempt(attemptId: string) {
 }
 
 export async function getAttempts(filters?: {
-  user_id?: string
+  clerk_user_id?: string
   scenario_id?: string
   status?: string
   limit?: number
   offset?: number
 }) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     let query = supabase
       .from('scenario_attempts')
@@ -315,8 +307,8 @@ export async function getAttempts(filters?: {
       .eq('org_id', orgId)
 
     // Apply filters
-    if (filters?.user_id) {
-      query = query.eq('user_id', filters.user_id)
+    if (filters?.clerk_user_id) {
+      query = query.eq('clerk_user_id', filters.clerk_user_id)
     }
 
     if (filters?.scenario_id) {
@@ -329,7 +321,7 @@ export async function getAttempts(filters?: {
 
     // Role-based access control
     if (user.role === 'trainee') {
-      query = query.eq('user_id', user.id)
+      query = query.eq('clerk_user_id', user.id)
     }
 
     // Apply pagination
@@ -354,8 +346,7 @@ export async function getAttempts(filters?: {
 }
 
 export async function getAttempt(attemptId: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: attempt, error } = await supabase
       .from('scenario_attempts')
@@ -373,7 +364,7 @@ export async function getAttempt(attemptId: string) {
     }
 
     // Check access permissions
-    const canView = attempt.user_id === user.id ||
+    const canView = attempt.clerk_user_id === user.id ||
                    user.role === 'admin' ||
                    user.role === 'manager' ||
                    user.role === 'hr'
@@ -387,8 +378,7 @@ export async function getAttempt(attemptId: string) {
 }
 
 export async function deleteAttempt(attemptId: string) {
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { error } = await supabase
       .from('scenario_attempts')
@@ -406,8 +396,7 @@ export async function deleteAttempt(attemptId: string) {
 }
 
 export async function addManagerComment(attemptId: string, comment: string) {
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { data: attempt, error } = await supabase
       .from('scenario_attempts')
@@ -430,13 +419,12 @@ export async function addManagerComment(attemptId: string, comment: string) {
 }
 
 // Get user's attempt statistics
-export async function getUserAttemptStats(userId?: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
-    const targetUserId = userId || user.id
+export async function getUserAttemptStats(clerkUserId?: string) {
+  return withOrgGuard(async (user, orgId, supabase) => {
+    const targetClerkUserId = clerkUserId || user.id
 
     // Check permission to view other user's stats
-    if (targetUserId !== user.id && !['admin', 'manager', 'hr'].includes(user.role || '')) {
+    if (targetClerkUserId !== user.id && !['admin', 'manager', 'hr'].includes(user.role || '')) {
       throw new Error('Permission denied')
     }
 
@@ -444,7 +432,7 @@ export async function getUserAttemptStats(userId?: string) {
       .from('scenario_attempts')
       .select('score, status, duration_seconds, started_at')
       .eq('org_id', orgId)
-      .eq('user_id', targetUserId)
+      .eq('clerk_user_id', targetClerkUserId)
       .eq('status', 'completed')
 
     if (error) {
@@ -473,5 +461,51 @@ export async function getUserAttemptStats(userId?: string) {
       recent_average_score: recentAttempts.length > 0 ?
         Math.round((recentAttempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0) / recentAttempts.length) * 100) / 100 : 0
     }
+  })
+}
+
+// Get user's activity history for training history page
+export async function getUserActivityHistory(clerkUserId?: string) {
+  return withOrgGuard(async (user, orgId, supabase) => {
+    const targetClerkUserId = clerkUserId || user.id
+
+    // Check permission to view other user's activity
+    if (targetClerkUserId !== user.id && !['admin', 'manager', 'hr'].includes(user.role || '')) {
+      throw new Error('Permission denied')
+    }
+
+    const { data: activities, error } = await supabase
+      .from('scenario_attempts')
+      .select(`
+        id,
+        scenario_id,
+        started_at,
+        duration_seconds,
+        score,
+        status,
+        scenarios!inner(id, title)
+      `)
+      .eq('org_id', orgId)
+      .eq('clerk_user_id', targetClerkUserId)
+      .order('started_at', { ascending: false })
+
+    if (error) {
+      throw new Error(`Failed to get activity history: ${error.message}`)
+    }
+
+    // Transform to expected format
+    return activities.map(activity => {
+      const scenario = Array.isArray(activity.scenarios) ? activity.scenarios[0] : activity.scenarios
+      return {
+        id: activity.id,
+        scenarioId: activity.scenario_id,
+        scenarioTitle: scenario?.title || 'Untitled Scenario',
+        type: 'scenario' as const, // For now, only scenarios. Will add tracks later
+        startedAt: activity.started_at,
+        duration: activity.duration_seconds || 0,
+        score: activity.score || undefined,
+        status: activity.status as 'completed' | 'in_progress' | 'failed',
+      }
+    })
   })
 }

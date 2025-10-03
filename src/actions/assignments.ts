@@ -1,7 +1,6 @@
 'use server'
 
 import { withOrgGuard, withRoleGuard } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -34,9 +33,7 @@ const updateAssignmentSchema = z.object({
 export async function createAssignment(data: z.infer<typeof createAssignmentSchema>) {
   const validatedData = createAssignmentSchema.parse(data)
 
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
     // Verify the assignee user exists in the org
     const { data: assignee, error: assigneeError } = await supabase
       .from('org_members')
@@ -148,8 +145,7 @@ export async function updateAssignment(
 ) {
   const validatedData = updateAssignmentSchema.parse(data)
 
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { data: assignment, error } = await supabase
       .from('assignments')
@@ -173,8 +169,7 @@ export async function updateAssignment(
 }
 
 export async function deleteAssignment(assignmentId: string) {
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { error } = await supabase
       .from('assignments')
@@ -193,8 +188,7 @@ export async function deleteAssignment(assignmentId: string) {
 }
 
 export async function getUserAssignments(userId?: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
     const targetUserId = userId || user.id
 
     // Check permission to view other user's assignments
@@ -219,6 +213,11 @@ export async function getUserAssignments(userId?: string) {
           title,
           description,
           status
+        ),
+        assigned_by_user:users!assignments_created_by_fkey(
+          first_name,
+          last_name,
+          email
         )
       `)
       .eq('org_id', orgId)
@@ -309,6 +308,11 @@ export async function getUserAssignments(userId?: string) {
           ? new Date(assignment.due_at) < new Date() && !isCompleted
           : false
 
+        // Format assigned_by name
+        const assignedByName = assignment.assigned_by_user
+          ? `${assignment.assigned_by_user.first_name || ''} ${assignment.assigned_by_user.last_name || ''}`.trim() || assignment.assigned_by_user.email
+          : undefined
+
         return {
           ...assignment,
           attempts_count: attemptsCount,
@@ -317,6 +321,10 @@ export async function getUserAssignments(userId?: string) {
           total_scenarios: totalScenarios,
           is_completed: isCompleted,
           is_overdue: isOverdue,
+          assigned_by: assignedByName ? {
+            name: assignedByName,
+            email: assignment.assigned_by_user?.email
+          } : undefined,
         }
       })
     )
@@ -326,8 +334,7 @@ export async function getUserAssignments(userId?: string) {
 }
 
 export async function getAssignment(assignmentId: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: assignment, error } = await supabase
       .from('assignments')
@@ -373,8 +380,7 @@ export async function getAssignment(assignmentId: string) {
 }
 
 export async function getRecentAttemptStats(userId?: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
     const targetUserId = userId || user.id
 
     // Check permission to view other user's stats
@@ -498,9 +504,7 @@ export async function getTeamAssignments(filters?: {
   limit?: number
   offset?: number
 }) {
-  return withRoleGuard(['admin', 'manager', 'hr'], async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withRoleGuard(['admin', 'manager', 'hr'], async (user, orgId, supabase) => {
     // Get all team members if team_id is specified
     let teamMemberIds: string[] | undefined
 
@@ -574,9 +578,7 @@ export async function getTeamAssignments(filters?: {
 }
 
 export async function completeAssignment(assignmentId: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withOrgGuard(async (user, orgId, supabase) => {
     // Verify user owns this assignment
     const { data: existingAssignment, error: assignmentError } = await supabase
       .from('assignments')

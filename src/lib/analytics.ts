@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { withOrgGuard } from '@/lib/auth'
 
 export interface DashboardMetrics {
@@ -55,8 +54,7 @@ export interface TeamMetrics {
 }
 
 export async function getDashboardMetrics(timeFrame: 'week' | 'month' | 'quarter' | 'year' = 'month'): Promise<DashboardMetrics> {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     // Calculate date range
     const endDate = new Date()
@@ -133,8 +131,7 @@ export async function getDashboardMetrics(timeFrame: 'week' | 'month' | 'quarter
 }
 
 export async function getPerformanceTrends(timeFrame: 'week' | 'month' | 'quarter' = 'month'): Promise<PerformanceTrend[]> {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     const endDate = new Date()
     const startDate = new Date()
@@ -194,8 +191,7 @@ export async function getPerformanceTrends(timeFrame: 'week' | 'month' | 'quarte
 }
 
 export async function getScenarioInsights(): Promise<ScenarioInsight[]> {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data, error } = await supabase
       .from('scenario_attempts')
@@ -265,8 +261,7 @@ export async function getScenarioInsights(): Promise<ScenarioInsight[]> {
 }
 
 export async function getUserPerformanceData(): Promise<UserPerformance[]> {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     // Get org members with their attempt data
     const { data, error } = await supabase
@@ -336,8 +331,7 @@ export async function getUserPerformanceData(): Promise<UserPerformance[]> {
 }
 
 export async function getTeamMetrics(): Promise<TeamMetrics> {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     // Get all completed attempts with user info
     const { data, error } = await supabase

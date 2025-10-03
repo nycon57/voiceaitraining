@@ -1,7 +1,6 @@
-import { Suspense } from 'react'
 import { Metadata } from 'next'
 import { ResourcesContent } from '@/components/resources/resources-content'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { getPublishedArticles, getFeaturedArticle } from '@/lib/articles'
 
 export const metadata: Metadata = {
   title: 'Resources & Insights | SpeakStride',
@@ -13,14 +12,25 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ResourcesPage() {
+// Enable ISR - revalidate every 5 minutes
+export const revalidate = 300
+
+export default async function ResourcesPage() {
+  // Fetch data on the server
+  const [featuredArticle, allArticles] = await Promise.all([
+    getFeaturedArticle(),
+    getPublishedArticles()
+  ])
+
+  // Filter out featured article from grid
+  const articles = featuredArticle
+    ? allArticles.filter(article => article.id !== featuredArticle.id)
+    : allArticles
+
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center py-20">
-        <LoadingSpinner size="lg" />
-      </div>
-    }>
-      <ResourcesContent />
-    </Suspense>
+    <ResourcesContent
+      initialFeatured={featuredArticle}
+      initialArticles={articles}
+    />
   )
 }

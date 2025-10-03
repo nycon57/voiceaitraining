@@ -158,16 +158,25 @@ export function AdminOverview({ user }: AdminOverviewProps) {
 
       {/* Stats Grid - 4 column layout */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {mockOrgStats.map((stat) => (
-          <StatCard
-            key={stat.label}
-            label={stat.label}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
-            trend={stat.trend}
-          />
-        ))}
+        {mockOrgStats.map((stat, index) => {
+          const borderColors = [
+            'border-l-chart-1',
+            'border-l-chart-2',
+            'border-l-chart-3',
+            'border-l-chart-4'
+          ]
+          return (
+            <StatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value}
+              description={stat.description}
+              icon={stat.icon}
+              trend={stat.trend}
+              className={`border-l-4 ${borderColors[index]}`}
+            />
+          )
+        })}
       </div>
 
       {/* Main Content Grid - 12 column system */}
@@ -237,9 +246,9 @@ export function AdminOverview({ user }: AdminOverviewProps) {
               </Link>
             </Button>
             <Button variant="outline" className="w-full" asChild>
-              <Link href="/tracks/new">
+              <Link href="/training">
                 <BookOpen className="h-4 w-4 mr-2" />
-                Create Track
+                View Tracks
               </Link>
             </Button>
             <Button variant="outline" className="w-full" asChild>
@@ -301,12 +310,12 @@ export function AdminOverview({ user }: AdminOverviewProps) {
 
                 <div className="flex gap-2 ml-4">
                   <Button size="sm" variant="outline" asChild>
-                    <Link href={`/scenarios/${scenario.id}`}>
+                    <Link href={`/training/scenarios/${scenario.id}`}>
                       <Eye className="h-4 w-4" />
                     </Link>
                   </Button>
                   <Button size="sm" variant="outline" asChild>
-                    <Link href={`/scenarios/${scenario.id}/edit`}>
+                    <Link href={`/scenarios/${scenario.id}`}>
                       <Settings className="h-4 w-4" />
                     </Link>
                   </Button>

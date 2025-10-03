@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import crypto from 'crypto'
+import type { WebhookEvent } from '@/lib/webhooks-types'
 
 const createWebhookSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -18,26 +19,10 @@ const createWebhookSchema = z.object({
 
 const updateWebhookSchema = createWebhookSchema.partial()
 
-export const WEBHOOK_EVENTS = [
-  'scenario.assigned',
-  'scenario.completed',
-  'attempt.scored.low', // score < 60
-  'attempt.scored.high', // score >= 80
-  'track.completed',
-  'user.added',
-  'user.removed',
-  'assignment.overdue',
-  'performance.milestone', // custom milestones
-] as const
-
-export type WebhookEvent = typeof WEBHOOK_EVENTS[number]
-
 export async function createWebhook(data: z.infer<typeof createWebhookSchema>) {
   const validatedData = createWebhookSchema.parse(data)
 
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
     // Generate webhook secret
     const secret = crypto.randomBytes(32).toString('hex')
 
@@ -67,8 +52,7 @@ export async function updateWebhook(
 ) {
   const validatedData = updateWebhookSchema.parse(data)
 
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { data: webhook, error } = await supabase
       .from('webhooks')
@@ -91,8 +75,7 @@ export async function updateWebhook(
 }
 
 export async function deleteWebhook(webhookId: string) {
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { error } = await supabase
       .from('webhooks')
@@ -110,9 +93,7 @@ export async function deleteWebhook(webhookId: string) {
 }
 
 export async function getWebhooks() {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withOrgGuard(async (user, orgId, supabase) => {
     // Check if user has access to webhooks
     if (!['admin', 'manager'].includes(user.role || '')) {
       throw new Error('Access denied: insufficient permissions')
@@ -136,9 +117,7 @@ export async function getWebhooks() {
 }
 
 export async function getWebhook(webhookId: string) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withOrgGuard(async (user, orgId, supabase) => {
     // Check if user has access to webhooks
     if (!['admin', 'manager'].includes(user.role || '')) {
       throw new Error('Access denied: insufficient permissions')
@@ -163,9 +142,7 @@ export async function getWebhook(webhookId: string) {
 }
 
 export async function getWebhookDeliveries(webhookId: string, limit = 50) {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withOrgGuard(async (user, orgId, supabase) => {
     // Check if user has access to webhooks
     if (!['admin', 'manager'].includes(user.role || '')) {
       throw new Error('Access denied: insufficient permissions')
@@ -199,9 +176,7 @@ export async function getWebhookDeliveries(webhookId: string, limit = 50) {
 }
 
 export async function retryWebhookDelivery(deliveryId: string) {
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
     // Get delivery with webhook info
     const { data: delivery, error: deliveryError } = await supabase
       .from('webhook_deliveries')
@@ -239,9 +214,7 @@ export async function retryWebhookDelivery(deliveryId: string) {
 }
 
 export async function regenerateWebhookSecret(webhookId: string) {
-  return withRoleGuard(['admin', 'manager'], async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
     // Generate new secret
     const newSecret = crypto.randomBytes(32).toString('hex')
 

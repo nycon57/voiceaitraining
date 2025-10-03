@@ -4,16 +4,19 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ArticleFilters } from './article-filters'
-import { getPublishedArticles, getFeaturedArticle, formatReadTime, formatPublishDate } from '@/lib/articles'
+import { formatReadTime, formatPublishDate } from '@/lib/articles'
 import type { Article, ArticleFilters as ArticleFiltersType } from '@/types/article'
 
-export function ResourcesContent() {
-  const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null)
-  const [articles, setArticles] = useState<Article[]>([])
-  const [filteredArticles, setFilteredArticles] = useState<Article[]>([])
-  const [loading, setLoading] = useState(true)
+interface ResourcesContentProps {
+  initialFeatured: Article | null
+  initialArticles: Article[]
+}
+
+export function ResourcesContent({ initialFeatured, initialArticles }: ResourcesContentProps) {
+  const [featuredArticle] = useState<Article | null>(initialFeatured)
+  const [articles] = useState<Article[]>(initialArticles)
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>(initialArticles)
   const [filters, setFilters] = useState<ArticleFiltersType>({
     sortBy: 'recent',
     sortOrder: 'desc',
@@ -21,33 +24,8 @@ export function ResourcesContent() {
   })
 
   useEffect(() => {
-    loadArticles()
-  }, [])
-
-  useEffect(() => {
     applyFilters()
   }, [articles, filters])
-
-  const loadArticles = async () => {
-    try {
-      setLoading(true)
-      const [featured, allArticles] = await Promise.all([
-        getFeaturedArticle(),
-        getPublishedArticles()
-      ])
-
-      setFeaturedArticle(featured)
-      // Filter out featured article from the grid
-      const gridArticles = featured
-        ? allArticles.filter(article => article.id !== featured.id)
-        : allArticles
-      setArticles(gridArticles)
-    } catch (error) {
-      console.error('Error loading articles:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const applyFilters = () => {
     let filtered = [...articles]
@@ -108,14 +86,6 @@ export function ResourcesContent() {
   const availableTags = Array.from(
     new Set(articles.flatMap(article => article.tags || []))
   ).sort()
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
 
   return (
     <section className="py-32">
