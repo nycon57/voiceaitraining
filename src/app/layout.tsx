@@ -31,6 +31,11 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
+        <head>
+          {/* Resource hints for faster third-party loading */}
+          <link rel="preconnect" href="https://meet-toad-73.clerk.accounts.dev" />
+          <link rel="dns-prefetch" href="https://meet-toad-73.clerk.accounts.dev" />
+        </head>
         <body className="relative flex min-h-screen flex-col antialiased font-sans" suppressHydrationWarning>
           <ClerkProvider
             signInFallbackRedirectUrl="/dashboard"
@@ -53,18 +58,6 @@ export default function RootLayout({
               />
               <StyleGlideProvider />
               <main className="flex-1">{children}</main>
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    console.log('View Transitions API supported:', 'startViewTransition' in document);
-                    if ('startViewTransition' in document) {
-                      console.log('🎉 Browser supports View Transitions!');
-                    } else {
-                      console.log('❌ Browser does not support View Transitions');
-                    }
-                  `,
-                }}
-              />
             </ThemeProvider>
           </ClerkProvider>
         </body>

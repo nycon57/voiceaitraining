@@ -27,12 +27,17 @@ export default async function AuthenticatedLayout({ children }: AuthenticatedLay
     lastName: user.lastName,
     email: user.emailAddresses?.[0]?.emailAddress || '',
     role: user.role,
+    isPersonalOrg: user.isPersonalOrg || false,
   }
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <SidebarProvider defaultOpen={!defaultClose}>
-        <AppSidebar userRole={user.role || 'trainee'} user={serializedUser} />
+        <AppSidebar
+          userRole={user.role || 'trainee'}
+          user={serializedUser}
+          isPersonalOrg={user.isPersonalOrg || false}
+        />
         <div className="flex w-full flex-1 flex-col overflow-y-auto">
           {children}
         </div>

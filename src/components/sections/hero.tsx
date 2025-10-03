@@ -2,33 +2,10 @@
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
-import PixelBlast from '@/components/ui/pixel-blast';
 
 export default function Hero() {
   return (
     <section className="section-padding relative">
-      {/* PixelBlast Background */}
-      <div className="absolute inset-x-0 top-0 -z-10 h-[65%]">
-        <PixelBlast
-          variant="circle"
-          pixelSize={6}
-          color="#B19EEF"
-          patternScale={3}
-          patternDensity={1.2}
-          pixelSizeJitter={0.5}
-          enableRipples
-          rippleSpeed={0.4}
-          rippleThickness={0.12}
-          rippleIntensityScale={1.5}
-          liquid
-          liquidStrength={0.12}
-          liquidRadius={1.2}
-          liquidWobbleSpeed={5}
-          speed={0.6}
-          edgeFade={0.25}
-          transparent
-        />
-      </div>
 
       <div className="relative container">
         <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-center">
@@ -61,7 +38,7 @@ export default function Hero() {
 
         {/* Hero Image */}
         <Image
-          src="/images/home/hero.webp"
+          src="/images/product/plasma.webp"
           alt="App screenshot"
           className="ring-foreground/5 mt-10 w-full rounded-xs shadow-2xl ring-6 invert md:mt-20 md:rounded-sm md:px-[1px] md:ring-16 lg:mt-30 dark:invert-0"
           width={1440}

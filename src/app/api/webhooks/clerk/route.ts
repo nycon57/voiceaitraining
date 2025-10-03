@@ -54,16 +54,44 @@ export async function POST(req: Request) {
         const { id, email_addresses, first_name, last_name, image_url } = evt.data
         const primaryEmail = email_addresses.find(email => email.id === evt.data.primary_email_address_id)
 
-        // Create user profile in our database
-        await supabase
-          .from('user_profiles')
-          .insert({
-            user_id: id,
-            email: primaryEmail?.email_address,
-            first_name: first_name,
-            last_name: last_name,
-            avatar_url: image_url,
-          })
+        // Check if user is joining an existing organization
+        const { data: existingMembership } = await supabase
+          .from('users')
+          .select('id')
+          .eq('clerk_user_id', id)
+          .limit(1)
+          .single()
+
+        // If no existing membership, create a personal org
+        if (!existingMembership) {
+          console.log('Creating personal org for new user:', id)
+
+          // Create personal org using database function
+          const { data: orgId, error: orgError } = await supabase
+            .rpc('create_personal_org', {
+              p_clerk_user_id: id,
+              p_first_name: first_name || 'User',
+              p_email: primaryEmail?.email_address || '',
+              p_plan: 'individual_free'
+            })
+
+          if (orgError) {
+            console.error('Error creating personal org:', orgError)
+            throw orgError
+          }
+
+          console.log('Personal org created with ID:', orgId)
+
+          // Update user's avatar_url if provided
+          if (image_url) {
+            await supabase
+              .from('users')
+              .update({ avatar_url: image_url })
+              .eq('clerk_user_id', id)
+          }
+        } else {
+          console.log('User already has membership, skipping personal org creation:', id)
+        }
 
         break
       }
@@ -72,9 +100,9 @@ export async function POST(req: Request) {
         const { id, email_addresses, first_name, last_name, image_url } = evt.data
         const primaryEmail = email_addresses.find(email => email.id === evt.data.primary_email_address_id)
 
-        // Update user profile
+        // Update user in users table
         await supabase
-          .from('user_profiles')
+          .from('users')
           .update({
             email: primaryEmail?.email_address,
             first_name: first_name,
@@ -82,7 +110,7 @@ export async function POST(req: Request) {
             avatar_url: image_url,
             updated_at: new Date().toISOString(),
           })
-          .eq('user_id', id)
+          .eq('clerk_user_id', id)
 
         break
       }
@@ -109,19 +137,33 @@ export async function POST(req: Request) {
         const { organization, public_user_data, role, public_metadata } = evt.data
 
         // Map Clerk roles to our roles
-        let userRole = 'trainee'
+        let userRole: 'trainee' | 'manager' | 'admin' | 'hr' = 'trainee'
         if (role === 'org:admin') userRole = 'admin'
         else if (role === 'org:manager') userRole = 'manager'
         else if (role === 'org:hr') userRole = 'hr'
 
-        // Add user to organization
+        // Get user's email and name
+        const { data: clerkUser } = await supabase
+          .from('users')
+          .select('email, first_name, last_name')
+          .eq('clerk_user_id', public_user_data.user_id)
+          .limit(1)
+          .single()
+
+        // Add user to team organization (not personal org)
+        // Use upsert to handle existing users
         await supabase
-          .from('org_members')
-          .insert({
+          .from('users')
+          .upsert({
+            clerk_user_id: public_user_data.user_id,
             org_id: organization.id,
-            user_id: public_user_data.user_id,
+            email: clerkUser?.email || public_user_data.identifier || '',
+            first_name: clerkUser?.first_name || public_user_data.first_name || '',
+            last_name: clerkUser?.last_name || public_user_data.last_name || '',
             role: userRole,
-            metadata: public_metadata || {},
+            is_active: true,
+          }, {
+            onConflict: 'clerk_user_id,org_id'
           })
 
         break
@@ -131,21 +173,20 @@ export async function POST(req: Request) {
         const { organization, public_user_data, role, public_metadata } = evt.data
 
         // Map Clerk roles to our roles
-        let userRole = 'trainee'
+        let userRole: 'trainee' | 'manager' | 'admin' | 'hr' = 'trainee'
         if (role === 'org:admin') userRole = 'admin'
         else if (role === 'org:manager') userRole = 'manager'
         else if (role === 'org:hr') userRole = 'hr'
 
         // Update user's role in organization
         await supabase
-          .from('org_members')
+          .from('users')
           .update({
             role: userRole,
-            metadata: public_metadata || {},
             updated_at: new Date().toISOString(),
           })
           .eq('org_id', organization.id)
-          .eq('user_id', public_user_data.user_id)
+          .eq('clerk_user_id', public_user_data.user_id)
 
         break
       }
@@ -153,12 +194,15 @@ export async function POST(req: Request) {
       case 'organizationMembership.deleted': {
         const { organization, public_user_data } = evt.data
 
-        // Remove user from organization
+        // Soft delete user from organization (set to inactive)
         await supabase
-          .from('org_members')
-          .delete()
+          .from('users')
+          .update({
+            is_active: false,
+            updated_at: new Date().toISOString(),
+          })
           .eq('org_id', organization.id)
-          .eq('user_id', public_user_data.user_id)
+          .eq('clerk_user_id', public_user_data.user_id)
 
         break
       }

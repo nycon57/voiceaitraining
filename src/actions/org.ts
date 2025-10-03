@@ -44,9 +44,7 @@ export async function updateOrganization(formData: FormData) {
     metadata: formData.get('metadata') ? JSON.parse(formData.get('metadata') as string) : undefined,
   })
 
-  return withRoleGuard(['admin'], async (user, orgId) => {
-    const supabase = await createClient()
-
+  return withRoleGuard(['admin'], async (user, orgId, supabase) => {
     const { data: org, error } = await supabase
       .from('orgs')
       .update({ ...data, updated_at: new Date().toISOString() })
@@ -64,8 +62,7 @@ export async function updateOrganization(formData: FormData) {
 }
 
 export async function getOrganization() {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: org, error } = await supabase
       .from('orgs')
@@ -82,8 +79,7 @@ export async function getOrganization() {
 }
 
 export async function getOrganizationMembers() {
-  return withOrgGuard(async (user, orgId) => {
-    const supabase = await createClient()
+  return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: members, error } = await supabase
       .from('org_members')

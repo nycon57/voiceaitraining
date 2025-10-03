@@ -53,9 +53,9 @@ export default async function AttemptResultsPage({
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/scenarios`}>
+          <Link href={`/training`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Scenarios
+            Back to Training
           </Link>
         </Button>
         <div>
@@ -187,11 +187,11 @@ export default async function AttemptResultsPage({
                   <Link href={`/play/${attempt.scenario_id}`}>Try Again</Link>
                 </Button>
                 <Button variant="outline" className="flex-1" asChild>
-                  <Link href={`/scenarios/${attempt.scenario_id}/view`}>View Scenario</Link>
+                  <Link href={`/training/scenarios/${attempt.scenario_id}`}>View Scenario</Link>
                 </Button>
               </div>
               <Button variant="ghost" className="w-full" asChild>
-                <Link href={`/scenarios`}>Browse More Scenarios</Link>
+                <Link href={`/training`}>Browse More Scenarios</Link>
               </Button>
             </div>
           </CardContent>
@@ -255,7 +255,7 @@ export default async function AttemptResultsPage({
                     Practice related scenarios to reinforce skills
                   </p>
                   <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
-                    <Link href={`/scenarios?similar=${attempt.scenario_id}`}>Explore →</Link>
+                    <Link href={`/training`}>Explore →</Link>
                   </Button>
                 </div>
               </div>
