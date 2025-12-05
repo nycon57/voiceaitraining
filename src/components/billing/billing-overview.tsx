@@ -103,7 +103,9 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
     )
   }
 
-  const currentPlan = subscription.plan ? SUBSCRIPTION_PLANS[subscription.plan] : null
+  const currentPlan = subscription.plan && subscription.plan in SUBSCRIPTION_PLANS
+    ? SUBSCRIPTION_PLANS[subscription.plan as keyof typeof SUBSCRIPTION_PLANS]
+    : null
   const daysUntilRenewal = getDaysUntilRenewal(subscription.current_period_end)
   const renewalProgress = ((30 - daysUntilRenewal) / 30) * 100
 

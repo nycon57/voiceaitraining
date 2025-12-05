@@ -229,7 +229,7 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                     <div className="flex items-center justify-end gap-2">
                       {scenario.status === 'active' && (
                         <Button asChild size="sm">
-                          <Link href={`/play/${scenario.id}`}>
+                          <Link href={`/play/${scenario.id}/call`}>
                             <div className="flex items-center gap-1">
                               <Play className="h-4 w-4" />
                               Practice

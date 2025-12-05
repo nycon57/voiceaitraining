@@ -1,4 +1,9 @@
-export type AttemptStatus = 'in_progress' | 'completed' | 'failed' | 'cancelled'
+// Database enum values for scenario_attempts.attempt_status
+// 'completed' - Successfully completed attempt that counts toward performance
+// 'cancelled' - User cancelled the call before completion
+// 'practice' - Practice attempt that does not count toward scoring
+// 'technical_issue' - Attempt failed due to technical problems
+export type AttemptStatus = 'completed' | 'cancelled' | 'practice' | 'technical_issue'
 
 export interface AttemptKPIs {
   talk_ms?: number
@@ -12,6 +17,18 @@ export interface AttemptKPIs {
   required_phrases_mentioned?: string[]
   objections_handled?: string[]
   goal_achieved?: boolean
+
+  // Enhanced KPIs from transcript analysis
+  unanswered_questions_count?: number
+  weak_responses_count?: number
+  fumbled_responses_count?: number
+  confidence_score?: number // 0-100
+  professionalism_score?: number // 0-100
+  clarity_score?: number // 0-100
+  avg_response_time_ms?: number
+  max_response_time_ms?: number
+  dead_air_instances?: number
+  empathy_signals_count?: number
 }
 
 export interface ScoreBreakdown {
@@ -58,7 +75,7 @@ export interface ScenarioAttempt {
   score?: number
   score_breakdown?: ScoreBreakdown
   kpis?: AttemptKPIs
-  status: AttemptStatus
+  attempt_status: AttemptStatus
   feedback_text?: string
   created_at: string
   updated_at: string

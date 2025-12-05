@@ -76,12 +76,13 @@ const QUICK_START_SECTIONS = [
 const POPULAR_SEARCHES = ['Billing', 'AI Build', 'Integrations'];
 
 // Initialize Orama for static search mode
-function initOrama() {
-  return create({
+async function initOrama() {
+  const db = await create({
     schema: { _: 'string' },
     // https://docs.orama.com/open-source/supported-languages
     language: 'english',
   });
+  return db as any;
 }
 
 export function DocsOverview() {

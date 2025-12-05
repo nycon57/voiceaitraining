@@ -313,7 +313,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                window.location.href = `/play/${activity.scenarioId}`
+                                window.location.href = `/play/${activity.scenarioId}/call`
                               }}
                             >
                               <RotateCcw className="h-4 w-4" />

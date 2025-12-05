@@ -61,7 +61,6 @@ function CommandDialog({
       <DialogContent
         className={cn('overflow-hidden p-0 backdrop-blur-sm', className)}
         showCloseButton={showCloseButton}
-        animated={animated}
       >
         <Command
           animated={animated}

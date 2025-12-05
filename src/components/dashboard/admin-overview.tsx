@@ -332,8 +332,7 @@ export function AdminOverview({ user }: AdminOverviewProps) {
           data={mockOrgPerformanceData}
           title="Organization Performance Trend"
           description="Average scores across all users"
-          chartType="area"
-          showStats
+          showArea
         />
 
         <KPIMetricsChart
@@ -351,7 +350,6 @@ export function AdminOverview({ user }: AdminOverviewProps) {
             activeUsers: 'var(--chart-2)',
             completionRate: 'var(--chart-3)'
           }}
-          height={300}
         />
       </div>
 

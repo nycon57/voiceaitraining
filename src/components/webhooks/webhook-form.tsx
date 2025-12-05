@@ -28,7 +28,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, ExternalLink, Info } from 'lucide-react'
-import { createWebhook, updateWebhook, WEBHOOK_EVENTS } from '@/actions/webhooks'
+import { createWebhook, updateWebhook } from '@/actions/webhooks'
+import { WEBHOOK_EVENTS } from '@/lib/webhooks-types'
 import { toast } from '@/hooks/use-toast'
 
 const webhookFormSchema = z.object({

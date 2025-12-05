@@ -19,6 +19,8 @@ function Breadcrumb({ animated = true, ...props }: BreadcrumbProps) {
   };
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.nav
         aria-label="breadcrumb"
@@ -28,7 +30,7 @@ function Breadcrumb({ animated = true, ...props }: BreadcrumbProps) {
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3, ease: "easeOut" }}
-        {...props}
+        {...motionProps}
       />
     );
   }
@@ -61,6 +63,8 @@ function BreadcrumbItem({ className, animated = true, ...props }: BreadcrumbItem
   };
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.li
         data-slot="breadcrumb-item"
@@ -70,7 +74,7 @@ function BreadcrumbItem({ className, animated = true, ...props }: BreadcrumbItem
         animate="animate"
         exit="exit"
         transition={{ duration: 0.2, ease: "easeOut" }}
-        {...props}
+        {...motionProps}
       />
     );
   }

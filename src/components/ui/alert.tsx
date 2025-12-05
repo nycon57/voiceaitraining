@@ -47,6 +47,8 @@ function Alert({
   const alertClasses = cn(alertVariants({ variant }), className);
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.div
         data-slot="alert"
@@ -57,7 +59,7 @@ function Alert({
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3, ease: "easeOut" }}
-        {...props}
+        {...motionProps}
       />
     );
   }

@@ -19,6 +19,8 @@ export type { KPIsTabProps } from './kpis-tab';
 export { TranscriptTab } from './transcript-tab';
 export type { TranscriptTabProps } from './transcript-tab';
 
+export { ExportActions } from './ExportActions';
+
 export type {
   AttemptData,
   AttemptFeedback,

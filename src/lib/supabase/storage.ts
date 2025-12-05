@@ -50,6 +50,7 @@ export async function deleteFile(bucket: string, path: string) {
 }
 
 export const STORAGE_BUCKETS = {
+  AVATARS: 'avatars',
   RECORDINGS: 'recordings',
   TRANSCRIPTS: 'transcripts',
   ORG_ASSETS: 'org-assets',
@@ -57,3 +58,5 @@ export const STORAGE_BUCKETS = {
   EXPORTS: 'exports',
   TMP: 'tmp'
 } as const
+
+export type StorageBucket = typeof STORAGE_BUCKETS[keyof typeof STORAGE_BUCKETS]

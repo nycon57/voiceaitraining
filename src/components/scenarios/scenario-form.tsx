@@ -92,7 +92,7 @@ export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
     setFormData(prev => {
       const keys = path.split('.')
       const updated = { ...prev }
-      let current = updated
+      let current: Record<string, any> = updated
 
       for (let i = 0; i < keys.length - 1; i++) {
         current[keys[i]] = { ...current[keys[i]] }
@@ -296,29 +296,32 @@ export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                {Object.entries(formData.rubric).map(([key, criteria]) => (
-                  <div key={key} className="space-y-2 p-4 border rounded-lg">
-                    <Label className="capitalize font-medium">
-                      {key.replace('_', ' ')}
-                    </Label>
-                    <div className="space-y-2">
-                      <Input
-                        type="number"
-                        value={criteria.weight}
-                        onChange={(e) => updateFormData(`rubric.${key}.weight`, parseInt(e.target.value))}
-                        placeholder="Weight %"
-                        max="100"
-                        min="0"
-                      />
-                      <Textarea
-                        value={criteria.description}
-                        onChange={(e) => updateFormData(`rubric.${key}.description`, e.target.value)}
-                        placeholder="Description..."
-                        rows={2}
-                      />
+                {Object.entries(formData.rubric).map(([key, criteria]) => {
+                  const typedCriteria = criteria as { weight: number; description: string }
+                  return (
+                    <div key={key} className="space-y-2 p-4 border rounded-lg">
+                      <Label className="capitalize font-medium">
+                        {key.replace('_', ' ')}
+                      </Label>
+                      <div className="space-y-2">
+                        <Input
+                          type="number"
+                          value={typedCriteria.weight}
+                          onChange={(e) => updateFormData(`rubric.${key}.weight`, parseInt(e.target.value))}
+                          placeholder="Weight %"
+                          max="100"
+                          min="0"
+                        />
+                        <Textarea
+                          value={typedCriteria.description}
+                          onChange={(e) => updateFormData(`rubric.${key}.description`, e.target.value)}
+                          placeholder="Description..."
+                          rows={2}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>

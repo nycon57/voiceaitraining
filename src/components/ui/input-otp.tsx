@@ -31,12 +31,11 @@ const inputOTPVariants = cva(
   }
 );
 
-interface InputOTPProps
-  extends React.ComponentProps<typeof OTPInput>,
-    VariantProps<typeof inputOTPVariants> {
-  containerClassName?: string;
-  animated?: boolean;
-}
+type InputOTPProps = Omit<React.ComponentProps<typeof OTPInput>, 'size'> &
+  VariantProps<typeof inputOTPVariants> & {
+    containerClassName?: string;
+    animated?: boolean;
+  };
 
 interface InputOTPSlotProps extends React.ComponentProps<'div'> {
   index: number;
@@ -59,7 +58,7 @@ function InputOTP({
         containerClassName
       )}
       className={cn(inputOTPVariants({ variant, size }), className)}
-      {...props}
+      {...(props as any)}
     />
   );
 }
@@ -102,6 +101,9 @@ function InputOTPSlot({
     return 'empty';
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
+
   return (
     <motion.div
       data-slot="input-otp-slot"
@@ -113,7 +115,7 @@ function InputOTPSlot({
       variants={animated ? slotVariants : undefined}
       animate={animated ? getVariant() : undefined}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      {...props}
+      {...motionProps}
     >
       {char && animated ? (
         <motion.span
