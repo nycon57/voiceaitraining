@@ -319,16 +319,13 @@ export function HROverview({ user }: HROverviewProps) {
           data={mockComplianceChartData}
           title="Compliance by Department"
           description="Compliance rates across departments"
-          orientation="horizontal"
-          showValues
         />
 
         <PerformanceTrendChart
           data={mockComplianceTrendData}
           title="Compliance Trend"
           description="Organization-wide compliance over time"
-          chartType="area"
-          showStats={false}
+          showArea
         />
       </div>
 

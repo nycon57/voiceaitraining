@@ -1,5 +1,14 @@
 export type ScenarioStatus = 'draft' | 'active' | 'archived'
 export type ScenarioDifficulty = 'easy' | 'medium' | 'hard'
+export type VapiBaseAgent = 'professional' | 'difficult' | 'friendly' | 'neutral'
+
+export interface VapiOverrides {
+  temperature?: number // 0.0 - 1.0, higher = more creative/unpredictable
+  voice_emotion?: 'neutral' | 'warm' | 'stern' | 'friendly'
+  background_sound?: 'office' | 'cafe' | 'quiet' | 'street'
+  max_duration_seconds?: number // Override default 600s
+  end_call_on_silence_seconds?: number // Override default 30s
+}
 
 export interface ScenarioPersona {
   role: string
@@ -71,6 +80,8 @@ export interface Scenario {
   branching?: ScenarioBranching
   rubric?: ScenarioRubric
   status: ScenarioStatus
+  vapi_base_agent?: VapiBaseAgent // Base permanent Vapi assistant to use
+  vapi_overrides?: VapiOverrides // Optional transient behavior overrides
   created_by?: string
   created_at: string
   updated_at: string

@@ -17,7 +17,8 @@ import {
   CheckCircle,
   Loader2
 } from 'lucide-react'
-import { vapiManager, getScenarioAssistant } from '@/lib/vapi'
+import { vapiManager } from '@/lib/vapi'
+import { getScenarioAssistant } from '@/lib/vapi-agents'
 import { createAttempt, updateAttempt, scoreAttempt } from '@/actions/attempts'
 
 interface VoicePlayerProps {

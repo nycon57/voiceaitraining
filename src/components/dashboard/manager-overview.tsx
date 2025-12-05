@@ -329,8 +329,6 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
         data={mockTeamActivityData}
         title="Team Activity Overview"
         description="Completed assignments by team member"
-        orientation="horizontal"
-        showValues
       />
 
       {/* Team Performance - Full width */}

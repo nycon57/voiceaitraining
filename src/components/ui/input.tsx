@@ -29,6 +29,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
 
     if (animated) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { onDrag, onDragEnd, onDragStart, ...motionProps } = domProps as any;
       return (
         <motion.input
           type={type}
@@ -40,7 +42,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           animate="animate"
           exit="exit"
           transition={{ duration: 0.2, ease: "easeOut" }}
-          {...domProps}
+          {...motionProps}
         />
       );
     }

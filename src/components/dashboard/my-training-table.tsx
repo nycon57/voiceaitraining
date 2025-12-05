@@ -96,8 +96,8 @@ function combineTrainingData(
       scenarioCount: enrollment.track?.scenario_count,
       scenarioId: enrollment.scenario_id,
       trackId: enrollment.track_id,
-      lastAccessed: enrollment.last_accessed_at || enrollment.enrolled_at,
-      imageUrl: enrollment.scenario?.image_url || enrollment.track?.image_url,
+      lastAccessed: enrollment.started_at,
+      imageUrl: undefined,
       assignment: assignment ? {
         id: assignment.id,
         dueAt: assignment.due_at,

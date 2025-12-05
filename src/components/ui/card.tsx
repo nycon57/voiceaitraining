@@ -34,6 +34,8 @@ function Card({ className, animated = true, variant = 'default', ...props }: Car
   );
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.div
         data-slot="card"
@@ -44,7 +46,7 @@ function Card({ className, animated = true, variant = 'default', ...props }: Car
         exit="exit"
         whileHover="hover"
         transition={{ duration: 0.3, ease: "easeOut" }}
-        {...props}
+        {...motionProps}
       />
     );
   }
@@ -75,6 +77,8 @@ function CardHeader({ className, animated = true, ...props }: CardHeaderProps) {
   );
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.div
         data-slot="card-header"
@@ -84,7 +88,7 @@ function CardHeader({ className, animated = true, ...props }: CardHeaderProps) {
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-        {...props}
+        {...motionProps}
       />
     );
   }
@@ -153,6 +157,8 @@ function CardContent({ className, animated = true, ...props }: CardContentProps)
   const contentClasses = cn('px-6', className);
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.div
         data-slot="card-content"
@@ -162,7 +168,7 @@ function CardContent({ className, animated = true, ...props }: CardContentProps)
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
-        {...props}
+        {...motionProps}
       />
     );
   }
@@ -190,6 +196,8 @@ function CardFooter({ className, animated = true, ...props }: CardFooterProps) {
   const footerClasses = cn('flex items-center px-6 [.border-t]:pt-6', className);
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = props as any;
     return (
       <motion.div
         data-slot="card-footer"
@@ -199,7 +207,7 @@ function CardFooter({ className, animated = true, ...props }: CardFooterProps) {
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3, ease: "easeOut", delay: 0.3 }}
-        {...props}
+        {...motionProps}
       />
     );
   }

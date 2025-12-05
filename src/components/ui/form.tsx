@@ -92,6 +92,8 @@ function FormItem({ className, animated = true, ...props }: FormItemProps) {
   const formItemClasses = cn('grid gap-2', className);
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = domProps as any;
     return (
       <FormItemContext.Provider value={{ id }}>
         <motion.div
@@ -102,7 +104,7 @@ function FormItem({ className, animated = true, ...props }: FormItemProps) {
           animate="animate"
           exit="exit"
           transition={{ duration: 0.3, ease: "easeOut" }}
-          {...domProps}
+          {...motionProps}
         />
       </FormItemContext.Provider>
     );
@@ -173,6 +175,8 @@ function FormDescription({ className, animated = true, ...props }: FormDescripti
   const descriptionClasses = cn('text-muted-foreground text-sm', className);
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = domProps as any;
     return (
       <motion.p
         data-slot="form-description"
@@ -183,7 +187,7 @@ function FormDescription({ className, animated = true, ...props }: FormDescripti
         animate="animate"
         exit="exit"
         transition={{ duration: 0.2, ease: "easeOut", delay: 0.1 }}
-        {...domProps}
+        {...motionProps}
       />
     );
   }
@@ -221,6 +225,8 @@ function FormMessage({ className, animated = true, ...props }: FormMessageProps)
   const messageClasses = cn('text-destructive text-xs font-medium', className);
 
   if (animated) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { onDrag, onDragEnd, onDragStart, ...motionProps } = domProps as any;
     return (
       <motion.p
         data-slot="form-message"
@@ -231,7 +237,7 @@ function FormMessage({ className, animated = true, ...props }: FormMessageProps)
         animate="animate"
         exit="exit"
         transition={{ duration: 0.2, ease: "easeOut" }}
-        {...domProps}
+        {...motionProps}
       >
         {body}
       </motion.p>

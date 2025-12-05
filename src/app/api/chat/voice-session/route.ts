@@ -26,10 +26,10 @@ Remember: This is voice training, so responses should sound natural when spoken 
         ...messages
       ],
       temperature: 0.8, // Higher temperature for more natural variation
-      maxTokens: 150, // Keep responses concise for voice
+      maxOutputTokens: 150, // Keep responses concise for voice
     })
 
-    return result.toDataStreamResponse()
+    return result.toTextStreamResponse()
   } catch (error) {
     console.error('Voice session chat error:', error)
     return Response.json(

@@ -44,7 +44,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { Resizable, ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { cn } from "@/lib/utils"
 
@@ -134,7 +134,6 @@ function ComponentShowcase({
               size="sm"
               onClick={() => setShowCode(!showCode)}
               className="gap-2"
-              animated
             >
               {showCode ? <Eye className="h-4 w-4" /> : <Code2 className="h-4 w-4" />}
               {showCode ? "Preview" : "Code"}
@@ -155,7 +154,6 @@ function ComponentShowcase({
                 size="sm"
                 className="absolute top-2 right-2 gap-2"
                 onClick={copyCode}
-                animated
               >
                 {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                 {copied ? "Copied" : "Copy"}
@@ -205,25 +203,24 @@ function ButtonExamples() {
       <ComponentShowcase
         title="Button Variants"
         usage="Enhanced button variants with Peakstride styling and animation support"
-        animated
-        code={`<Button variant="default" animated>Default</Button>
-<Button variant="secondary" animated>Secondary</Button>
-<Button variant="destructive" animated>Destructive</Button>
-<Button variant="outline" animated>Outline</Button>
-<Button variant="ghost" animated>Ghost</Button>
-<Button variant="link" animated>Link</Button>
-<Button variant="success" animated>Success</Button>
-<Button variant="warning" animated>Warning</Button>
-<Button variant="info" animated>Info</Button>`}
+        code={`<Button variant="default">Default</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="destructive">Destructive</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="link">Link</Button>
+<Button variant="success">Success</Button>
+<Button variant="warning">Warning</Button>
+<Button variant="info">Info</Button>`}
         guidelines={{
           dos: [
-            "Use animated prop for better user experience",
+            "Use prop for better user experience",
             "Use success/warning/info variants for specific contexts",
             "Combine with glass morphism effects",
             "Leverage Peakstride color palette"
           ],
           donts: [
-            "Overuse animated buttons in dense layouts",
+            "Overuse buttons in dense layouts",
             "Mix too many variant colors in one section",
             "Forget to test dark mode combinations",
             "Use destructive variant for non-destructive actions"
@@ -231,43 +228,40 @@ function ButtonExamples() {
         }}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="default" animated>Default</Button>
-          <Button variant="secondary" animated>Secondary</Button>
-          <Button variant="destructive" animated>Destructive</Button>
-          <Button variant="outline" animated>Outline</Button>
-          <Button variant="ghost" animated>Ghost</Button>
-          <Button variant="link" animated>Link</Button>
-          <Button variant="success" animated>Success</Button>
-          <Button variant="warning" animated>Warning</Button>
-          <Button variant="info" animated>Info</Button>
+          <Button variant="default">Default</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="destructive">Destructive</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="link">Link</Button>
+          <Button variant="muted">Muted</Button>
+          <Button variant="gradient">Gradient</Button>
         </div>
       </ComponentShowcase>
 
       <ComponentShowcase
         title="Button Sizes & States"
         usage="Multiple sizes and interactive states with enhanced animations"
-        animated
-        code={`<Button size="sm" animated>Small</Button>
-<Button size="default" animated>Default</Button>
-<Button size="lg" animated>Large</Button>
-<Button size="xl" animated>Extra Large</Button>
-<Button size="icon" animated>
+        code={`<Button size="sm">Small</Button>
+<Button size="default">Default</Button>
+<Button size="lg">Large</Button>
+<Button size="xl">Extra Large</Button>
+<Button size="icon">
   <Settings className="h-4 w-4" />
 </Button>
 <Button disabled>Disabled</Button>
 <LoadingSpinner size="sm" />
-<Button animated>
+<Button>
   <LoadingSpinner size="sm" className="mr-2" />
   Loading
 </Button>`}
       >
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Button size="sm" animated>Small</Button>
-            <Button size="default" animated>Default</Button>
-            <Button size="lg" animated>Large</Button>
-            <Button size="xl" animated>Extra Large</Button>
-            <Button size="icon" animated>
+            <Button size="sm">Small</Button>
+            <Button size="default">Default</Button>
+            <Button size="lg">Large</Button>
+            <Button size="icon">
               <Settings className="h-4 w-4" />
             </Button>
           </div>
@@ -277,7 +271,7 @@ function ButtonExamples() {
           <div className="flex flex-wrap items-center gap-3">
             <Button disabled>Disabled</Button>
             <LoadingSpinner size="sm" />
-            <Button animated>
+            <Button>
               <LoadingSpinner size="sm" className="mr-2" />
               Loading
             </Button>
@@ -288,12 +282,11 @@ function ButtonExamples() {
       <ComponentShowcase
         title="Toggle & Toggle Group"
         usage="Toggle components with enhanced styling and animation"
-        animated
-        code={`<Toggle aria-label="Toggle italic" animated>
+        code={`<Toggle aria-label="Toggle italic">
   <Star className="h-4 w-4" />
 </Toggle>
 
-<ToggleGroup type="multiple" animated>
+<ToggleGroup type="multiple">
   <ToggleGroupItem value="bold" aria-label="Toggle bold">
     <Star className="h-4 w-4" />
   </ToggleGroupItem>
@@ -307,15 +300,15 @@ function ButtonExamples() {
       >
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <Toggle aria-label="Toggle favorite" animated>
+            <Toggle aria-label="Toggle favorite">
               <Star className="h-4 w-4" />
             </Toggle>
-            <Toggle aria-label="Toggle like" animated variant="outline">
+            <Toggle aria-label="Toggle like" variant="outline">
               <Heart className="h-4 w-4" />
             </Toggle>
           </div>
 
-          <ToggleGroup type="multiple" animated>
+          <ToggleGroup type="multiple">
             <ToggleGroupItem value="bold" aria-label="Toggle bold">
               <Star className="h-4 w-4" />
             </ToggleGroupItem>
@@ -341,23 +334,20 @@ function FormExamples() {
       <ComponentShowcase
         title="Enhanced Input Fields"
         usage="Input components with Peakstride styling and animation support"
-        animated
         code={`<div className="space-y-2">
-  <Label htmlFor="email" isHeadline>Email Address</Label>
+  <Label htmlFor="email">Email Address</Label>
   <Input
     id="email"
     type="email"
     placeholder="Enter your email"
-    animated
   />
 </div>
 
 <div className="space-y-2">
-  <Label htmlFor="message" isHeadline>Message</Label>
+  <Label htmlFor="message">Message</Label>
   <Textarea
     id="message"
     placeholder="Type your message..."
-    animated
   />
 </div>`}
         guidelines={{
@@ -377,16 +367,16 @@ function FormExamples() {
       >
         <div className="space-y-4 max-w-md">
           <div className="space-y-2">
-            <Label htmlFor="email" isHeadline>Email Address</Label>
-            <Input id="email" type="email" placeholder="Enter your email" animated />
+            <Label htmlFor="email">Email Address</Label>
+            <Input id="email" type="email" placeholder="Enter your email" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" isHeadline>Password</Label>
-            <Input id="password" type="password" placeholder="Enter your password" animated />
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" placeholder="Enter your password" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="message" isHeadline>Message</Label>
-            <Textarea id="message" placeholder="Type your message..." animated />
+            <Label htmlFor="message">Message</Label>
+            <Textarea id="message" placeholder="Type your message..." />
           </div>
         </div>
       </ComponentShowcase>
@@ -394,8 +384,7 @@ function FormExamples() {
       <ComponentShowcase
         title="Select & Form Controls"
         usage="Enhanced selection and form control components"
-        animated
-        code={`<Select animated>
+        code={`<Select>
   <SelectTrigger className="w-[180px]">
     <SelectValue placeholder="Select option" />
   </SelectTrigger>
@@ -406,7 +395,7 @@ function FormExamples() {
   </SelectContent>
 </Select>
 
-<RadioGroup defaultValue="option1" animated>
+<RadioGroup defaultValue="option1">
   <div className="flex items-center space-x-2">
     <RadioGroupItem value="option1" id="r1" />
     <Label htmlFor="r1">Option 1</Label>
@@ -419,8 +408,8 @@ function FormExamples() {
       >
         <div className="space-y-6 max-w-md">
           <div className="space-y-2">
-            <Label isHeadline>Select Option</Label>
-            <Select animated>
+            <Label >Select Option</Label>
+            <Select>
               <SelectTrigger>
                 <SelectValue placeholder="Choose an option" />
               </SelectTrigger>
@@ -433,8 +422,8 @@ function FormExamples() {
           </div>
 
           <div className="space-y-3">
-            <Label isHeadline>Radio Group</Label>
-            <RadioGroup defaultValue="option1" animated>
+            <Label >Radio Group</Label>
+            <RadioGroup defaultValue="option1">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="option1" id="r1" />
                 <Label htmlFor="r1">Option 1</Label>
@@ -451,24 +440,23 @@ function FormExamples() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox id="terms" animated />
+            <Checkbox id="terms" />
             <Label htmlFor="terms">Accept terms and conditions</Label>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Switch id="notifications" animated />
+            <Switch id="notifications" />
             <Label htmlFor="notifications">Enable notifications</Label>
           </div>
 
           <div className="space-y-2">
-            <Label isHeadline>Volume: {sliderValue[0]}%</Label>
+            <Label >Volume: {sliderValue[0]}%</Label>
             <Slider
               value={sliderValue}
               onValueChange={setSliderValue}
               max={100}
               step={1}
               className="w-full"
-              animated
             />
           </div>
         </div>
@@ -477,12 +465,10 @@ function FormExamples() {
       <ComponentShowcase
         title="Calendar & Date Selection"
         usage="Enhanced calendar component with Peakstride styling"
-        animated
         code={`<Calendar
   mode="single"
   selected={date}
   onSelect={setDate}
-  animated
 />`}
       >
         <div className="space-y-4">
@@ -490,7 +476,6 @@ function FormExamples() {
             mode="single"
             selected={date}
             onSelect={setDate}
-            animated
           />
         </div>
       </ComponentShowcase>
@@ -506,8 +491,7 @@ function LayoutExamples() {
       <ComponentShowcase
         title="Enhanced Cards"
         usage="Card components with glass morphism and enhanced styling"
-        animated
-        code={`<Card animated>
+        code={`<Card>
   <CardHeader>
     <CardTitle isHeadline>Analytics Overview</CardTitle>
     <CardDescription>
@@ -525,7 +509,7 @@ function LayoutExamples() {
 </Card>`}
         guidelines={{
           dos: [
-            "Use animated prop for hover effects",
+            "Use prop for hover effects",
             "Use isHeadline for consistent typography",
             "Apply glass morphism sparingly",
             "Maintain proper spacing hierarchy"
@@ -539,7 +523,7 @@ function LayoutExamples() {
         }}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle isHeadline>Analytics Overview</CardTitle>
               <CardDescription>
@@ -564,7 +548,7 @@ function LayoutExamples() {
             </CardContent>
           </Card>
 
-          <Card animated variant="glass">
+          <Card variant="featured">
             <CardHeader>
               <CardTitle isHeadline>Recent Activity</CardTitle>
               <CardDescription>
@@ -594,8 +578,7 @@ function LayoutExamples() {
       <ComponentShowcase
         title="Accordion & Collapsible"
         usage="Expandable content components with smooth animations"
-        animated
-        code={`<Accordion type="single" collapsible animated>
+        code={`<Accordion type="single" collapsible>
   <AccordionItem value="item-1">
     <AccordionTrigger>Is it accessible?</AccordionTrigger>
     <AccordionContent>
@@ -604,7 +587,7 @@ function LayoutExamples() {
   </AccordionItem>
 </Accordion>
 
-<Collapsible open={isOpen} onOpenChange={setIsOpen} animated>
+<Collapsible open={isOpen} onOpenChange={setIsOpen}>
   <CollapsibleTrigger asChild>
     <Button variant="ghost">Toggle Content</Button>
   </CollapsibleTrigger>
@@ -616,7 +599,7 @@ function LayoutExamples() {
 </Collapsible>`}
       >
         <div className="space-y-6">
-          <Accordion type="single" collapsible animated>
+          <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
               <AccordionTrigger>How does the training system work?</AccordionTrigger>
               <AccordionContent>
@@ -642,7 +625,7 @@ function LayoutExamples() {
 
           <Separator />
 
-          <Collapsible open={isOpen} onOpenChange={setIsOpen} animated>
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="flex w-full justify-between p-4">
                 <span>Advanced Settings</span>
@@ -651,10 +634,10 @@ function LayoutExamples() {
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 px-4 pb-4">
               <div className="rounded-md border p-4 space-y-2">
-                <Label isHeadline>API Configuration</Label>
-                <Input placeholder="https://api.example.com" animated />
-                <Label isHeadline>Timeout Settings</Label>
-                <Input type="number" placeholder="30" animated />
+                <Label >API Configuration</Label>
+                <Input placeholder="https://api.example.com" />
+                <Label >Timeout Settings</Label>
+                <Input type="number" placeholder="30" />
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -666,19 +649,19 @@ function LayoutExamples() {
         usage="Structural components for organizing content with enhanced styling"
         code={`<div className="space-y-4">
   <div>Section 1 Content</div>
-  <Separator animated />
+  <Separator />
   <div>Section 2 Content</div>
-  <Separator orientation="vertical" className="h-8" animated />
+  <Separator orientation="vertical" className="h-8" />
   <div>Section 3 Content</div>
 </div>`}
       >
         <div className="space-y-4">
           <div className="p-4 bg-muted/50 rounded">Section 1 Content</div>
-          <Separator animated />
+          <Separator />
           <div className="p-4 bg-muted/50 rounded">Section 2 Content</div>
           <div className="flex items-center gap-4">
             <div className="p-4 bg-muted/50 rounded flex-1">Left Content</div>
-            <Separator orientation="vertical" className="h-8" animated />
+            <Separator orientation="vertical" className="h-8" />
             <div className="p-4 bg-muted/50 rounded flex-1">Right Content</div>
           </div>
         </div>
@@ -687,7 +670,7 @@ function LayoutExamples() {
       <ComponentShowcase
         title="Scroll Area & Resizable"
         usage="Advanced layout components for content management"
-        code={`<ScrollArea className="h-[200px] w-full rounded-md border p-4" animated>
+        code={`<ScrollArea className="h-[200px] w-full rounded-md border p-4">
   <div className="space-y-4">
     {Array.from({ length: 50 }).map((_, i) => (
       <div key={i} className="text-sm">
@@ -697,7 +680,7 @@ function LayoutExamples() {
   </div>
 </ScrollArea>
 
-<ResizablePanelGroup direction="horizontal" animated>
+<ResizablePanelGroup direction="horizontal">
   <ResizablePanel defaultSize={50}>
     <div className="p-6">Panel 1</div>
   </ResizablePanel>
@@ -709,8 +692,8 @@ function LayoutExamples() {
       >
         <div className="space-y-6">
           <div>
-            <Label isHeadline className="mb-2 block">Scroll Area Example</Label>
-            <ScrollArea className="h-[200px] w-full rounded-md border p-4" animated>
+            <Label  className="mb-2 block">Scroll Area Example</Label>
+            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
               <div className="space-y-2">
                 {Array.from({ length: 30 }).map((_, i) => (
                   <div key={i} className="text-sm p-2 border rounded">
@@ -722,9 +705,9 @@ function LayoutExamples() {
           </div>
 
           <div>
-            <Label isHeadline className="mb-2 block">Resizable Panels</Label>
+            <Label  className="mb-2 block">Resizable Panels</Label>
             <div className="h-[200px] w-full border rounded">
-              <ResizablePanelGroup direction="horizontal" animated>
+              <ResizablePanelGroup direction="horizontal">
                 <ResizablePanel defaultSize={50}>
                   <div className="p-6 h-full flex items-center justify-center bg-muted/50">
                     <div className="text-center">
@@ -759,8 +742,7 @@ function NavigationExamples() {
       <ComponentShowcase
         title="Enhanced Tabs"
         usage="Tab navigation with improved styling and animations"
-        animated
-        code={`<Tabs defaultValue="overview" animated>
+        code={`<Tabs defaultValue="overview">
   <TabsList className="grid w-full grid-cols-3">
     <TabsTrigger value="overview">Overview</TabsTrigger>
     <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -779,7 +761,7 @@ function NavigationExamples() {
 </Tabs>`}
         guidelines={{
           dos: [
-            "Use animated prop for smooth transitions",
+            "Use prop for smooth transitions",
             "Keep tab labels concise and clear",
             "Maintain consistent tab spacing",
             "Use semantic tab order"
@@ -792,7 +774,7 @@ function NavigationExamples() {
           ]
         }}
       >
-        <Tabs defaultValue="overview" animated>
+        <Tabs defaultValue="overview">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -835,14 +817,14 @@ function NavigationExamples() {
                       <span>Progress This Week</span>
                       <span>75%</span>
                     </div>
-                    <Progress value={75} animated />
+                    <Progress value={75} />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Monthly Goal</span>
                       <span>60%</span>
                     </div>
-                    <Progress value={60} animated />
+                    <Progress value={60} />
                   </div>
                 </div>
               </CardContent>
@@ -859,11 +841,11 @@ function NavigationExamples() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="notifications">Email Notifications</Label>
-                  <Switch id="notifications" animated />
+                  <Switch id="notifications" />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="reminders">Daily Reminders</Label>
-                  <Switch id="reminders" animated />
+                  <Switch id="reminders" />
                 </div>
               </CardContent>
             </Card>
@@ -874,8 +856,7 @@ function NavigationExamples() {
       <ComponentShowcase
         title="Breadcrumb Navigation"
         usage="Enhanced breadcrumb component with improved styling"
-        animated
-        code={`<Breadcrumb animated>
+        code={`<Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
       <BreadcrumbLink href="/">Home</BreadcrumbLink>
@@ -891,7 +872,7 @@ function NavigationExamples() {
   </BreadcrumbList>
 </Breadcrumb>`}
       >
-        <Breadcrumb animated>
+        <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/">
@@ -917,8 +898,7 @@ function NavigationExamples() {
       <ComponentShowcase
         title="Command & Search"
         usage="Enhanced command palette with search functionality"
-        animated
-        code={`<Command animated>
+        code={`<Command>
   <CommandInput placeholder="Type a command or search..." />
   <CommandList>
     <CommandEmpty>No results found.</CommandEmpty>
@@ -940,14 +920,13 @@ function NavigationExamples() {
             variant="outline"
             onClick={() => setCommandOpen(true)}
             className="w-full justify-start text-left"
-            animated
           >
             <Search className="mr-2 h-4 w-4" />
             Search commands...
           </Button>
 
           <div className="border rounded-lg">
-            <Command animated>
+            <Command>
               <CommandInput placeholder="Type a command or search..." />
               <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
@@ -985,8 +964,7 @@ function NavigationExamples() {
       <ComponentShowcase
         title="Pagination"
         usage="Enhanced pagination component with improved styling"
-        animated
-        code={`<Pagination animated>
+        code={`<Pagination>
   <PaginationContent>
     <PaginationItem>
       <PaginationPrevious href="#" />
@@ -1006,7 +984,7 @@ function NavigationExamples() {
   </PaginationContent>
 </Pagination>`}
       >
-        <Pagination animated>
+        <Pagination>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious href="#" />
@@ -1036,8 +1014,7 @@ function NavigationExamples() {
       <ComponentShowcase
         title="Menubar & Navigation Menu"
         usage="Enhanced menu components with improved interactions"
-        animated
-        code={`<Menubar animated>
+        code={`<Menubar>
   <MenubarMenu>
     <MenubarTrigger>File</MenubarTrigger>
     <MenubarContent>
@@ -1050,7 +1027,7 @@ function NavigationExamples() {
 </Menubar>`}
       >
         <div className="space-y-4">
-          <Menubar animated>
+          <Menubar>
             <MenubarMenu>
               <MenubarTrigger>File</MenubarTrigger>
               <MenubarContent>
@@ -1089,21 +1066,20 @@ function OverlayExamples() {
       <ComponentShowcase
         title="Enhanced Dialogs"
         usage="Modal dialogs with improved styling and animations"
-        animated
-        code={`<Dialog animated>
+        code={`<Dialog>
   <DialogTrigger asChild>
-    <Button animated>Open Dialog</Button>
+    <Button>Open Dialog</Button>
   </DialogTrigger>
   <DialogContent>
     <DialogHeader>
-      <DialogTitle isHeadline>Confirm Action</DialogTitle>
+      <DialogTitle>Confirm Action</DialogTitle>
       <DialogDescription>
         Are you sure you want to perform this action?
       </DialogDescription>
     </DialogHeader>
     <div className="flex justify-end space-x-2">
-      <Button variant="outline" animated>Cancel</Button>
-      <Button animated>Confirm</Button>
+      <Button variant="outline">Cancel</Button>
+      <Button>Confirm</Button>
     </div>
   </DialogContent>
 </Dialog>`}
@@ -1123,38 +1099,38 @@ function OverlayExamples() {
         }}
       >
         <div className="flex gap-4">
-          <Dialog animated>
+          <Dialog>
             <DialogTrigger asChild>
-              <Button animated>Open Dialog</Button>
+              <Button>Open Dialog</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle isHeadline>Delete Training Scenario</DialogTitle>
+                <DialogTitle>Delete Training Scenario</DialogTitle>
                 <DialogDescription>
                   Are you sure you want to delete "Sales Call Simulation"? This action cannot be undone and will remove all associated data.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex justify-end space-x-2 mt-4">
-                <Button variant="outline" animated>Cancel</Button>
-                <Button variant="destructive" animated>Delete</Button>
+                <Button variant="outline">Cancel</Button>
+                <Button variant="destructive">Delete</Button>
               </div>
             </DialogContent>
           </Dialog>
 
-          <AlertDialog animated>
+          <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" animated>Delete Account</Button>
+              <Button variant="destructive">Delete Account</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle isHeadline>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action cannot be undone. This will permanently delete your account and remove your data from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel animated>Cancel</AlertDialogCancel>
-                <AlertDialogAction animated>Continue</AlertDialogAction>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction>Continue</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -1164,14 +1140,13 @@ function OverlayExamples() {
       <ComponentShowcase
         title="Sheet & Drawer"
         usage="Slide-out panels and drawers with enhanced animations"
-        animated
-        code={`<Sheet animated>
+        code={`<Sheet>
   <SheetTrigger asChild>
-    <Button variant="outline" animated>Open Sheet</Button>
+    <Button variant="outline">Open Sheet</Button>
   </SheetTrigger>
   <SheetContent>
     <SheetHeader>
-      <SheetTitle isHeadline>Edit profile</SheetTitle>
+      <SheetTitle>Edit profile</SheetTitle>
       <SheetDescription>
         Make changes to your profile here.
       </SheetDescription>
@@ -1179,56 +1154,56 @@ function OverlayExamples() {
     <div className="grid gap-4 py-4">
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="name" className="text-right">Name</Label>
-        <Input id="name" className="col-span-3" animated />
+        <Input id="name" className="col-span-3" />
       </div>
     </div>
   </SheetContent>
 </Sheet>`}
       >
         <div className="flex gap-4">
-          <Sheet animated>
+          <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" animated>Open Sheet</Button>
+              <Button variant="outline">Open Sheet</Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle isHeadline>Training Settings</SheetTitle>
+                <SheetTitle>Training Settings</SheetTitle>
                 <SheetDescription>
                   Configure your training preferences and notifications.
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" isHeadline>Display Name</Label>
-                  <Input id="name" placeholder="Enter your name" animated />
+                  <Label htmlFor="name">Display Name</Label>
+                  <Input id="name" placeholder="Enter your name" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" isHeadline>Email</Label>
-                  <Input id="email" type="email" placeholder="Enter your email" animated />
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" placeholder="Enter your email" />
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="notifications" animated />
+                  <Switch id="notifications" />
                   <Label htmlFor="notifications">Enable notifications</Label>
                 </div>
               </div>
             </SheetContent>
           </Sheet>
 
-          <Drawer animated>
+          <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="outline" animated>Open Drawer</Button>
+              <Button variant="outline">Open Drawer</Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle isHeadline>Quick Actions</DrawerTitle>
+                <DrawerTitle>Quick Actions</DrawerTitle>
                 <DrawerDescription>
                   Choose an action to perform quickly.
                 </DrawerDescription>
               </DrawerHeader>
               <div className="p-4 space-y-4">
-                <Button className="w-full" animated>Start New Training</Button>
-                <Button className="w-full" variant="outline" animated>View Progress</Button>
-                <Button className="w-full" variant="outline" animated>Export Data</Button>
+                <Button className="w-full">Start New Training</Button>
+                <Button className="w-full" variant="outline">View Progress</Button>
+                <Button className="w-full" variant="outline">Export Data</Button>
               </div>
             </DrawerContent>
           </Drawer>
@@ -1238,10 +1213,9 @@ function OverlayExamples() {
       <ComponentShowcase
         title="Popovers & Hover Cards"
         usage="Contextual overlays with enhanced styling"
-        animated
-        code={`<Popover animated>
+        code={`<Popover>
   <PopoverTrigger asChild>
-    <Button variant="outline" animated>Open popover</Button>
+    <Button variant="outline">Open popover</Button>
   </PopoverTrigger>
   <PopoverContent className="w-80">
     <div className="grid gap-4">
@@ -1256,9 +1230,9 @@ function OverlayExamples() {
 </Popover>`}
       >
         <div className="flex gap-4">
-          <Popover animated>
+          <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" animated>Training Options</Button>
+              <Button variant="outline">Training Options</Button>
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="grid gap-4">
@@ -1270,15 +1244,15 @@ function OverlayExamples() {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="audio" animated />
+                    <Checkbox id="audio" />
                     <Label htmlFor="audio">Audio feedback</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="visual" animated />
+                    <Checkbox id="visual" />
                     <Label htmlFor="visual">Visual indicators</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="progress" animated />
+                    <Checkbox id="progress" />
                     <Label htmlFor="progress">Progress tracking</Label>
                   </div>
                 </div>
@@ -1286,9 +1260,9 @@ function OverlayExamples() {
             </PopoverContent>
           </Popover>
 
-          <HoverCard animated>
+          <HoverCard>
             <HoverCardTrigger asChild>
-              <Button variant="link" animated>@john_doe</Button>
+              <Button variant="link">@john_doe</Button>
             </HoverCardTrigger>
             <HoverCardContent className="w-80">
               <div className="flex justify-between space-x-4">
@@ -1314,11 +1288,10 @@ function OverlayExamples() {
       <ComponentShowcase
         title="Tooltips & Dropdown Menus"
         usage="Enhanced tooltips and dropdown menus with better animations"
-        animated
         code={`<TooltipProvider>
-  <Tooltip animated>
+  <Tooltip>
     <TooltipTrigger asChild>
-      <Button variant="outline" size="icon" animated>
+      <Button variant="outline" size="icon">
         <Info className="h-4 w-4" />
       </Button>
     </TooltipTrigger>
@@ -1328,9 +1301,9 @@ function OverlayExamples() {
   </Tooltip>
 </TooltipProvider>
 
-<DropdownMenu animated>
+<DropdownMenu>
   <DropdownMenuTrigger asChild>
-    <Button variant="outline" animated>Open Menu</Button>
+    <Button variant="outline">Open Menu</Button>
   </DropdownMenuTrigger>
   <DropdownMenuContent>
     <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -1343,9 +1316,9 @@ function OverlayExamples() {
       >
         <div className="flex gap-4">
           <TooltipProvider>
-            <Tooltip animated>
+            <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" animated>
+                <Button variant="outline" size="icon">
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -1356,9 +1329,9 @@ function OverlayExamples() {
           </TooltipProvider>
 
           <TooltipProvider>
-            <Tooltip animated>
+            <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" animated>
+                <Button variant="outline">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </Button>
@@ -1369,9 +1342,9 @@ function OverlayExamples() {
             </Tooltip>
           </TooltipProvider>
 
-          <DropdownMenu animated>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" animated>
+              <Button variant="outline">
                 <User className="mr-2 h-4 w-4" />
                 Account
                 <ChevronDown className="ml-2 h-4 w-4" />
@@ -1400,7 +1373,7 @@ function OverlayExamples() {
           </DropdownMenu>
 
           <div className="border rounded p-4">
-            <ContextMenu animated>
+            <ContextMenu>
               <ContextMenuTrigger className="text-sm">
                 Right-click this area
               </ContextMenuTrigger>
@@ -1430,8 +1403,7 @@ function DataExamples() {
       <ComponentShowcase
         title="Enhanced Data Table"
         usage="Table component with improved styling and interactions"
-        animated
-        code={`<Table animated>
+        code={`<Table>
   <TableHeader>
     <TableRow>
       <TableHead>Name</TableHead>
@@ -1470,7 +1442,7 @@ function DataExamples() {
           ]
         }}
       >
-        <Table animated>
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>User</TableHead>
@@ -1504,7 +1476,7 @@ function DataExamples() {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" animated>
+                      <Button variant="ghost" size="icon">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -1527,32 +1499,31 @@ function DataExamples() {
       <ComponentShowcase
         title="Enhanced Avatars & Badges"
         usage="User representation with improved styling and variants"
-        animated
         code={`<div className="flex items-center space-x-4">
-  <Avatar animated>
+  <Avatar>
     <AvatarFallback>JD</AvatarFallback>
   </Avatar>
   <div>
     <p className="font-medium">John Doe</p>
     <div className="flex gap-2">
-      <Badge variant="success" animated>Pro</Badge>
-      <Badge variant="info" animated>Manager</Badge>
-      <Badge variant="warning" animated>Online</Badge>
+      <Badge variant="success">Pro</Badge>
+      <Badge variant="info">Manager</Badge>
+      <Badge variant="warning">Online</Badge>
     </div>
   </div>
 </div>`}
       >
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
-            <Avatar animated>
+            <Avatar>
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <div>
               <p className="font-medium">John Doe</p>
               <div className="flex gap-2 mt-1">
-                <Badge variant="success" animated>Pro</Badge>
-                <Badge variant="info" animated>Manager</Badge>
-                <Badge variant="secondary" animated>Online</Badge>
+                <Badge variant="success">Pro</Badge>
+                <Badge variant="info">Manager</Badge>
+                <Badge variant="secondary">Online</Badge>
               </div>
             </div>
           </div>
@@ -1562,29 +1533,29 @@ function DataExamples() {
           <div className="space-y-4">
             <h4 className="font-medium">Badge Variants</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="default" animated>Default</Badge>
-              <Badge variant="secondary" animated>Secondary</Badge>
-              <Badge variant="destructive" animated>Destructive</Badge>
-              <Badge variant="outline" animated>Outline</Badge>
-              <Badge variant="success" animated>Success</Badge>
-              <Badge variant="warning" animated>Warning</Badge>
-              <Badge variant="info" animated>Info</Badge>
+              <Badge variant="default">Default</Badge>
+              <Badge variant="secondary">Secondary</Badge>
+              <Badge variant="destructive">Destructive</Badge>
+              <Badge variant="outline">Outline</Badge>
+              <Badge variant="success">Success</Badge>
+              <Badge variant="warning">Warning</Badge>
+              <Badge variant="info">Info</Badge>
             </div>
           </div>
 
           <div className="space-y-4">
             <h4 className="font-medium">Avatar Sizes</h4>
             <div className="flex items-center gap-4">
-              <Avatar size="sm" animated>
+              <Avatar size="sm">
                 <AvatarFallback>SM</AvatarFallback>
               </Avatar>
-              <Avatar animated>
+              <Avatar>
                 <AvatarFallback>MD</AvatarFallback>
               </Avatar>
-              <Avatar size="lg" animated>
+              <Avatar size="lg">
                 <AvatarFallback>LG</AvatarFallback>
               </Avatar>
-              <Avatar size="xl" animated>
+              <Avatar size="xl">
                 <AvatarFallback>XL</AvatarFallback>
               </Avatar>
             </div>
@@ -1595,13 +1566,12 @@ function DataExamples() {
       <ComponentShowcase
         title="Enhanced Progress Indicators"
         usage="Progress components with improved animations and variants"
-        animated
         code={`<div className="space-y-2">
   <div className="flex justify-between text-sm">
     <span>Training Progress</span>
     <span>75%</span>
   </div>
-  <Progress value={75} variant="success" animated />
+  <Progress value={75} variant="success" />
 </div>`}
       >
         <div className="space-y-6">
@@ -1611,7 +1581,7 @@ function DataExamples() {
                 <span>Training Progress</span>
                 <span>75%</span>
               </div>
-              <Progress value={75} variant="success" animated />
+              <Progress value={75} variant="success" />
             </div>
 
             <div className="space-y-2">
@@ -1619,7 +1589,7 @@ function DataExamples() {
                 <span>Weekly Goal</span>
                 <span>60%</span>
               </div>
-              <Progress value={60} variant="warning" animated />
+              <Progress value={60} variant="warning" />
             </div>
 
             <div className="space-y-2">
@@ -1627,7 +1597,7 @@ function DataExamples() {
                 <span>Scenario Completion</span>
                 <span>90%</span>
               </div>
-              <Progress value={90} variant="info" animated />
+              <Progress value={90} variant="secondary" />
             </div>
 
             <div className="space-y-2">
@@ -1635,7 +1605,7 @@ function DataExamples() {
                 <span>Error Rate</span>
                 <span>25%</span>
               </div>
-              <Progress value={25} variant="destructive" animated />
+              <Progress value={25} variant="destructive" />
             </div>
           </div>
 
@@ -1644,9 +1614,9 @@ function DataExamples() {
           <div className="space-y-4">
             <h4 className="font-medium">Progress Sizes</h4>
             <div className="space-y-3">
-              <Progress value={75} size="sm" animated />
-              <Progress value={75} animated />
-              <Progress value={75} size="lg" animated />
+              <Progress value={75} size="sm" />
+              <Progress value={75} />
+              <Progress value={75} size="lg" />
             </div>
           </div>
         </div>
@@ -1655,26 +1625,25 @@ function DataExamples() {
       <ComponentShowcase
         title="Enhanced Loading States"
         usage="Skeleton loaders with improved animations and variants"
-        animated
         code={`<div className="space-y-4">
-  <Skeleton className="h-4 w-[250px]" animated />
-  <Skeleton className="h-4 w-[200px]" animated />
-  <Skeleton className="h-4 w-[150px]" animated />
+  <Skeleton className="h-4 w-[250px]" />
+  <Skeleton className="h-4 w-[200px]" />
+  <Skeleton className="h-4 w-[150px]" />
 </div>
 
 <LoadingSpinner size="lg" />
-<LoadingSpinner variant="dots" />`}
+<LoadingSpinner />`}
       >
         <div className="space-y-6">
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-12 rounded-full" animated />
+              <Skeleton className="h-12 w-12 rounded-full" />
               <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" animated />
-                <Skeleton className="h-4 w-[200px]" animated />
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
               </div>
             </div>
-            <Skeleton className="h-[125px] w-full rounded-lg" animated />
+            <Skeleton className="h-[125px] w-full rounded-lg" />
           </div>
 
           <Separator />
@@ -1695,7 +1664,7 @@ function DataExamples() {
                 <p className="text-xs text-muted-foreground">Large</p>
               </div>
               <div className="text-center space-y-2">
-                <LoadingSpinner variant="dots" />
+                <LoadingSpinner />
                 <p className="text-xs text-muted-foreground">Dots</p>
               </div>
             </div>
@@ -1712,7 +1681,6 @@ function BrandExamples() {
       <ComponentShowcase
         title="Gradient Button Variants"
         usage="Branded gradient button for primary CTAs and featured actions"
-        animated
         code={`<Button variant="gradient" size="sm">
   Small Gradient
 </Button>
@@ -1755,8 +1723,7 @@ function BrandExamples() {
       <ComponentShowcase
         title="Featured Card Variant"
         usage="Premium card design with gradient border for highlighting special content"
-        animated
-        code={`<Card variant="featured" animated>
+        code={`<Card variant="featured">
   <CardHeader>
     <CardTitle isHeadline>Premium Feature</CardTitle>
     <CardDescription>
@@ -1783,7 +1750,7 @@ function BrandExamples() {
         }}
       >
         <div className="grid gap-6 md:grid-cols-2">
-          <Card variant="default" animated>
+          <Card variant="default">
             <CardHeader>
               <CardTitle isHeadline>Standard Card</CardTitle>
               <CardDescription>
@@ -1797,7 +1764,7 @@ function BrandExamples() {
             </CardContent>
           </Card>
 
-          <Card variant="featured" animated>
+          <Card variant="featured">
             <CardHeader>
               <CardTitle isHeadline>Featured Training</CardTitle>
               <CardDescription>
@@ -1821,7 +1788,6 @@ function BrandExamples() {
       <ComponentShowcase
         title="Brand Badge Variant"
         usage="Gradient badge for highlighting premium features and special status"
-        animated
         code={`<Badge variant="brand">Featured</Badge>
 <Badge variant="brand" size="lg">
   <Star className="h-3 w-3" />
@@ -1846,7 +1812,7 @@ function BrandExamples() {
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="brand">Featured</Badge>
-            <Badge variant="brand" animated>
+            <Badge variant="brand">
               <Star className="h-3 w-3" />
               Premium
             </Badge>
@@ -1878,11 +1844,11 @@ function BrandExamples() {
           <div className="space-y-3">
             <h4 className="font-medium text-sm">Comparison with Other Variants</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="brand" animated>Brand</Badge>
-              <Badge variant="default" animated>Default</Badge>
-              <Badge variant="secondary" animated>Secondary</Badge>
-              <Badge variant="success" animated>Success</Badge>
-              <Badge variant="info" animated>Info</Badge>
+              <Badge variant="brand">Brand</Badge>
+              <Badge variant="default">Default</Badge>
+              <Badge variant="secondary">Secondary</Badge>
+              <Badge variant="success">Success</Badge>
+              <Badge variant="info">Info</Badge>
             </div>
           </div>
         </div>
@@ -1891,8 +1857,7 @@ function BrandExamples() {
       <ComponentShowcase
         title="Brand Component Combinations"
         usage="Effective combinations of branded components for maximum impact"
-        animated
-        code={`<Card variant="featured" animated>
+        code={`<Card variant="featured">
   <CardHeader>
     <div className="flex items-center justify-between">
       <CardTitle isHeadline>Premium Training</CardTitle>
@@ -1910,11 +1875,11 @@ function BrandExamples() {
 </Card>`}
       >
         <div className="grid gap-6 md:grid-cols-2">
-          <Card variant="featured" animated>
+          <Card variant="featured">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle isHeadline>Premium Training</CardTitle>
-                <Badge variant="brand" animated>Featured</Badge>
+                <Badge variant="brand">Featured</Badge>
               </div>
               <CardDescription>
                 Master advanced objection handling techniques
@@ -1927,7 +1892,7 @@ function BrandExamples() {
                     <span>Progress</span>
                     <span>75%</span>
                   </div>
-                  <Progress value={75} animated />
+                  <Progress value={75} />
                 </div>
                 <Button variant="gradient" className="w-full">
                   <Play className="mr-2 h-4 w-4" />
@@ -1937,11 +1902,11 @@ function BrandExamples() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle isHeadline>Special Offer</CardTitle>
-                <Badge variant="brand" animated>
+                <Badge variant="brand">
                   <Zap className="h-3 w-3" />
                   Limited Time
                 </Badge>
@@ -1974,8 +1939,7 @@ function FeedbackExamples() {
       <ComponentShowcase
         title="Enhanced Alerts"
         usage="Alert components with improved styling and variants"
-        animated
-        code={`<Alert variant="info" animated>
+        code={`<Alert variant="info">
   <Info className="h-4 w-4" />
   <AlertTitle>Information</AlertTitle>
   <AlertDescription>
@@ -1983,7 +1947,7 @@ function FeedbackExamples() {
   </AlertDescription>
 </Alert>
 
-<Alert variant="success" animated>
+<Alert variant="success">
   <Check className="h-4 w-4" />
   <AlertTitle>Success</AlertTitle>
   <AlertDescription>
@@ -2006,7 +1970,7 @@ function FeedbackExamples() {
         }}
       >
         <div className="space-y-4">
-          <Alert variant="info" animated>
+          <Alert variant="info">
             <Info className="h-4 w-4" />
             <AlertTitle>Information</AlertTitle>
             <AlertDescription>
@@ -2014,7 +1978,7 @@ function FeedbackExamples() {
             </AlertDescription>
           </Alert>
 
-          <Alert variant="success" animated>
+          <Alert variant="success">
             <Check className="h-4 w-4" />
             <AlertTitle>Success</AlertTitle>
             <AlertDescription>
@@ -2022,7 +1986,7 @@ function FeedbackExamples() {
             </AlertDescription>
           </Alert>
 
-          <Alert variant="warning" animated>
+          <Alert variant="warning">
             <ExternalLink className="h-4 w-4" />
             <AlertTitle>Warning</AlertTitle>
             <AlertDescription>
@@ -2030,7 +1994,7 @@ function FeedbackExamples() {
             </AlertDescription>
           </Alert>
 
-          <Alert variant="destructive" animated>
+          <Alert variant="destructive">
             <ExternalLink className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
@@ -2043,12 +2007,11 @@ function FeedbackExamples() {
       <ComponentShowcase
         title="Loading Spinner Variants"
         usage="Enhanced loading indicators with multiple styles"
-        animated
         code={`<LoadingSpinner size="sm" />
 <LoadingSpinner />
 <LoadingSpinner size="lg" />
-<LoadingSpinner variant="dots" />
-<LoadingSpinner variant="pulse" />`}
+<LoadingSpinner />
+<LoadingSpinner size="lg" />`}
       >
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           <div className="text-center space-y-2">
@@ -2064,11 +2027,11 @@ function FeedbackExamples() {
             <p className="text-xs text-muted-foreground">Large</p>
           </div>
           <div className="text-center space-y-2">
-            <LoadingSpinner variant="dots" />
+            <LoadingSpinner />
             <p className="text-xs text-muted-foreground">Dots</p>
           </div>
           <div className="text-center space-y-2">
-            <LoadingSpinner variant="pulse" />
+            <LoadingSpinner size="lg" />
             <p className="text-xs text-muted-foreground">Pulse</p>
           </div>
         </div>
@@ -2099,7 +2062,6 @@ toast.warning("Session expires in 5 minutes")`}
                 // This would normally trigger a toast
                 console.log("Success toast triggered")
               }}
-              animated
             >
               Success Toast
             </Button>
@@ -2109,7 +2071,6 @@ toast.warning("Session expires in 5 minutes")`}
                 // This would normally trigger a toast
                 console.log("Error toast triggered")
               }}
-              animated
             >
               Error Toast
             </Button>
@@ -2119,7 +2080,6 @@ toast.warning("Session expires in 5 minutes")`}
                 // This would normally trigger a toast
                 console.log("Info toast triggered")
               }}
-              animated
             >
               Info Toast
             </Button>
@@ -2129,7 +2089,6 @@ toast.warning("Session expires in 5 minutes")`}
                 // This would normally trigger a toast
                 console.log("Warning toast triggered")
               }}
-              animated
             >
               Warning Toast
             </Button>
@@ -2203,7 +2162,6 @@ export function ComponentLibrarySection() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
-              animated
             />
           </div>
         </div>
@@ -2211,7 +2169,7 @@ export function ComponentLibrarySection() {
 
       {/* Component Categories */}
       <section id="components" className="space-y-8">
-        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full" animated>
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 mb-8">
             {filteredCategories.map(([key, category]) => (
               <TabsTrigger key={key} value={key} className="text-xs">
@@ -2221,7 +2179,7 @@ export function ComponentLibrarySection() {
           </TabsList>
 
           {/* Category Description */}
-          <Card className="mb-8" animated>
+          <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 font-headline">
                 {componentCategories[activeCategory as keyof typeof componentCategories]?.title}
@@ -2236,7 +2194,7 @@ export function ComponentLibrarySection() {
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {componentCategories[activeCategory as keyof typeof componentCategories]?.components.map((component) => (
-                  <Badge key={component} variant="outline" animated>
+                  <Badge key={component} variant="outline">
                     {component}
                   </Badge>
                 ))}
@@ -2253,7 +2211,7 @@ export function ComponentLibrarySection() {
 
       {/* Enhanced Guidelines */}
       <section className="space-y-8">
-        <Separator animated />
+        <Separator />
         <div className="space-y-4">
           <h2 className="text-3xl font-bold font-headline">Peakstride Component Guidelines</h2>
           <p className="text-lg text-muted-foreground">
@@ -2262,7 +2220,7 @@ export function ComponentLibrarySection() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Enhanced Animations</CardTitle>
             </CardHeader>
@@ -2275,7 +2233,7 @@ export function ComponentLibrarySection() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Typography Enhancement</CardTitle>
             </CardHeader>
@@ -2288,7 +2246,7 @@ export function ComponentLibrarySection() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Color Variants</CardTitle>
             </CardHeader>
@@ -2301,7 +2259,7 @@ export function ComponentLibrarySection() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Accessibility Standards</CardTitle>
             </CardHeader>
@@ -2314,7 +2272,7 @@ export function ComponentLibrarySection() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Responsive Design</CardTitle>
             </CardHeader>
@@ -2327,7 +2285,7 @@ export function ComponentLibrarySection() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Performance</CardTitle>
             </CardHeader>
@@ -2344,7 +2302,7 @@ export function ComponentLibrarySection() {
 
       {/* Quick Reference */}
       <section className="space-y-8">
-        <Separator animated />
+        <Separator />
         <div className="space-y-4">
           <h2 className="text-3xl font-bold font-headline">Quick Reference</h2>
           <p className="text-lg text-muted-foreground">
@@ -2353,7 +2311,7 @@ export function ComponentLibrarySection() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Enhanced Props</CardTitle>
             </CardHeader>
@@ -2387,7 +2345,7 @@ export function ComponentLibrarySection() {
             </CardContent>
           </Card>
 
-          <Card animated>
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Usage Patterns</CardTitle>
             </CardHeader>
@@ -2396,7 +2354,7 @@ export function ComponentLibrarySection() {
                 <div>
                   <strong>Form Components</strong>
                   <p className="mt-1 text-muted-foreground">
-                    Always pair with Label, use animated prop, validate input states
+                    Always pair with Label, use prop, validate input states
                   </p>
                 </div>
                 <div>

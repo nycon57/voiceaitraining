@@ -34,12 +34,10 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
       label: "Average Score",
       value: stats?.average_score ? Math.round(stats.average_score) : 0,
       icon: Trophy,
-      trend: stats?.performance_trend ? {
-        direction: stats.performance_trend === 'up' ? 'up' as const :
-                   stats.performance_trend === 'down' ? 'down' as const : undefined,
-        value: stats.performance_trend === 'up' ? '+12%' :
-               stats.performance_trend === 'down' ? '-5%' : '0%',
-        isPositive: stats.performance_trend !== 'down'
+      trend: stats?.trend && stats.trend !== 'stable' ? {
+        direction: stats.trend as 'up' | 'down',
+        value: stats.trend === 'up' ? '+' : '-',
+        isPositive: stats.trend === 'up'
       } : undefined,
       description: "Your average performance score"
     },
@@ -47,9 +45,9 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
       label: "Completed Sessions",
       value: stats?.total_completed || 0,
       icon: CheckCircle,
-      trend: stats?.recent_attempts ? {
+      trend: stats?.recent_attempts?.length ? {
         direction: 'up' as const,
-        value: `+${stats.recent_attempts}`,
+        value: `+${stats.recent_attempts.length}`,
         isPositive: true
       } : undefined,
       description: "Training sessions this month"
@@ -73,15 +71,15 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
     id: s.id,
     title: s.title,
     description: s.description || '',
-    category: s.category || 'General',
-    industry: s.industry || 'General',
+    category: 'General',
+    industry: 'General',
     difficulty: (s.difficulty as 'easy' | 'medium' | 'hard') || 'medium',
-    durationMin: Math.floor((s.estimated_duration || 300) / 60),
-    durationMax: Math.ceil((s.estimated_duration || 300) / 60) + 5,
-    thumbnailUrl: s.image_url,
-    tags: s.metadata?.tags as string[] || [],
-    averageScore: s.avg_score,
-    attemptCount: s.attempt_count || 0,
+    durationMin: 5,
+    durationMax: 10,
+    thumbnailUrl: undefined,
+    tags: [],
+    averageScore: undefined,
+    attemptCount: 0,
     isEnrolled: false,
   }))
 
@@ -103,10 +101,10 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
   const activeTrainingCount = enrollments.filter(e => e.status !== 'completed').length
 
   // Transform performance data for chart
-  const performanceData = stats?.recent_performance?.map((attempt, index) => ({
+  const performanceData = stats?.recent_attempts?.map((attempt, index) => ({
     date: new Date(attempt.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     score: attempt.score || 0,
-    label: `Session ${stats.recent_performance!.length - index}`
+    label: `Session ${stats.recent_attempts!.length - index}`
   })) || []
 
   return (
@@ -138,7 +136,6 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
               description={stat.description}
               icon={stat.icon}
               trend={stat.trend}
-              headlineTitle={false}
               className={`border-l-4 ${borderColors[index]}`}
             />
           )
@@ -194,7 +191,6 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
                 data={performanceData}
                 title=""
                 description=""
-                showStats={false}
               />
             </CardContent>
           </Card>

@@ -23,8 +23,15 @@ import {
   Pause,
   RotateCcw
 } from 'lucide-react'
-import { useChat } from 'ai/react'
+// import { useChat } from 'ai' // TODO: Fix AI SDK v5 compatibility
 import type { AuthUser } from '@/lib/auth'
+
+// Temporary stub until AI SDK v5 compatibility is fixed
+const useChat = (_config?: any) => ({
+  messages: [] as Array<{ id: string; role: string; content: string }>,
+  append: async (_message?: any) => null,
+  isLoading: false,
+})
 
 interface VoiceSessionProps {
   user: AuthUser

@@ -51,7 +51,7 @@ export function ScenarioSidebar({
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               asChild
             >
-              <Link href={`/play/${scenarioId}`}>
+              <Link href={`/play/${scenarioId}/call`}>
                 <Play className="h-5 w-5 mr-2" />
                 Start Training
               </Link>

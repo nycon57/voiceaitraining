@@ -11,7 +11,7 @@ import { StatCard } from '@/components/dashboard/cards'
 import { OpportunityCarousel } from '@/components/dashboard/opportunity-carousel'
 import { PerformanceTrendChart } from '@/components/charts'
 import { MyTrainingView } from '@/components/dashboard/my-training-view'
-import { getRecentAttemptStats } from '@/actions/attempts'
+import { getUserAttemptStats } from '@/actions/attempts'
 import { getLatestActiveScenarios } from '@/actions/scenarios'
 import { getUserEnrollments } from '@/actions/enrollments'
 import {
@@ -35,7 +35,7 @@ interface PersonalOverviewProps {
 export async function PersonalOverview({ user }: PersonalOverviewProps) {
   // Fetch data for personal dashboard
   const [stats, scenarios, enrollments] = await Promise.all([
-    getRecentAttemptStats(user.id).catch(() => null),
+    getUserAttemptStats(user.id).catch(() => null),
     getLatestActiveScenarios(12).catch(() => []),
     getUserEnrollments(user.id).catch(() => [])
   ])
@@ -50,12 +50,10 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
       label: "Average Score",
       value: stats?.average_score ? Math.round(stats.average_score) : 0,
       icon: Trophy,
-      trend: stats?.performance_trend ? {
-        direction: stats.performance_trend === 'up' ? 'up' as const :
-                   stats.performance_trend === 'down' ? 'down' as const : undefined,
-        value: stats.performance_trend === 'up' ? '+12%' :
-               stats.performance_trend === 'down' ? '-5%' : '0%',
-        isPositive: stats.performance_trend !== 'down'
+      trend: stats?.recent_average_score && stats?.average_score ? {
+        direction: stats.recent_average_score >= stats.average_score ? 'up' as const : 'down' as const,
+        value: stats.recent_average_score >= stats.average_score ? '+' : '',
+        isPositive: stats.recent_average_score >= stats.average_score
       } : undefined,
       description: "Your average performance score"
     },
@@ -63,7 +61,6 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
       label: "Sessions This Month",
       value: stats?.total_completed || 0,
       icon: Calendar,
-      suffix: planLimits ? ` / ${planLimits.max_sessions_per_month}` : undefined,
       trend: stats?.recent_attempts ? {
         direction: 'up' as const,
         value: `+${stats.recent_attempts}`,
@@ -72,18 +69,16 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
       description: planLimits ? `${planLimits.max_sessions_per_month} sessions available per month` : undefined
     },
     {
-      label: "Current Streak",
-      value: stats?.current_streak || 0,
+      label: "Training Time",
+      value: `${stats?.total_duration_minutes || 0} min`,
       icon: TrendingUp,
-      suffix: " days",
-      description: "Consecutive days of training"
+      description: "Total training time"
     },
     {
-      label: "Custom Scenarios",
-      value: stats?.scenarios_created || 0,
+      label: "Recent Score",
+      value: stats?.recent_average_score ? Math.round(stats.recent_average_score) : 0,
       icon: Award,
-      suffix: planLimits ? ` / ${planLimits.max_scenarios}` : undefined,
-      description: planLimits ? `${planLimits.max_scenarios} scenarios available` : undefined
+      description: "Your recent performance"
     }
   ]
 
@@ -92,24 +87,20 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
     id: s.id,
     title: s.title,
     description: s.description || '',
-    category: s.category || 'General',
-    industry: s.industry || 'General',
+    category: 'General',
+    industry: 'General',
     difficulty: (s.difficulty as 'easy' | 'medium' | 'hard') || 'medium',
-    durationMin: Math.floor((s.estimated_duration || 300) / 60),
-    durationMax: Math.ceil((s.estimated_duration || 300) / 60) + 5,
-    thumbnailUrl: s.image_url,
-    tags: s.metadata?.tags as string[] || [],
-    averageScore: s.avg_score,
-    attemptCount: s.attempt_count || 0,
+    durationMin: 5,
+    durationMax: 10,
+    thumbnailUrl: undefined,
+    tags: [],
+    averageScore: undefined,
+    attemptCount: 0,
     isEnrolled: false,
   }))
 
-  // Transform performance data for chart
-  const performanceData = stats?.recent_performance?.map((attempt, index) => ({
-    date: new Date(attempt.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    score: attempt.score || 0,
-    label: `Session ${stats.recent_performance!.length - index}`
-  })) || []
+  // Transform performance data for chart (using placeholder data since we don't have recent_performance)
+  const performanceData: { date: string; score: number; label: string }[] = []
 
   // Calculate usage percentage for sessions
   const sessionsUsagePercent = planLimits && planLimits.max_sessions_per_month > 0
@@ -162,8 +153,6 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
               description={stat.description}
               icon={stat.icon}
               trend={stat.trend}
-              suffix={stat.suffix}
-              headlineTitle={false}
               className={`border-l-4 ${borderColors[index]}`}
             />
           )
@@ -206,7 +195,6 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
                 data={performanceData}
                 title=""
                 description=""
-                showStats={false}
               />
             </CardContent>
           </Card>

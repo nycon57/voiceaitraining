@@ -222,7 +222,7 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
             variant={assignment?.isOverdue ? 'destructive' : 'default'}
             onClick={() => {
               if (showProgress && scenario.isEnrolled) {
-                window.location.href = `/play/${scenario.id}`
+                window.location.href = `/play/${scenario.id}/call`
               } else {
                 window.location.href = `/training/scenarios/${scenario.id}`
               }
