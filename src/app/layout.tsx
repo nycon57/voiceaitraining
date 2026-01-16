@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from '@/components/theme-provider'
 import { StyleGlideProvider } from '@/components/styleglide-provider'
 import { ViewTransitions } from 'next-view-transitions'
+import { BotIdClient } from 'botid/client'
 import '@/styles/globals.css'
 
 const inter = Inter({
@@ -37,6 +38,15 @@ export default function RootLayout({
           <link rel="dns-prefetch" href="https://meet-toad-73.clerk.accounts.dev" />
         </head>
         <body className="relative flex min-h-screen flex-col antialiased font-sans" suppressHydrationWarning>
+          <BotIdClient
+            protect={[
+              { path: '/api/calls/start', method: 'POST' },
+              { path: '/api/calls/end', method: 'POST' },
+              { path: '/api/calls/analyze', method: 'POST' },
+              { path: '/api/chat/voice-session', method: 'POST' },
+              { path: '/api/attempts/*/score', method: 'POST' },
+            ]}
+          />
           <ClerkProvider
             signInFallbackRedirectUrl="/dashboard"
             signUpFallbackRedirectUrl="/dashboard"

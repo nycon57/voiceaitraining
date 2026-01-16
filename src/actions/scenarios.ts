@@ -1,5 +1,6 @@
 'use server'
 
+import { assertHuman } from '@/lib/botid'
 import { withOrgGuard, withRoleGuard } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -18,6 +19,8 @@ const createScenarioSchema = z.object({
 const updateScenarioSchema = createScenarioSchema.partial()
 
 export async function createScenario(formData: FormData) {
+  await assertHuman()
+
   const data = createScenarioSchema.parse({
     title: formData.get('title'),
     description: formData.get('description'),
@@ -50,6 +53,8 @@ export async function createScenario(formData: FormData) {
 }
 
 export async function updateScenario(scenarioId: string, formData: FormData) {
+  await assertHuman()
+
   const data = updateScenarioSchema.parse({
     title: formData.get('title'),
     description: formData.get('description'),
@@ -115,6 +120,8 @@ export async function getScenario(scenarioId: string) {
 }
 
 export async function publishScenario(scenarioId: string) {
+  await assertHuman()
+
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { data: scenario, error } = await supabase
@@ -136,6 +143,8 @@ export async function publishScenario(scenarioId: string) {
 }
 
 export async function archiveScenario(scenarioId: string) {
+  await assertHuman()
+
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { data: scenario, error } = await supabase

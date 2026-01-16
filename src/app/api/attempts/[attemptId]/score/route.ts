@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireHuman } from '@/lib/botid'
 import { createAdminClient } from '@/lib/supabase/server'
 import { calculateGlobalKPIs, calculateScenarioKPIs, calculateOverallScore } from '@/lib/ai/scoring'
 
@@ -7,6 +8,9 @@ export async function POST(
   { params }: { params: Promise<{ attemptId: string }> }
 ) {
   try {
+    const botResponse = await requireHuman()
+    if (botResponse) return botResponse
+
     const { attemptId } = await params
 
     // Use admin client - this is an internal API called from webhooks

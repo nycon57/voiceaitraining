@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { requireHuman } from '@/lib/botid'
 import { getCurrentUser } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/server'
 import { z } from 'zod'
@@ -49,6 +50,9 @@ Your feedback should help the trainee understand exactly what they did wrong and
 
 export async function POST(req: NextRequest) {
   try {
+    const botResponse = await requireHuman()
+    if (botResponse) return botResponse
+
     const user = await getCurrentUser()
     if (!user || !user.orgId) {
       return new Response('Unauthorized', { status: 401 })

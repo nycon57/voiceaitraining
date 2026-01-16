@@ -1,5 +1,6 @@
 'use server'
 
+import { assertHuman } from '@/lib/botid'
 import { withOrgGuard, withRoleGuard } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -31,6 +32,8 @@ const updateAssignmentSchema = z.object({
 })
 
 export async function createAssignment(data: z.infer<typeof createAssignmentSchema>) {
+  await assertHuman()
+
   const validatedData = createAssignmentSchema.parse(data)
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -143,6 +146,8 @@ export async function updateAssignment(
   assignmentId: string,
   data: z.infer<typeof updateAssignmentSchema>
 ) {
+  await assertHuman()
+
   const validatedData = updateAssignmentSchema.parse(data)
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -169,6 +174,8 @@ export async function updateAssignment(
 }
 
 export async function deleteAssignment(assignmentId: string) {
+  await assertHuman()
+
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { error } = await supabase
@@ -578,6 +585,8 @@ export async function getTeamAssignments(filters?: {
 }
 
 export async function completeAssignment(assignmentId: string) {
+  await assertHuman()
+
   return withOrgGuard(async (user, orgId, supabase) => {
     // Verify user owns this assignment
     const { data: existingAssignment, error: assignmentError } = await supabase

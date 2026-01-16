@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireHuman } from '@/lib/botid'
 import { getCurrentUser } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/server'
 import { z } from 'zod'
@@ -22,6 +23,9 @@ const endCallSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const botResponse = await requireHuman()
+    if (botResponse) return botResponse
+
     const user = await getCurrentUser()
     if (!user || !user.orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
