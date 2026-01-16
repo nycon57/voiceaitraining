@@ -1,9 +1,13 @@
 import { openai } from '@ai-sdk/openai'
 import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
+import { requireHuman } from '@/lib/botid'
 
 export async function POST(req: NextRequest) {
   try {
+    const botResponse = await requireHuman()
+    if (botResponse) return botResponse
+
     const { messages } = await req.json()
 
     // System prompt for voice training scenarios

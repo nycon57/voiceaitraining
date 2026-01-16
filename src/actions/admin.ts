@@ -1,5 +1,6 @@
 'use server'
 
+import { assertHuman } from '@/lib/botid'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { clerkClient } from '@clerk/nextjs/server'
@@ -21,6 +22,8 @@ const updateUserRoleSchema = z.object({
 })
 
 export async function inviteUserToOrganization(formData: FormData) {
+  await assertHuman()
+
   const user = await getCurrentUser()
   if (!user?.orgId) {
     throw new Error('No organization context')
@@ -84,6 +87,8 @@ export async function inviteUserToOrganization(formData: FormData) {
 }
 
 export async function bulkInviteUsers(formData: FormData) {
+  await assertHuman()
+
   const user = await getCurrentUser()
   if (!user?.orgId) {
     throw new Error('No organization context')
@@ -177,6 +182,8 @@ export async function bulkInviteUsers(formData: FormData) {
 }
 
 export async function updateUserRole(formData: FormData) {
+  await assertHuman()
+
   const user = await getCurrentUser()
   if (!user?.orgId) {
     throw new Error('No organization context')
@@ -214,6 +221,8 @@ export async function updateUserRole(formData: FormData) {
 }
 
 export async function removeUserFromOrganization(formData: FormData) {
+  await assertHuman()
+
   const user = await getCurrentUser()
   if (!user?.orgId) {
     throw new Error('No organization context')
@@ -250,6 +259,8 @@ export async function removeUserFromOrganization(formData: FormData) {
 }
 
 export async function revokeInvitation(formData: FormData) {
+  await assertHuman()
+
   const user = await getCurrentUser()
   if (!user?.orgId) {
     throw new Error('No organization context')

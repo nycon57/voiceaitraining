@@ -1,5 +1,6 @@
 'use server'
 
+import { assertHuman } from '@/lib/botid'
 import { withOrgGuard } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -75,6 +76,8 @@ function computeEnrollmentStatus(completedAt: string | null, progressPercentage:
  * @throws Error if enrollment validation fails or duplicate exists
  */
 export async function enrollUser(data: EnrollInput) {
+  await assertHuman()
+
   const validatedData = enrollSchema.parse(data)
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -179,6 +182,8 @@ export async function enrollUser(data: EnrollInput) {
  * @throws Error if enrollment not found or permission denied
  */
 export async function unenrollUser(enrollmentId: string) {
+  await assertHuman()
+
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Verify user owns this enrollment
@@ -371,6 +376,8 @@ export async function getUserEnrollments(userId?: string): Promise<EnrichedEnrol
  * @throws Error if enrollment not found or permission denied
  */
 export async function updateEnrollmentProgress(enrollmentId: string, progress: number) {
+  await assertHuman()
+
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Validate progress value
@@ -424,6 +431,8 @@ export async function updateEnrollmentProgress(enrollmentId: string, progress: n
  * @throws Error if enrollment not found or permission denied
  */
 export async function markEnrollmentComplete(enrollmentId: string) {
+  await assertHuman()
+
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Verify user owns this enrollment

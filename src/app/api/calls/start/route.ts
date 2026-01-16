@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireHuman } from '@/lib/botid'
 import { getCurrentUser } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getAssistantId, buildAssistantOverrides } from '@/lib/vapi-agents'
@@ -12,6 +13,9 @@ const startCallSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const botResponse = await requireHuman()
+    if (botResponse) return botResponse
+
     console.log('[POST /api/calls/start] Starting call initialization')
 
     const user = await getCurrentUser()

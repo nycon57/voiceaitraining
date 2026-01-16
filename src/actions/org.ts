@@ -1,5 +1,6 @@
 'use server'
 
+import { assertHuman } from '@/lib/botid'
 import { withOrgGuard, withRoleGuard } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -17,6 +18,8 @@ const updateOrgSchema = z.object({
 })
 
 export async function createOrganization(formData: FormData) {
+  await assertHuman()
+
   const data = createOrgSchema.parse({
     name: formData.get('name'),
     plan: formData.get('plan'),
@@ -38,6 +41,8 @@ export async function createOrganization(formData: FormData) {
 }
 
 export async function updateOrganization(formData: FormData) {
+  await assertHuman()
+
   const data = updateOrgSchema.parse({
     name: formData.get('name'),
     plan: formData.get('plan'),
