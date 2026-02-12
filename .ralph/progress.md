@@ -1168,3 +1168,35 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Code simplifier pass is most effective after quality review — the code is already correct, so simplification can focus purely on clarity
   - Section divider comments (// Types, // Helpers) add noise in files under 300 lines where structure is obvious
 ---
+
+## [2026-02-12] - US-013: Embed transcript segments after scoring for semantic memory
+Run: 20260212-041723-20350 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: acd9813 [Pass 1/3] feat: embed transcript segments after scoring for semantic memory (US-013)
+- Post-commit status: clean (for US-013 files; pre-existing unrelated changes remain unstaged)
+- Skills invoked: /feature-dev
+- Verification:
+  - Command: npx tsc --noEmit (US-013 files) -> PASS (0 errors in new files; pre-existing errors in pagination.tsx, progress.tsx, etc.)
+  - Command: pnpm build -> PASS (compiled successfully; TypeScript check fails on pre-existing UI component errors)
+- Files changed:
+  - src/lib/inngest/functions/embed-attempt-memory.ts (created)
+  - src/lib/inngest/functions/index.ts (modified — registered embedAttemptMemory)
+- What was implemented:
+  - Inngest function subscribing to `voiceai/attempt.scored` event
+  - Fetches attempt with transcript_json and feedback_text from Supabase
+  - Extracts significant segments via heuristics: fumbles (short + filler-heavy), unanswered questions (agent question + weak trainee response), strong responses (substantive + low filler)
+  - Stores each as embedding via storeEmbedding() with content_type 'transcript_segment' and source_id referencing the attempt
+  - Embeds feedback_text as 'coaching_insight' if present
+  - Enforces 10-embedding limit per attempt for cost control
+  - Uses step.run() for each embedding for individual retryability
+  - Gracefully skips attempts with no transcript_json (logs and returns)
+  - Registered in Inngest functions index
+- **Learnings for future iterations:**
+  - createServiceClient() from @/lib/memory/supabase is the right choice for Inngest background jobs (no cookies() dependency)
+  - FILLER_PATTERN regex needs `gi` flags for case-insensitive global matching
+  - Inngest step names must be unique within a function — using `embed-${i}` pattern for loop-based steps
+---
