@@ -6,8 +6,8 @@ import { generateWeaknessProfile, type DimensionResult } from '@/lib/memory/weak
 const AGENT_ID = 'coach-agent'
 
 /**
- * Triggered when an attempt is scored. Regenerates the trainee's weakness
- * profile, logs the activity, and emits a coach.weakness.updated event.
+ * Recalculates the trainee's weakness profile after a scored attempt,
+ * logs the activity, and emits a weakness-updated event for downstream agents.
  *
  * Each step.run() is independently retryable by Inngest.
  */
@@ -17,7 +17,7 @@ export const onAttemptScored = inngest.createFunction(
   async ({ event, step }) => {
     const { orgId, userId, attemptId } = event.data
 
-    // Catch errors so subsequent steps still execute (acceptance criteria).
+    // Catch errors to prevent profile failures from blocking the log and event steps.
     const profile = await step.run('update-weakness-profile', async () => {
       try {
         return await generateWeaknessProfile(orgId, userId)
@@ -48,18 +48,8 @@ export const onAttemptScored = inngest.createFunction(
       const payload: CoachWeaknessUpdatedPayload = {
         userId,
         orgId,
-        weaknesses: weaknesses.map((d) => ({
-          key: d.key,
-          score: d.score,
-          trend: d.trend,
-          evidenceCount: d.evidenceCount,
-        })),
-        strengths: strengths.map((d) => ({
-          key: d.key,
-          score: d.score,
-          trend: d.trend,
-          evidenceCount: d.evidenceCount,
-        })),
+        weaknesses: weaknesses.map(toDimensionSummary),
+        strengths: strengths.map(toDimensionSummary),
         trajectory: determineTrajectory(profile),
       }
 
@@ -73,7 +63,11 @@ export const onAttemptScored = inngest.createFunction(
   },
 )
 
-/** Derive overall trajectory from the dimension trends. */
+function toDimensionSummary(d: DimensionResult) {
+  return { key: d.key, score: d.score, trend: d.trend, evidenceCount: d.evidenceCount }
+}
+
+/** Determine overall trajectory by comparing improving vs. declining dimension counts. */
 function determineTrajectory(profile: DimensionResult[]): string {
   if (profile.length === 0) return 'new'
 

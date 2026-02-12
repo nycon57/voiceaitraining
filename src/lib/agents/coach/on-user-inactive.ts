@@ -2,12 +2,13 @@ import { EVENT_NAMES, type CoachRecommendationReadyPayload } from '@/lib/events/
 import { inngest } from '@/lib/inngest/client'
 import { logAgentActivity } from '@/lib/agents/activity-log'
 import { getAgentContext } from '@/lib/memory/query'
+import type { WeaknessEntry } from '@/lib/memory/user-memory'
 
 const AGENT_ID = 'coach-agent'
 
 /**
- * Triggered when a user is detected as inactive (3+ days without practice).
- * Fetches their weakness profile and emits a practice reminder recommendation.
+ * Handles user inactivity events by fetching the trainee's weakness profile
+ * and emitting a personalized practice reminder recommendation.
  *
  * Each step.run() is independently retryable by Inngest.
  */
@@ -42,7 +43,6 @@ export const onUserInactive = inngest.createFunction(
         userId,
         orgId,
         recommendationType: 'practice_reminder',
-        scenarioId: undefined,
         message,
       }
 
@@ -56,22 +56,20 @@ export const onUserInactive = inngest.createFunction(
   },
 )
 
-/** Build a personalized reminder message based on weakness data. */
+/** Build a personalized reminder message from weakness data and inactivity duration. */
 function buildReminderMessage(
-  weaknesses: { key: string; score?: number | null }[],
+  weaknesses: Pick<WeaknessEntry, 'key' | 'score'>[],
   daysSinceLastAttempt: number,
 ): string {
   const dayLabel = daysSinceLastAttempt === 1 ? 'day' : 'days'
+  const prefix = `You haven't practiced in ${daysSinceLastAttempt} ${dayLabel}.`
 
   if (weaknesses.length === 0) {
-    return `You haven't practiced in ${daysSinceLastAttempt} ${dayLabel}. A quick session will keep your skills sharp.`
+    return `${prefix} Jump into a quick session to keep your skills sharp.`
   }
 
   const weakest = weaknesses[0]
-  return (
-    `You haven't practiced in ${daysSinceLastAttempt} ${dayLabel}. ` +
-    `Your weakest area is ${weakest.key}` +
-    (weakest.score != null ? ` (score: ${weakest.score})` : '') +
-    `. A focused practice session could help improve it.`
-  )
+  const label = weakest.key.replace(/_/g, ' ')
+  const scoreNote = weakest.score != null ? ` (currently at ${weakest.score}%)` : ''
+  return `${prefix} Your weakest area is ${label}${scoreNote}. A focused practice session will help you improve.`
 }

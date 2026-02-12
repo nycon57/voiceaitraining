@@ -8,7 +8,7 @@ export const coachAgent: AgentDefinition = {
   id: 'coach-agent',
   name: 'Coach Agent',
   description:
-    'Subscribes to attempt and inactivity events to maintain weakness profiles and send practice reminders.',
+    'Maintains trainee weakness profiles after each scored attempt and sends practice reminders when trainees are inactive.',
   subscribesTo: ['attempt.scored', 'user.inactive'],
   inngestFunctions: [onAttemptScored, onUserInactive],
 }
