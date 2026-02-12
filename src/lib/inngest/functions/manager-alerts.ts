@@ -7,16 +7,23 @@ const CRITICAL_SCORE_THRESHOLD = 40
 const DECLINING_WINDOW = 3
 const ACHIEVEMENT_SCORE_THRESHOLD = 90
 
-interface AlertPayload {
+interface Alert {
   type: NotificationType
   title: string
   body: string
 }
 
-interface ManagerInfo {
+interface Manager {
   userId: string
   name: string | undefined
   email: string | undefined
+}
+
+interface SendResult {
+  managerId: string
+  alertType: string
+  notificationId: string | null
+  error?: string
 }
 
 /**
@@ -34,9 +41,8 @@ export const managerAlerts = inngest.createFunction(
 
     const alerts = await step.run('evaluate-alert-rules', async () => {
       const supabase = createServiceClient()
-      const results: AlertPayload[] = []
+      const matched: Alert[] = []
 
-      // Fetch trainee name and scenario title in parallel
       const [traineeResult, scenarioResult] = await Promise.all([
         supabase
           .from('users')
@@ -65,10 +71,10 @@ export const managerAlerts = inngest.createFunction(
 
       // Rule 1: Score < 40 → critical alert
       if (score < CRITICAL_SCORE_THRESHOLD) {
-        results.push({
+        matched.push({
           type: 'critical_score',
           title: `Low score alert: ${traineeName} scored ${score} on ${scenarioName}`,
-          body: `${traineeName} scored ${score} on "${scenarioName}". This is below the critical threshold of ${CRITICAL_SCORE_THRESHOLD}. Immediate coaching intervention may be needed.`,
+          body: `${traineeName} scored ${score} on "${scenarioName}", below the critical threshold of ${CRITICAL_SCORE_THRESHOLD}. Review their attempt and schedule a coaching session.`,
         })
       }
 
@@ -105,10 +111,10 @@ export const managerAlerts = inngest.createFunction(
 
         if (isDeclining) {
           const chronological = [...scores].reverse()
-          results.push({
+          matched.push({
             type: 'declining_trend',
             title: `Declining trend: ${traineeName} has ${DECLINING_WINDOW}+ consecutive declining scores`,
-            body: `${traineeName}'s recent scores show a declining trend: ${chronological.join(' → ')}. Consider providing targeted coaching support.`,
+            body: `${traineeName}'s scores are declining: ${chronological.join(' → ')}. Review recent attempts and schedule a coaching session.`,
           })
         }
       }
@@ -127,24 +133,23 @@ export const managerAlerts = inngest.createFunction(
       }
 
       if (count === 1 && score > ACHIEVEMENT_SCORE_THRESHOLD) {
-        results.push({
+        matched.push({
           type: 'achievement',
-          title: `Achievement: ${traineeName} scored ${score} on first attempt!`,
-          body: `${traineeName} scored an impressive ${score} on their very first attempt at "${scenarioName}". Consider recognizing this accomplishment!`,
+          title: `Achievement: ${traineeName} scored ${score} on first attempt`,
+          body: `${traineeName} scored ${score} on their first attempt at "${scenarioName}". Consider recognizing this in your next team sync.`,
         })
       }
 
-      return results
+      return matched
     })
 
     if (alerts.length === 0) {
       return { dispatched: false, reason: 'no_alerts_triggered' }
     }
 
-    // Find managers in the same org
-    const managers = await step.run('find-managers', async (): Promise<ManagerInfo[]> => {
+    const managers = await step.run('find-managers', async (): Promise<Manager[]> => {
       const supabase = createServiceClient()
-      const { data, error } = await supabase
+      const { data: members, error } = await supabase
         .from('org_members')
         .select('user_id')
         .eq('org_id', orgId)
@@ -155,9 +160,9 @@ export const managerAlerts = inngest.createFunction(
         return []
       }
 
-      if (!data || data.length === 0) return []
+      if (!members || members.length === 0) return []
 
-      const managerIds = data.map((m: { user_id: string }) => m.user_id)
+      const managerIds = members.map((m) => m.user_id)
       const { data: managerUsers, error: usersError } = await supabase
         .from('users')
         .select('clerk_user_id, first_name, email')
@@ -168,9 +173,8 @@ export const managerAlerts = inngest.createFunction(
         return managerIds.map((id) => ({ userId: id, name: undefined, email: undefined }))
       }
 
-      type ManagerUser = { clerk_user_id: string; first_name: string | null; email: string | null }
       const userMap = new Map(
-        ((managerUsers ?? []) as ManagerUser[]).map((u) => [u.clerk_user_id, u]),
+        (managerUsers ?? []).map((u) => [u.clerk_user_id, u]),
       )
 
       return managerIds.map((id) => ({
@@ -184,19 +188,14 @@ export const managerAlerts = inngest.createFunction(
       return { dispatched: false, reason: 'no_managers_found' }
     }
 
-    // Send each alert to every manager, continuing on individual failures
-    const results = await step.run('send-alerts', async () => {
-      const sent: Array<{
-        managerId: string
-        alertType: string
-        notificationId: string | null
-        error?: string
-      }> = []
+    // Continue past individual send failures so one broken notification doesn't block the rest
+    const sendResults = await step.run('send-alerts', async () => {
+      const results: SendResult[] = []
 
       for (const manager of managers) {
         for (const alert of alerts) {
           try {
-            const result = await sendNotification({
+            const { notificationId } = await sendNotification({
               userId: manager.userId,
               orgId,
               type: alert.type,
@@ -206,34 +205,35 @@ export const managerAlerts = inngest.createFunction(
               recipientName: manager.name,
             })
 
-            sent.push({
+            results.push({
               managerId: manager.userId,
               alertType: alert.type,
-              notificationId: result.notificationId,
+              notificationId,
             })
           } catch (err) {
+            const message = err instanceof Error ? err.message : String(err)
             console.error(
               `[manager-alerts] Failed to send ${alert.type} to manager ${manager.userId}:`,
-              err instanceof Error ? err.message : String(err),
+              message,
             )
-            sent.push({
+            results.push({
               managerId: manager.userId,
               alertType: alert.type,
               notificationId: null,
-              error: err instanceof Error ? err.message : 'Unknown error',
+              error: message,
             })
           }
         }
       }
 
-      return sent
+      return results
     })
 
     return {
       dispatched: true,
       alertCount: alerts.length,
       managerCount: managers.length,
-      results,
+      results: sendResults,
     }
   },
 )
