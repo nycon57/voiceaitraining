@@ -2619,3 +2619,35 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When spreading metadata objects, put explicit/required keys AFTER the spread to ensure they always take precedence
   - CodeRabbit CLI doesn't work in non-TTY environments (raw mode error) — fall back to manual review or subagent code-reviewer
 ---
+
+## 2026-02-12 10:45 UTC - US-028: Build insight generator and weekly manager analysis cron
+Thread: N/A
+Run: 20260212-102255-38146 (iteration 2)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: d8c4205 [Pass 3/3] refactor: polish insight generator and weekly cron for clarity (US-028)
+- Post-commit status: clean (US-028 files only; other untracked/modified files are pre-existing)
+- Skills invoked: code-simplifier, writing-clearly-and-concisely (manual text review)
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in US-028 files; pre-existing errors in pagination.tsx, webhook-form.tsx, analytics.ts, etc.)
+  - Command: pnpm build -> FAIL (pre-existing: type error in pagination.tsx, unrelated to US-028)
+  - Command: eslint (direct on US-028 files) -> FAIL (pre-existing ESLint config circular reference)
+- Files changed:
+  - src/lib/agents/manager/insight-generator.ts
+  - src/lib/inngest/functions/manager-weekly-analysis.ts
+- What was implemented:
+  - Replaced mutation pattern (add* functions pushing into shared array) with pure build* functions that return insight arrays
+  - Renamed add* -> build* to reflect pure-function semantics
+  - Replaced imperative for...of loops with declarative .map() and .filter().map()
+  - Extracted named row-type interfaces (OrgMemberRow, UserRow, NotificationPrefRow) to replace inline type casts
+  - Extracted formatError() helper to deduplicate error-formatting pattern (used 3 times)
+  - Moved helpers above main export for top-down reading order
+  - Polished notification message copy: more actionable language, domain-specific verbs ("practiced" instead of "were active")
+  - Eliminated double Map lookup in managerIds.map() by extracting to local variable
+- **Learnings for future iterations:**
+  - Pure builder functions (returning arrays) are cleaner than mutating a shared accumulator — easier to test and reason about
+  - Named row-type interfaces for Supabase query results prevent repetitive inline type casts and centralize the shape definition
+---
