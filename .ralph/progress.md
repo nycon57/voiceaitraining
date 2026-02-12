@@ -1525,6 +1525,42 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - CodeRabbit CLI fails in non-TTY (raw mode not supported) — use feature-dev:code-reviewer agent instead
 ---
 
+## [2026-02-12 07:15] - US-018: Coach Agent pre-call briefing API
+Run: 20260212-062236-75703 (iteration 3)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-062236-75703-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-062236-75703-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: a546e6b [Pass 3/3] refactor: simplify pre-call briefing with extracted constants and better types (US-018)
+- Post-commit status: clean (for US-018 files)
+- Skills invoked: code-simplifier, writing-clearly-and-concisely (manual audit)
+- Verification:
+  - Command: `npx tsc --noEmit | grep pre-call-briefing` -> PASS (0 errors in US-018 files)
+  - Command: `grep ': any' src/lib/agents/coach/pre-call-briefing.ts src/app/api/coach/briefing/route.ts` -> PASS (0 matches)
+- Files changed:
+  - src/lib/agents/coach/pre-call-briefing.ts (simplified)
+- What was polished:
+  - **Type reuse**: `estimatedDifficulty` now uses `ScenarioDifficulty | 'unknown'` from `@/types/scenario` instead of inline union
+  - **Extracted constants**: `DEFAULT_FOCUS_AREAS` and `WEAKNESS_FOCUS_MAP` hoisted to module level (no re-allocation per call)
+  - **Dead code removal**: Removed unreachable `if (!data)` check after `.single()` — Supabase returns PGRST116 error, not null data
+  - **Removed section comments**: Stripped `// Types`, `// Data fetching`, etc. dividers — code structure is self-evident
+  - **Redundant slice removed**: `buildFocusAreas` loop already caps at `MAX_FOCUS_AREAS`, no need for trailing `.slice()`
+- Acceptance criteria (all 9 verified):
+  - [x] generatePreCallBriefing() returns personalized briefing with focus areas from weakness profile
+  - [x] Previous attempt history for this specific scenario included if available
+  - [x] Scenario tips derived from rubric configuration (ScenarioRubric type)
+  - [x] Motivational note generated via Gemini Flash (google('gemini-2.0-flash-exp'))
+  - [x] API route requires authentication via getCurrentUser()
+  - [x] Well-typed response, no any
+  - [x] pnpm typecheck passes (0 errors in US-018 files)
+  - [x] Example: objection_handling weakness with rubric returns feel-felt-found technique tip
+  - [x] Negative: No previous attempts returns empty array (not null or undefined)
+- **Learnings for future iterations:**
+  - Supabase `.single()` returns PGRST116 error code when no rows match — checking `!data` after `.single()` is dead code
+  - Static lookup maps should live at module level to avoid per-call allocation
+---
+
 ## [2026-02-12 06:30] - US-019: Coach Agent daily digest for trainees
 Run: 20260212-062237-75941 (iteration 1)
 Pass: 1/3 - Implementation
