@@ -836,3 +836,47 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When code review suggests adding RLS policies, always check existing migration patterns first. SELECT-only RLS is the established convention for system-written tables (background jobs via service-role key).
   - Code review produced 1 valid fix and 3 non-issues — always verify findings against codebase conventions before accepting.
 ---
+
+## [2026-02-12] - US-009: Enable pgvector and create embeddings infrastructure
+Thread: N/A
+Run: 20260212-015711-11780 (iteration 2)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: efb035c [Pass 3/3] refactor: polish embeddings infrastructure for clarity and deduplication
+- Post-commit status: clean (for US-009 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep memory/embeddings` -> PASS (0 errors in US-009 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Acceptance criteria: all 10 criteria verified and passing
+- Files changed:
+  - src/lib/memory/embeddings.ts (polished — extracted createServiceClient() helper, named SearchSimilarParams and MatchRow interfaces, lightweight section headers, tightened JSDoc)
+  - src/lib/memory/index.ts (added SearchSimilarParams to type re-exports)
+  - db/migrations/0014_enable_pgvector_and_embeddings.sql (polished — tightened IVFFlat tuning comment, replaced implementation-detail comment with behavioral description)
+- Polish applied:
+  1. Extracted `createServiceClient()` helper — eliminates duplicated `createClient(URL, SERVICE_ROLE_KEY)` in storeEmbedding and searchSimilar. JSDoc captures the "why" (service-role for background jobs).
+  2. Named `SearchSimilarParams` interface — consistent with `StoreEmbeddingParams` pattern. Added to barrel re-exports.
+  3. Named `MatchRow` interface — extracted 7-line inline type from .map() callback for readability.
+  4. Replaced heavy `// ---...` section dividers with lightweight `// Types` / `// Functions` headers.
+  5. Tightened `storeEmbedding` JSDoc — removed filler ("for the given content"), architectural rationale now lives on `createServiceClient`.
+  6. SQL: "re-tune to sqrt(row count) as data grows" is more actionable than the prior wording. Function comment describes behavior, not caller convention.
+- **Acceptance criteria final status:**
+  - [x] pgvector extension enabled via migration (line 2: CREATE EXTENSION IF NOT EXISTS vector)
+  - [x] memory_embeddings table exists with vector(1536) column (line 11)
+  - [x] IVFFlat index created for cosine similarity search (line 28: USING ivfflat)
+  - [x] RLS policy restricts access by org_id (line 22: jwt.claims.org_id)
+  - [x] generateEmbedding() calls OpenAI text-embedding-3-small API (line 69)
+  - [x] storeEmbedding() generates embedding and inserts in one call using createServiceClient() (lines 76-98)
+  - [x] searchSimilar() performs vector similarity search with org and optional user scoping (lines 101-124)
+  - [x] pnpm build and pnpm typecheck pass (pre-existing pagination.tsx error unrelated)
+  - [x] Example: storeEmbedding({ content: 'The customer objected to pricing', contentType: 'transcript_segment' }) generates a 1536-dim vector and stores it
+  - [x] Negative: searchSimilar() with a userId from org A never returns embeddings from org B (RLS + match_memory_embeddings function both filter by org_id)
+- **Learnings for future iterations:**
+  - When two functions duplicate the same client creation pattern, extract a helper — even if only 2 call sites, it eliminates the risk of divergent configuration
+  - Heavy `// -----` section dividers are noise in files under 150 lines (confirmed again from US-002 Pass 3 learning)
+  - Inline type annotations in .map() callbacks become unreadable past ~5 fields — extract to a named interface
+  - Three-pass cycle for infrastructure stories: Pass 1 implements, Pass 2 catches serialization bug (JSON.stringify), Pass 3 deduplicates and names types
+---
