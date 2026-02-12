@@ -1266,3 +1266,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Structured return values (`reason` field) are better than console.log for Inngest functions — Inngest captures return values in its dashboard
   - `||` vs `??` — prefer `??` for null/undefined checks per project lint rules
 ---
+
+## [2026-02-12] - US-014: Build Coach Agent core: event subscriptions and weakness profile updates
+Run: 20260212-041723-20350 (iteration 5)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-5.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-5.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 12dd11a [Pass 1/3] feat: build Coach Agent with event subscriptions and weakness profile updates (US-014)
+- Post-commit status: clean (US-014 files only)
+- Skills invoked: none (backend-only Inngest agent, no UI)
+- Verification:
+  - Command: npx tsc --noEmit | grep coach → PASS (0 errors in coach files)
+  - Command: pnpm build → compiled successfully (pre-existing pagination.tsx error unrelated)
+- Files changed:
+  - src/lib/agents/coach/index.ts (new — agent definition + registerAgent)
+  - src/lib/agents/coach/on-attempt-scored.ts (new — Inngest handler)
+  - src/lib/agents/coach/on-user-inactive.ts (new — Inngest handler)
+  - src/app/api/inngest/route.ts (modified — import coach agent registration)
+- Implementation:
+  - Coach Agent defined with id 'coach-agent', subscribesTo ['attempt.scored', 'user.inactive']
+  - on-attempt-scored: step.run('update-weakness-profile') → generateWeaknessProfile(), step.run('log-activity') → logAgentActivity(), step.run('emit-weakness-updated') → inngest.send(coach.weakness.updated)
+  - on-user-inactive: step.run('fetch-context') → getAgentContext(), step.run('log-activity') → logAgentActivity(), step.run('emit-recommendation') → inngest.send(coach.recommendation.ready with type 'practice_reminder')
+  - Agent registered in registry via side-effect import in Inngest route
+- **Learnings for future iterations:**
+  - Inngest route uses side-effect imports for agent registration — must import before getAllAgentFunctions() call
+  - Service-role supabase client is the pattern for Inngest background jobs (no cookies())
+  - Each step.run() is independently retryable — errors in one step don't prevent others from executing on retry
+---
