@@ -1565,3 +1565,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Inngest cron functions go in `src/lib/inngest/functions/` as standalone, not in agent definition
   - `pnpm lint` is broken (Next.js 16 + ESLint v9 config mismatch), use `ESLINT_USE_FLAT_CONFIG=false npx eslint` instead
 ---
+
+## [2026-02-12 07:00] - US-019: Coach Agent daily digest for trainees
+Run: 20260212-062237-75941 (iteration 2)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-062237-75941-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-062237-75941-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 8192333 [Pass 2/3] fix: improve reliability of daily digest cron (US-019)
+- Post-commit status: clean (for US-019 files)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep daily-digest` -> PASS (0 errors in US-019 files)
+  - Command: `npx next lint --dir src` -> PASS (0 errors)
+  - Command: `pnpm build` -> pre-existing pagination.tsx error (unrelated to US-019)
+- Files changed:
+  - src/lib/agents/coach/daily-digest.ts (modified)
+  - src/lib/inngest/functions/send-daily-digest.ts (modified)
+- What was fixed:
+  - **Defensive guard**: `average()` now returns 0 for empty arrays instead of NaN (division by zero). Callers already guard but function is now safe independently.
+  - **Consistency**: Replaced inline `createClient()` with `createServiceClient()` from `@/lib/memory/supabase` — matches pattern in daily-digest.ts and other memory module files.
+  - **Idempotency**: Split combined `log-and-emit` Inngest step into separate `log-digest` and `emit-digest` steps. Matches the pattern in on-attempt-scored.ts and on-user-inactive.ts where logging and event emission are separate steps.
+  - **Batch resilience**: Wrapped per-trainee processing in try-catch so one trainee's failure doesn't block all subsequent digests. Function now returns `failures` count alongside `digestsSent`.
+- **Learnings for future iterations:**
+  - CodeRabbit CLI fails in non-TTY environments — use feature-dev:code-reviewer agent instead
+  - Inngest batch crons should wrap per-item processing in try-catch to prevent cascading failures
+  - Always prefer `createServiceClient()` over inline `createClient()` for consistency
+---
