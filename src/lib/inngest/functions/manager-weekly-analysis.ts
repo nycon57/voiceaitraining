@@ -1,9 +1,8 @@
 import { generateManagerInsights } from '@/lib/agents/manager/insight-generator'
-import type { InsightPriority } from '@/lib/agents/manager/insight-generator'
 import { analyzeTeamPerformance } from '@/lib/agents/manager/team-analyzer'
 import { inngest } from '@/lib/inngest/client'
 import { createServiceClient } from '@/lib/memory/supabase'
-import { sendNotification, type NotificationType } from '@/lib/notifications'
+import { sendNotification } from '@/lib/notifications'
 
 const AGENT_ID = 'manager-intelligence'
 
@@ -11,6 +10,10 @@ const AGENT_ID = 'manager-intelligence'
  * Weekly cron: Monday 9am UTC.
  * Runs team analysis per org, converts to insights, and sends
  * notifications to all managers and admins.
+ *
+ * Uses the service client (bypasses RLS) because this runs as a
+ * system-level cron without user context. All queries filter by
+ * org_id explicitly.
  */
 export const managerWeeklyAnalysis = inngest.createFunction(
   { id: 'manager-weekly-analysis', name: 'Manager: Weekly Team Analysis' },
@@ -26,7 +29,7 @@ export const managerWeeklyAnalysis = inngest.createFunction(
 
     let totalInsights = 0
     let totalNotifications = 0
-    let failures = 0
+    const failedOrgs: string[] = []
 
     for (const orgId of orgIds) {
       try {
@@ -54,12 +57,14 @@ export const managerWeeklyAnalysis = inngest.createFunction(
               ? insights
               : insights.filter((i) => i.priority !== 'low')
 
+            if (filtered.length === 0) continue
+
             for (const insight of filtered) {
               try {
                 await sendNotification({
                   userId: manager.userId,
                   orgId,
-                  type: 'weekly_insight' as NotificationType,
+                  type: 'weekly_insight',
                   title: insight.title,
                   body: insight.message,
                   agentId: AGENT_ID,
@@ -67,7 +72,7 @@ export const managerWeeklyAnalysis = inngest.createFunction(
                   recipientName: manager.name,
                   metadata: {
                     insightType: insight.type,
-                    priority: insight.priority as InsightPriority,
+                    priority: insight.priority,
                     ...insight.metadata,
                   },
                 })
@@ -90,11 +95,17 @@ export const managerWeeklyAnalysis = inngest.createFunction(
           `[manager-weekly] Failed to process org ${orgId}:`,
           err instanceof Error ? err.message : String(err),
         )
-        failures++
+        failedOrgs.push(orgId)
       }
     }
 
-    return { orgsProcessed: orgIds.length, totalInsights, totalNotifications, failures }
+    return {
+      orgsProcessed: orgIds.length,
+      totalInsights,
+      totalNotifications,
+      failures: failedOrgs.length,
+      failedOrgs,
+    }
   },
 )
 
