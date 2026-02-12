@@ -880,3 +880,34 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Inline type annotations in .map() callbacks become unreadable past ~5 fields — extract to a named interface
   - Three-pass cycle for infrastructure stories: Pass 1 implements, Pass 2 catches serialization bug (JSON.stringify), Pass 3 deduplicates and names types
 ---
+
+## [2026-02-12] - US-010: Create user_memory table for structured weakness profiles
+Thread: N/A
+Run: 20260212-015711-11780 (iteration 3)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 5b8d7fd [Pass 1/3] feat: create user_memory table for structured weakness profiles
+- Post-commit status: clean (for US-010 files; pre-existing untracked/modified files remain)
+- Skills invoked: supabase-postgres-best-practices
+- Verification:
+  - Command: `npx tsc --noEmit | grep memory/user-memory` -> PASS (0 errors in US-010 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - db/migrations/0015_create_user_memory.sql (new) — table, unique constraint, CHECK constraints, RLS, indexes, updated_at trigger
+  - src/lib/memory/user-memory.ts (new) — WeaknessEntry, SkillLevel, TrajectoryPoint interfaces; upsertMemory, getWeaknessProfile, getSkillLevels, getTopWeaknesses, getTopStrengths
+  - src/lib/memory/index.ts (modified — added user-memory type and function re-exports)
+- What was implemented:
+  - Migration: user_memory table with all 12 columns per spec, UNIQUE constraint on (org_id, user_id, memory_type, key), CHECK constraints for score range (0-100), valid trend values, valid memory_type values, RLS SELECT policy on org_id, composite indexes for type-based and score-based queries, updated_at trigger
+  - upsertMemory() uses Supabase `.upsert()` with `onConflict` for INSERT ON CONFLICT UPDATE behavior
+  - getWeaknessProfile() sorts by score ASC (worst first), getTopStrengths() sorts by score DESC (best first)
+  - Used bare @supabase/supabase-js createClient with service-role key (background job compatible, same pattern as embeddings.ts)
+  - Shared `toEntry()` helper maps snake_case DB rows to camelCase TypeScript interfaces
+- **Learnings for future iterations:**
+  - Supabase `.upsert()` with `onConflict` parameter handles INSERT ON CONFLICT UPDATE without raw SQL
+  - Added CHECK constraints for score range, trend enum, and memory_type enum — database-level validation in addition to TypeScript types
+  - The `createServiceClient()` pattern from embeddings.ts was reused here for background job compatibility
+  - Pre-existing pagination.tsx motion.nav type error continues to block full pnpm build TypeScript step
+---
