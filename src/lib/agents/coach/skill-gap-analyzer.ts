@@ -41,7 +41,7 @@ export function analyzeSkillGaps(context: AgentContext): SkillGapAnalysis {
   const gaps: SkillGap[] = weaknesses.map((w) => ({
     key: w.key,
     score: w.score ?? 0,
-    trend: (w.trend as Trend) ?? 'new',
+    trend: w.trend ?? 'new',
     evidenceCount: w.evidenceCount,
   }))
 

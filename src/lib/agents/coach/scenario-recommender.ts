@@ -9,6 +9,11 @@ export interface ScenarioRecommendation {
   difficulty: ScenarioDifficulty | null
 }
 
+export interface RecommendationResult {
+  recommendation: ScenarioRecommendation | null
+  reason: string
+}
+
 interface ScenarioRow {
   id: string
   title: string
@@ -38,15 +43,16 @@ const RECENT_ATTEMPT_THRESHOLD = 3
 
 /**
  * Recommend the best next scenario for a trainee based on their skill gaps.
- * Returns null if no scenarios match any gaps.
+ * Always returns a result with a reason — the recommendation is null when
+ * no suitable scenario can be found.
  */
 export async function recommendNextScenario(
   orgId: string,
   userId: string,
   gaps: SkillGap[],
-): Promise<ScenarioRecommendation | null> {
+): Promise<RecommendationResult> {
   if (gaps.length === 0) {
-    return null
+    return { recommendation: null, reason: 'No skill gaps identified yet.' }
   }
 
   const supabase = createServiceClient()
@@ -63,7 +69,7 @@ export async function recommendNextScenario(
   }
 
   if (!scenarios || scenarios.length === 0) {
-    return null
+    return { recommendation: null, reason: 'No active scenarios available for this organization.' }
   }
 
   // Fetch recent attempt counts per scenario in the last 7 days
@@ -80,7 +86,7 @@ export async function recommendNextScenario(
   const candidates = (scenarios as ScenarioRow[]).filter((s) => !overPracticed.has(s.id))
 
   if (candidates.length === 0) {
-    return null
+    return { recommendation: null, reason: 'All matching scenarios have been practiced 3+ times in the last 7 days.' }
   }
 
   // Score each candidate against the gaps
@@ -94,16 +100,19 @@ export async function recommendNextScenario(
 
   const best = scored[0]
   if (best.score === 0) {
-    return null
+    return { recommendation: null, reason: 'No scenarios match the identified skill gaps.' }
   }
 
   const reason = buildRecommendationReason(best.scenario, gaps)
 
   return {
-    scenarioId: best.scenario.id,
-    scenarioTitle: best.scenario.title,
+    recommendation: {
+      scenarioId: best.scenario.id,
+      scenarioTitle: best.scenario.title,
+      reason,
+      difficulty: best.scenario.difficulty,
+    },
     reason,
-    difficulty: best.scenario.difficulty,
   }
 }
 
