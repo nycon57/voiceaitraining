@@ -73,13 +73,7 @@ async function getUserPreferences(
 
   if (!data) return DEFAULT_PREFERENCES
 
-  return {
-    channel_email: data.channel_email ?? true,
-    channel_in_app: data.channel_in_app ?? true,
-    quiet_hours_start: data.quiet_hours_start,
-    quiet_hours_end: data.quiet_hours_end,
-    quiet_hours_timezone: data.quiet_hours_timezone ?? 'UTC',
-  }
+  return { ...DEFAULT_PREFERENCES, ...data }
 }
 
 // Quiet hours
@@ -141,7 +135,6 @@ function isQuietHours(prefs: NotificationPreferences): boolean {
 
 async function createInAppNotification(
   params: SendNotificationParams,
-  channelsSent: string[],
 ): Promise<string> {
   const supabase = createServiceClient()
 
@@ -156,7 +149,7 @@ async function createInAppNotification(
       action_url: params.actionUrl ?? null,
       agent_id: params.agentId ?? null,
       read: false,
-      channel_sent: channelsSent,
+      channel_sent: ['in_app'],
       metadata: params.metadata ?? null,
     })
     .select('id')
@@ -233,8 +226,7 @@ export async function sendNotification(
 
   const prefs = await getUserPreferences(validated.orgId, validated.userId)
 
-  // In-app notification is always created first to guarantee a record exists
-  const notificationId = await createInAppNotification(validated, ['in_app'])
+  const notificationId = await createInAppNotification(validated)
 
   let emailSent = false
   let emailSuppressedReason: SendNotificationResult['emailSuppressedReason']
