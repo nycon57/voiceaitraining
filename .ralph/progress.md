@@ -1106,3 +1106,28 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - `next lint` is broken in Next.js 16 (treats "lint" as directory arg) — use ESLINT_USE_FLAT_CONFIG=false npx eslint directly
   - ESLint rule `@typescript-eslint/non-nullable-type-assertion-style` prefers `x!` over `x as Type` after a null-filter
 ---
+
+## [2026-02-12 03:55] - US-012: Build memory query API for agent context retrieval
+Run: 20260212-033720-75936 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-033720-75936-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-033720-75936-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 0a74468 [Pass 2/3] refactor: eliminate duplicate query in getAgentContext (US-012)
+- Post-commit status: clean (US-012 files committed; pre-existing untracked files remain)
+- Skills invoked: /code-review (via feature-dev:code-reviewer agent)
+- Verification:
+  - Command: npx tsc --noEmit | grep src/lib/memory/ -> PASS (0 errors in memory module)
+  - Command: ESLINT_USE_FLAT_CONFIG=false npx eslint src/lib/memory/query.ts src/lib/memory/index.ts -> PASS
+- Files changed:
+  - src/lib/memory/query.ts (refactored)
+- Code review found 4 issues:
+  - Column name `status` vs `attempt_status`: FALSE POSITIVE — old `status` column still exists, entire codebase uses it
+  - Duplicate query in getAgentContext(): VALID — fixed by extracting fetchCompletedAttempts() and computePracticePattern() to share data between practice pattern and trajectory computation (5 queries → 4)
+  - Streak calculation logic: ACCEPTABLE — grace period for today is intentional (Duolingo-style)
+  - Division by zero edge case: ALREADY HANDLED by Math.max(..., 1)
+- **Learnings for future iterations:**
+  - Code reviewers may flag column name issues when a migration adds a new column without dropping the old one — always verify against actual usage patterns in the codebase
+  - When multiple computations need the same DB data, extract a shared fetch function and pass results to pure computation functions
+---
