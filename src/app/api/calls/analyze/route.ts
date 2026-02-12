@@ -8,6 +8,7 @@ import { google } from '@ai-sdk/google'
 import { analyzeTranscript } from '@/lib/analysis/transcript-analyzer'
 import { scoreWithRubric } from '@/lib/analysis/rubric-scorer'
 import type { ScenarioRubric } from '@/types/scenario'
+import { emitAttemptScored, emitAttemptFeedbackGenerated } from '@/lib/events'
 
 const analyzeCallSchema = z.object({
   attemptId: z.string().uuid(),
@@ -111,6 +112,23 @@ export async function POST(req: NextRequest) {
       criteria: rubricScore.criterion_scores.map(c => ({ name: c.criterion_name, score: c.score, max: c.max_score }))
     })
 
+    // Fire-and-forget: notify subscribers that scoring finished
+    emitAttemptScored({
+      attemptId,
+      userId: user.id,
+      orgId: user.orgId!,
+      scenarioId: attempt.scenario_id,
+      score: rubricScore.overall_score,
+      scoreBreakdown: Object.fromEntries(
+        rubricScore.criterion_scores.map((c: { criterion_name: string; score: number; max_score: number; percentage: number }) => [
+          c.criterion_name,
+          { score: c.score, maxScore: c.max_score, percentage: c.percentage },
+        ])
+      ),
+      kpis,
+      criticalFailures: rubricScore.critical_failures,
+    }).catch((err: unknown) => console.error('[analyze] Failed to emit attempt.scored:', err))
+
     // Build context-aware AI prompt
     const analysisPrompt = buildEnhancedPrompt(
       scenario,
@@ -176,6 +194,16 @@ export async function POST(req: NextRequest) {
           }
 
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(analysis)}\n\n`))
+
+          // Fire-and-forget: notify subscribers that feedback is ready
+          emitAttemptFeedbackGenerated({
+            attemptId,
+            userId: user.id,
+            orgId: user.orgId!,
+            feedbackSections: analysis.analysis.feedback,
+            nextSteps: analysis.analysis.nextSteps,
+          }).catch((err: unknown) => console.error('[analyze] Failed to emit attempt.feedback.generated:', err))
+
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
         } catch (error) {
