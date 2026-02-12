@@ -91,42 +91,56 @@ async function getUserPreferences(
 
 // Quiet hours
 
+function parseTimeToMinutes(time: string): number | null {
+  const parts = time.split(':')
+  if (parts.length !== 2) return null
+  const hour = parseInt(parts[0], 10)
+  const minute = parseInt(parts[1], 10)
+  if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    return null
+  }
+  return hour * 60 + minute
+}
+
 /**
  * Check if the current time falls within the user's quiet hours.
- *
- * Quiet hours are defined as a start and end time in the user's timezone.
  * Supports overnight ranges (e.g., 22:00 to 08:00).
+ * Fails open (returns false) on invalid timezone or time format.
  */
 function isQuietHours(prefs: NotificationPreferences): boolean {
   if (!prefs.quiet_hours_start || !prefs.quiet_hours_end) return false
 
-  const now = new Date()
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: prefs.quiet_hours_timezone,
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
+  const startMinutes = parseTimeToMinutes(prefs.quiet_hours_start)
+  const endMinutes = parseTimeToMinutes(prefs.quiet_hours_end)
+  if (startMinutes === null || endMinutes === null) return false
 
-  const parts = formatter.formatToParts(now)
-  const hourPart = parts.find((p) => p.type === 'hour')
-  const minutePart = parts.find((p) => p.type === 'minute')
-  if (!hourPart || !minutePart) return false
+  try {
+    const now = new Date()
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: prefs.quiet_hours_timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
 
-  const currentMinutes = parseInt(hourPart.value, 10) * 60 + parseInt(minutePart.value, 10)
+    const parts = formatter.formatToParts(now)
+    const hourPart = parts.find((p) => p.type === 'hour')
+    const minutePart = parts.find((p) => p.type === 'minute')
+    if (!hourPart || !minutePart) return false
 
-  const [startH, startM] = prefs.quiet_hours_start.split(':').map(Number)
-  const [endH, endM] = prefs.quiet_hours_end.split(':').map(Number)
-  const startMinutes = startH * 60 + startM
-  const endMinutes = endH * 60 + endM
+    const currentMinutes = parseInt(hourPart.value, 10) * 60 + parseInt(minutePart.value, 10)
 
-  // Overnight range (e.g., 22:00 to 08:00)
-  if (startMinutes > endMinutes) {
-    return currentMinutes >= startMinutes || currentMinutes < endMinutes
+    // Overnight range (e.g., 22:00 to 08:00)
+    if (startMinutes > endMinutes) {
+      return currentMinutes >= startMinutes || currentMinutes < endMinutes
+    }
+
+    // Same-day range (e.g., 13:00 to 15:00)
+    return currentMinutes >= startMinutes && currentMinutes < endMinutes
+  } catch {
+    // Invalid timezone — fail open (send notification)
+    return false
   }
-
-  // Same-day range (e.g., 13:00 to 15:00)
-  return currentMinutes >= startMinutes && currentMinutes < endMinutes
 }
 
 // In-app notification
@@ -174,6 +188,12 @@ function getResend(): Resend {
 async function sendEmail(params: SendNotificationParams): Promise<boolean> {
   if (!params.recipientEmail) return false
 
+  const from = process.env.EMAIL_FROM
+  if (!from) {
+    console.error('[notifications] EMAIL_FROM environment variable is not set')
+    return false
+  }
+
   const Template = emailTemplates[params.type as NotificationType]
   if (!Template) return false
 
@@ -185,7 +205,7 @@ async function sendEmail(params: SendNotificationParams): Promise<boolean> {
   })
 
   const { error } = await getResend().emails.send({
-    from: process.env.EMAIL_FROM,
+    from,
     to: params.recipientEmail,
     subject: params.title,
     react: element,
@@ -219,7 +239,9 @@ export async function sendNotification(
 
   const prefs = await getUserPreferences(validated.orgId, validated.userId)
 
-  const channelsSent: string[] = ['in_app']
+  // In-app notification is always created first to guarantee a record exists
+  const notificationId = await createInAppNotification(validated, ['in_app'])
+
   let emailSent = false
   let emailSuppressedReason: SendNotificationResult['emailSuppressedReason']
 
@@ -232,13 +254,7 @@ export async function sendNotification(
     emailSuppressedReason = 'quiet_hours'
   } else {
     emailSent = await sendEmail(validated)
-    if (emailSent) {
-      channelsSent.push('email')
-    }
   }
-
-  // In-app notification is always created
-  const notificationId = await createInAppNotification(validated, channelsSent)
 
   return {
     inAppCreated: true,
