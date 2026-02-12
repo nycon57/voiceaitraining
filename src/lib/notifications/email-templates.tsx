@@ -89,14 +89,16 @@ interface BaseEmailProps {
   recipientName?: string
 }
 
-// Coach recommendation template
+// Shared layout
 
-function CoachRecommendationEmail({
+function NotificationEmailLayout({
   title,
   body,
   actionUrl,
   recipientName,
-}: BaseEmailProps) {
+  headingText,
+  ctaLabel,
+}: BaseEmailProps & { headingText: (name?: string) => string; ctaLabel: string }) {
   return (
     <Html>
       <Head />
@@ -105,13 +107,13 @@ function CoachRecommendationEmail({
         <Container style={container}>
           <Section style={{ padding: '0 32px' }}>
             <Heading style={heading}>
-              {recipientName ? `Hey ${recipientName},` : 'Hey there,'}
+              {headingText(recipientName)}
             </Heading>
             <Text style={paragraph}>{body}</Text>
             {actionUrl && (
               <Section style={{ textAlign: 'center', margin: '24px 0' }}>
                 <Link href={actionUrl} style={ctaButton}>
-                  Start practicing
+                  {ctaLabel}
                 </Link>
               </Section>
             )}
@@ -128,220 +130,47 @@ function CoachRecommendationEmail({
   )
 }
 
-// Daily digest template
+// Template configuration
 
-function DailyDigestEmail({
-  title,
-  body,
-  actionUrl,
-  recipientName,
-}: BaseEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>{title}</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={{ padding: '0 32px' }}>
-            <Heading style={heading}>
-              {recipientName
-                ? `${recipientName}'s daily summary`
-                : 'Your daily summary'}
-            </Heading>
-            <Text style={paragraph}>{body}</Text>
-            {actionUrl && (
-              <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-                <Link href={actionUrl} style={ctaButton}>
-                  View dashboard
-                </Link>
-              </Section>
-            )}
-            <Hr style={hr} />
-            <Text style={footer}>
-              VoiceAI Training — Your AI sales coach.
-              <br />
-              You can manage notification preferences in your account settings.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  )
-}
-
-// Practice reminder template
-
-function PracticeReminderEmail({
-  title,
-  body,
-  actionUrl,
-  recipientName,
-}: BaseEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>{title}</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={{ padding: '0 32px' }}>
-            <Heading style={heading}>
-              {recipientName
-                ? `${recipientName}, time to practice`
-                : 'Time to practice'}
-            </Heading>
-            <Text style={paragraph}>{body}</Text>
-            {actionUrl && (
-              <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-                <Link href={actionUrl} style={ctaButton}>
-                  Practice now
-                </Link>
-              </Section>
-            )}
-            <Hr style={hr} />
-            <Text style={footer}>
-              VoiceAI Training — Your AI sales coach.
-              <br />
-              You can manage notification preferences in your account settings.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  )
-}
-
-// Weakness update template
-
-function WeaknessUpdateEmail({
-  title,
-  body,
-  actionUrl,
-  recipientName,
-}: BaseEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>{title}</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={{ padding: '0 32px' }}>
-            <Heading style={heading}>
-              {recipientName
-                ? `${recipientName}, skill update`
-                : 'Skill profile update'}
-            </Heading>
-            <Text style={paragraph}>{body}</Text>
-            {actionUrl && (
-              <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-                <Link href={actionUrl} style={ctaButton}>
-                  View profile
-                </Link>
-              </Section>
-            )}
-            <Hr style={hr} />
-            <Text style={footer}>
-              VoiceAI Training — Your AI sales coach.
-              <br />
-              You can manage notification preferences in your account settings.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  )
-}
-
-// Assignment created template
-
-function AssignmentCreatedEmail({
-  title,
-  body,
-  actionUrl,
-  recipientName,
-}: BaseEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>{title}</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={{ padding: '0 32px' }}>
-            <Heading style={heading}>
-              {recipientName
-                ? `${recipientName}, new assignment`
-                : 'New assignment'}
-            </Heading>
-            <Text style={paragraph}>{body}</Text>
-            {actionUrl && (
-              <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-                <Link href={actionUrl} style={ctaButton}>
-                  View assignment
-                </Link>
-              </Section>
-            )}
-            <Hr style={hr} />
-            <Text style={footer}>
-              VoiceAI Training — Your AI sales coach.
-              <br />
-              You can manage notification preferences in your account settings.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  )
-}
-
-// Assignment overdue template
-
-function AssignmentOverdueEmail({
-  title,
-  body,
-  actionUrl,
-  recipientName,
-}: BaseEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>{title}</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={{ padding: '0 32px' }}>
-            <Heading style={heading}>
-              {recipientName
-                ? `${recipientName}, overdue assignment`
-                : 'Assignment overdue'}
-            </Heading>
-            <Text style={paragraph}>{body}</Text>
-            {actionUrl && (
-              <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-                <Link href={actionUrl} style={ctaButton}>
-                  Complete now
-                </Link>
-              </Section>
-            )}
-            <Hr style={hr} />
-            <Text style={footer}>
-              VoiceAI Training — Your AI sales coach.
-              <br />
-              You can manage notification preferences in your account settings.
-            </Text>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  )
+const TEMPLATE_CONFIG: Record<
+  NotificationType,
+  { headingText: (name?: string) => string; ctaLabel: string }
+> = {
+  coach_recommendation: {
+    headingText: (name) => (name ? `Hey ${name},` : 'Hey there,'),
+    ctaLabel: 'Start practicing',
+  },
+  daily_digest: {
+    headingText: (name) => (name ? `${name}'s daily summary` : 'Your daily summary'),
+    ctaLabel: 'View dashboard',
+  },
+  practice_reminder: {
+    headingText: (name) => (name ? `${name}, time to practice` : 'Time to practice'),
+    ctaLabel: 'Practice now',
+  },
+  weakness_update: {
+    headingText: (name) => (name ? `${name}, skill update` : 'Skill update'),
+    ctaLabel: 'View profile',
+  },
+  assignment_created: {
+    headingText: (name) => (name ? `${name}, new assignment` : 'New assignment'),
+    ctaLabel: 'View assignment',
+  },
+  assignment_overdue: {
+    headingText: (name) => (name ? `${name}, assignment overdue` : 'Assignment overdue'),
+    ctaLabel: 'Complete assignment',
+  },
 }
 
 /** Map of notification type to its React Email template component. */
 export const emailTemplates: Record<
   NotificationType,
   React.FC<BaseEmailProps>
-> = {
-  coach_recommendation: CoachRecommendationEmail,
-  daily_digest: DailyDigestEmail,
-  practice_reminder: PracticeReminderEmail,
-  weakness_update: WeaknessUpdateEmail,
-  assignment_created: AssignmentCreatedEmail,
-  assignment_overdue: AssignmentOverdueEmail,
-}
+> = Object.fromEntries(
+  Object.entries(TEMPLATE_CONFIG).map(([type, config]) => [
+    type,
+    (props: BaseEmailProps) => (
+      <NotificationEmailLayout {...props} {...config} />
+    ),
+  ]),
+) as Record<NotificationType, React.FC<BaseEmailProps>>
