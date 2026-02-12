@@ -25,6 +25,23 @@ export const embedAttemptMemory = inngest.createFunction(
   async ({ event, step }) => {
     const { attemptId, userId, orgId } = event.data
 
+    // Step 0: Idempotency — skip if this attempt was already embedded
+    const alreadyEmbedded = await step.run('check-existing', async () => {
+      const { data } = await createServiceClient()
+        .from('memory_embeddings')
+        .select('id')
+        .eq('source_id', attemptId)
+        .eq('org_id', orgId)
+        .limit(1)
+
+      return data !== null && data.length > 0
+    })
+
+    if (alreadyEmbedded) {
+      console.log(`[embed-attempt-memory] Skipping attempt ${attemptId}: already embedded`)
+      return { embedded: 0, skipped: true, reason: 'already_embedded' }
+    }
+
     // Step 1: Fetch attempt with transcript and feedback
     const attempt = await step.run('fetch-attempt', async () => {
       const { data, error } = await createServiceClient()
@@ -75,7 +92,6 @@ export const embedAttemptMemory = inngest.createFunction(
     const toEmbed = queue.slice(0, MAX_EMBEDDINGS)
 
     // Step 3: Embed each item with retryability
-    let embeddedCount = 0
     for (let i = 0; i < toEmbed.length; i++) {
       const item = toEmbed[i]
       await step.run(`embed-${i}`, async () => {
@@ -88,10 +104,9 @@ export const embedAttemptMemory = inngest.createFunction(
           metadata: item.metadata,
         })
       })
-      embeddedCount++
     }
 
-    return { embedded: embeddedCount, segments: segments.length }
+    return { embedded: toEmbed.length, segments: segments.length }
   },
 )
 
@@ -113,8 +128,11 @@ function fillerCount(text: string): number {
  */
 function extractSignificantSegments(segments: TranscriptSegment[]): SignificantSegment[] {
   const found: SignificantSegment[] = []
+  const consumed = new Set<number>()
 
   for (let i = 0; i < segments.length; i++) {
+    if (consumed.has(i)) continue
+
     const seg = segments[i]
     const nextSeg = i + 1 < segments.length ? segments[i + 1] : undefined
 
@@ -132,6 +150,7 @@ function extractSignificantSegments(segments: TranscriptSegment[]): SignificantS
           content: `Agent asked: "${seg.text}" — Trainee responded inadequately: "${nextSeg.text}"`,
           metadata: { startTimeMs: seg.start_time_ms },
         })
+        consumed.add(i + 1)
       }
       continue
     }
