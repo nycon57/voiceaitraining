@@ -91,7 +91,7 @@ export async function searchSimilar(params: {
   )
 
   const { data, error } = await supabase.rpc('match_memory_embeddings', {
-    query_embedding: JSON.stringify(queryEmbedding),
+    query_embedding: queryEmbedding,
     match_org_id: params.orgId,
     match_user_id: params.userId ?? null,
     match_content_type: params.contentType ?? null,
