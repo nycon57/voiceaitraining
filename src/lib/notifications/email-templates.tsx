@@ -72,6 +72,9 @@ export const NOTIFICATION_TYPES = [
   'weakness_update',
   'assignment_created',
   'assignment_overdue',
+  'critical_score',
+  'declining_trend',
+  'achievement',
 ] as const
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
@@ -151,6 +154,18 @@ const TEMPLATE_CONFIG: Record<NotificationType, TemplateConfig> = {
   assignment_overdue: {
     headingText: (name) => (name ? `${name}, assignment overdue` : 'Assignment overdue'),
     ctaLabel: 'Complete assignment',
+  },
+  critical_score: {
+    headingText: (name) => (name ? `${name}, attention needed` : 'Attention needed'),
+    ctaLabel: 'View details',
+  },
+  declining_trend: {
+    headingText: (name) => (name ? `${name}, trend alert` : 'Trend alert'),
+    ctaLabel: 'View details',
+  },
+  achievement: {
+    headingText: (name) => (name ? `${name}, great news!` : 'Great news!'),
+    ctaLabel: 'View details',
   },
 }
 

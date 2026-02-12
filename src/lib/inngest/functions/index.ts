@@ -3,6 +3,7 @@ import type { InngestFunction } from 'inngest'
 import { detectInactiveUsers } from './detect-inactive-users'
 import { dispatchCoachNotification } from './dispatch-coach-notification'
 import { embedAttemptMemory } from './embed-attempt-memory'
+import { managerAlerts } from './manager-alerts'
 import { sendDailyDigest } from './send-daily-digest'
 
 /**
@@ -13,5 +14,6 @@ export const functions: InngestFunction.Any[] = [
   detectInactiveUsers,
   dispatchCoachNotification,
   embedAttemptMemory,
+  managerAlerts,
   sendDailyDigest,
 ]
