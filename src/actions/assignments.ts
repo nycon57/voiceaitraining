@@ -2,6 +2,7 @@
 
 import { assertHuman } from '@/lib/botid'
 import { withOrgGuard, withRoleGuard } from '@/lib/auth'
+import { emitAssignmentCreated } from '@/lib/events'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -99,42 +100,16 @@ export async function createAssignment(data: z.infer<typeof createAssignmentSche
       throw new Error(`Failed to create assignment: ${error.message}`)
     }
 
-    // TODO: Trigger webhook for assignment created
-    // Webhook function triggerAssignmentCreated needs to be implemented in src/lib/webhooks.ts
-    // try {
-    //   const { triggerAssignmentCreated } = await import('@/lib/webhooks')
-    //
-    //   const { data: org } = await supabase
-    //     .from('orgs')
-    //     .select('name')
-    //     .eq('id', orgId)
-    //     .single()
-    //
-    //   const { data: userData } = await supabase
-    //     .from('users')
-    //     .select('id, first_name, last_name, email, role')
-    //     .eq('clerk_user_id', validatedData.assignee_user_id)
-    //     .single()
-    //
-    //   if (userData) {
-    //     const webhookUser = {
-    //       id: userData.id,
-    //       name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
-    //       email: userData.email,
-    //       role: userData.role as 'trainee' | 'manager' | 'admin' | 'hr',
-    //     }
-    //
-    //     await triggerAssignmentCreated(
-    //       orgId,
-    //       org?.name || 'Unknown Organization',
-    //       webhookUser,
-    //       assignment
-    //     )
-    //   }
-    // } catch (webhookError) {
-    //   console.error('Failed to trigger assignment webhook:', webhookError)
-    //   // Don't fail the assignment creation if webhook fails
-    // }
+    // Fire-and-forget: notify subscribers that an assignment was created
+    emitAssignmentCreated({
+      assignmentId: assignment.id,
+      userId: validatedData.assignee_user_id,
+      orgId,
+      scenarioId: validatedData.scenario_id,
+      trackId: validatedData.track_id,
+      dueAt: validatedData.due_at,
+      assignedBy: user.id,
+    }).catch((err) => console.error('Failed to emit assignment.created:', err))
 
     revalidatePath('/assignments', 'page')
     revalidatePath('/dashboard', 'page')

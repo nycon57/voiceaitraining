@@ -1,6 +1,7 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
+import { emitUserJoinedOrg } from '@/lib/events'
 import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(req: Request) {
@@ -165,6 +166,18 @@ export async function POST(req: Request) {
           }, {
             onConflict: 'clerk_user_id,org_id'
           })
+
+        // Fire-and-forget: notify subscribers that a user joined the org
+        const email = clerkUser?.email || public_user_data.identifier || ''
+        const firstName = clerkUser?.first_name || public_user_data.first_name || ''
+        const lastName = clerkUser?.last_name || public_user_data.last_name || ''
+        emitUserJoinedOrg({
+          userId: public_user_data.user_id,
+          orgId: organization.id,
+          role: userRole,
+          email,
+          name: `${firstName} ${lastName}`.trim(),
+        }).catch((err) => console.error('Failed to emit user.joined.org:', err))
 
         break
       }
