@@ -13,7 +13,7 @@ function isValidTimezone(tz: string): boolean {
   }
 }
 
-const notificationPreferencesSchema = z.object({
+export const notificationPreferencesSchema = z.object({
   channel_email: z.boolean(),
   channel_push: z.boolean(),
   channel_in_app: z.boolean(),
@@ -22,7 +22,7 @@ const notificationPreferencesSchema = z.object({
   quiet_hours_timezone: z
     .string()
     .refine(isValidTimezone, {
-      message: 'Invalid timezone. Please select a valid IANA timezone.',
+      message: 'Invalid timezone. Please select a valid timezone from the list.',
     }),
   digest_frequency: z.enum(['daily', 'weekly', 'none']),
   coach_nudges: z.boolean(),
@@ -30,17 +30,11 @@ const notificationPreferencesSchema = z.object({
 
 export type NotificationPreferencesInput = z.infer<typeof notificationPreferencesSchema>
 
-export interface NotificationPreferences {
+export interface NotificationPreferences extends NotificationPreferencesInput {
   id: string
-  channel_email: boolean
-  channel_push: boolean
-  channel_in_app: boolean
-  quiet_hours_start: string | null
-  quiet_hours_end: string | null
-  quiet_hours_timezone: string
-  digest_frequency: string
-  coach_nudges: boolean
 }
+
+const PREFS_SELECT = 'id, channel_email, channel_push, channel_in_app, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, digest_frequency, coach_nudges' as const
 
 const DEFAULT_PREFERENCES: Omit<NotificationPreferences, 'id'> = {
   channel_email: true,
@@ -57,7 +51,7 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
   return withOrgGuard(async (user, orgId, supabase) => {
     const { data, error } = await supabase
       .from('notification_preferences')
-      .select('id, channel_email, channel_push, channel_in_app, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, digest_frequency, coach_nudges')
+      .select(PREFS_SELECT)
       .eq('org_id', orgId)
       .eq('user_id', user.id)
       .single()
@@ -92,7 +86,7 @@ export async function updateNotificationPreferences(
         },
         { onConflict: 'org_id,user_id' }
       )
-      .select('id, channel_email, channel_push, channel_in_app, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, digest_frequency, coach_nudges')
+      .select(PREFS_SELECT)
       .single()
 
     if (error) {
