@@ -2499,3 +2499,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Inline reduce expressions repeated 3+ times warrant a named helper
   - Pre-existing build failures should be documented each pass to prevent confusion
 ---
+
+## [2026-02-12T09:45:00] - US-030: Real-time manager alerts on critical scoring events
+Run: 20260212-092752-41851 (iteration 5)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-5.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-5.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: f4039d6 [Pass 2/3] fix: harden manager alerts with error handling and declining trend logic (US-030)
+- Post-commit status: clean (US-030 files only)
+- Skills invoked: /code-review (via feature-dev:code-reviewer subagent), /code-simplifier (via code-simplifier:code-simplifier subagent)
+- Verification:
+  - Command: pnpm typecheck (manager-alerts.ts) -> PASS (no errors in story files)
+  - Command: pnpm lint (manager-alerts.ts) -> PASS (no lint errors)
+  - Pre-existing build/typecheck errors remain in pagination.tsx, analytics.ts, vapi.ts, etc. — not from US-030
+- Files changed:
+  - src/lib/inngest/functions/manager-alerts.ts (modified)
+- Issues found and fixed from code review:
+  1. **CRITICAL: Declining trend included current attempt** — query now excludes current attemptId via .neq('id', attemptId) and fetches DECLINING_WINDOW-1 prior attempts, prepending the current score for comparison
+  2. **Error handling: query failures silently ignored** — added error logging for trainee, scenario, attempts, and count queries
+  3. **Error handling: sendNotification could crash the loop** — wrapped per-manager notification in try/catch so one failure doesn't block remaining managers
+  4. **Type safety: unsafe score cast** — replaced `a.score as number` with `.filter((s): s is number => typeof s === 'number')` type guard
+  5. **Code cleanup** — removed unused top-level ManagerUser interface, flattened nested isDeclining conditional, cleaner type annotations
+- **Learnings for future iterations:**
+  - Declining trend detection must exclude the triggering event to detect a true prior pattern
+  - Always wrap iterative notification sends in try/catch — one Supabase insert failure shouldn't block remaining recipients
+  - code-simplifier:code-simplifier is the correct subagent_type for the simplifier skill
+---
