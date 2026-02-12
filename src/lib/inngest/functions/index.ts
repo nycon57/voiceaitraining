@@ -1,4 +1,7 @@
 import type { InngestFunction } from 'inngest'
 
-/** Central registry of all Inngest background functions. */
+/**
+ * Standalone Inngest functions not owned by any agent.
+ * Agent-owned functions are registered via the agent registry (src/lib/agents).
+ */
 export const functions: InngestFunction.Any[] = []
