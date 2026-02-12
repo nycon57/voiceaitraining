@@ -1969,3 +1969,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When Zod enum and TypeScript union share values, extract a const array and derive both from it
   - CodeRabbit CLI requires TTY (raw mode) — cannot run in non-interactive shell
 ---
+
+## [2026-02-12 08:20] - US-021: Build notification dispatcher with email templates
+Thread: n/a
+Run: 20260212-080745-74639 (iteration 2)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080745-74639-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080745-74639-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 70695fb [Pass 3/3] refactor: extract shared email layout, simplify dispatcher (US-021)
+- Post-commit status: clean (for US-021 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier, writing-clearly-and-concisely (via agent analysis)
+- Verification:
+  - Command: `npx tsc --noEmit | grep src/lib/notifications` -> PASS (0 errors in US-021 files)
+  - Command: `pnpm build` -> FAIL (pre-existing pagination.tsx error, unrelated to US-021)
+- Files changed:
+  - src/lib/notifications/email-templates.tsx — extracted shared NotificationEmailLayout, replaced 6 duplicate templates with config map
+  - src/lib/notifications/dispatcher.ts — simplified getUserPreferences return, removed misleading channelsSent param
+- What was implemented:
+  - Extracted shared `NotificationEmailLayout` component and `TEMPLATE_CONFIG` map, reducing 6 near-identical email templates (~200 lines) to a single layout + config entries
+  - Removed `channelsSent` parameter from `createInAppNotification()` (always `['in_app']`; misleading abstraction)
+  - Simplified `getUserPreferences()` return from 6-line manual fallback to `{ ...DEFAULT_PREFERENCES, ...data }` spread
+  - Fixed heading text inconsistencies: "Skill profile update" → "Skill update", "Assignment overdue" → consistent capitalization
+  - Fixed CTA label: "Complete now" → "Complete assignment" for consistency with other action verbs
+- **Learnings for future iterations:**
+  - When 3+ React components share identical JSX structure with only 1-2 string differences, extract a shared layout and drive variations via a config record — reduces both code and maintenance surface
+  - The `Object.fromEntries(Object.entries(...).map(...))` pattern with `as Record<K, V>` is the clean way to build typed maps from config objects in TypeScript
+  - Pre-existing build failures (pagination.tsx) have been present since at least US-004; not a blocker for notification work
+---
