@@ -19,10 +19,7 @@ import {
 
 type InngestSendPayload = SendEventPayload<GetEvents<typeof inngest>>
 
-/**
- * Sends a typed domain event through Inngest.
- * Validates the payload against the Zod schema at runtime before sending.
- */
+/** Validates payload against its Zod schema, then sends the event via Inngest. */
 export async function emitEvent<K extends keyof EventPayloadMap>(
   eventName: K,
   payload: EventPayloadMap[K]
@@ -30,14 +27,11 @@ export async function emitEvent<K extends keyof EventPayloadMap>(
   const schema = eventSchemas[eventName]
   const parsed = schema.parse(payload)
 
-  // Safe assertion: Zod validates the payload above, and K is constrained to
-  // valid event names. TS can't narrow a generic union member through send().
+  // TS can't narrow a generic union through send(); Zod validates above.
   await inngest.send({ name: eventName, data: parsed } as InngestSendPayload)
 }
 
-// ---------------------------------------------------------------------------
-// Convenience emit functions
-// ---------------------------------------------------------------------------
+// Typed emit helpers
 
 export function emitAttemptCompleted(data: AttemptCompletedPayload) {
   return emitEvent(EVENT_NAMES.ATTEMPT_COMPLETED, data)
