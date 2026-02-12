@@ -1737,3 +1737,82 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - User-facing motivational copy benefits from consistent time references ("in the last 24 hours" vs mixing "yesterday")
   - Exclamation marks and casual urgency ("don't lose it!") should be replaced with calm confidence ("You're on a streak.") for professional coaching tone
 ---
+
+## [2026-02-12 07:10] - US-031: Real-time audio ingestion WebSocket endpoint for Live Copilot
+Thread: ralph-build
+Run: 20260212-070240-29265 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-070240-29265-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-070240-29265-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 334d8a0 [Pass 1/3] feat: add real-time audio ingestion WebSocket endpoint for Live Copilot (US-031)
+- Post-commit status: remaining untracked/modified files are all from prior runs (documentation, .ralph, .claude, .agents)
+- Skills invoked: /feature-dev, /next-best-practices
+- Verification:
+  - Command: `npx tsc --noEmit | grep copilot` -> PASS (0 errors in US-031 files)
+  - Command: `pnpm build` -> Compiled successfully in 4.1s; pre-existing pagination.tsx type error blocks full build TypeScript step (not related to US-031)
+  - Command: `npx eslint src/lib/copilot/ src/app/api/copilot/` -> SKIP (pre-existing ESLint circular reference config issue)
+- Files changed:
+  - `src/lib/copilot/types.ts` (new) — CopilotSession, CopilotSessionStatus, ServerMessage/ClientControlMessage types, audio constants, WS close codes
+  - `src/lib/copilot/session-manager.ts` (new) — Map-based in-memory session tracking with stale cleanup (5min threshold, 60s sweep)
+  - `src/lib/copilot/ws-handler.ts` (new) — WebSocket connection handler: JWT auth via Clerk verifyToken, binary audio ingestion, JSON control messages, lifecycle events
+  - `src/lib/copilot/index.ts` (new) — barrel export for all copilot types and functions
+  - `src/app/api/copilot/stream/route.ts` (new) — GET handler returning health/info JSON + active session count
+  - `server.mjs` (new) — Custom Node.js server wrapping Next.js with WebSocket upgrade handling at /api/copilot/stream
+  - `package.json` (modified) — added ws, @types/ws, tsx deps; added dev:ws and start:ws scripts
+  - `pnpm-lock.yaml` (modified) — lockfile update
+- What was implemented:
+  - WebSocket endpoint at /api/copilot/stream via custom server (server.mjs)
+  - Authentication: token query param → Clerk verifyToken with CLERK_SECRET_KEY
+  - Session manager: createSession, getSession, updateSessionActivity, removeSession, getActiveSessionCount, getSessionsByUser/Org
+  - Audio handling: binary chunks tracked with byte count and sequence number, ACK every 50th chunk
+  - Control messages: ping (keepalive), config (metadata update), end (graceful close)
+  - Close codes: 4001 (auth failed), 4002 (invalid payload), 4003 (session expired), 4008 (server error)
+  - Stale session reaper: 60s interval, 5min inactivity threshold, self-stopping when no sessions
+  - Custom server passes non-copilot upgrade requests to Next.js via getUpgradeHandler() (preserves HMR)
+- **Learnings for future iterations:**
+  - Next.js 16 App Router does not support WebSocket in route handlers; custom server (server.mjs) required for WS upgrade
+  - Next.js 16 provides `app.getUpgradeHandler()` for forwarding non-handled upgrade requests — use this to preserve HMR
+  - Zod v4 `z.record()` requires 2 args (key schema + value schema), unlike v3 which accepted 1
+  - `@clerk/backend` (bundled with `@clerk/nextjs`) exports `verifyToken` for JWT verification outside middleware context
+  - `tsx` (devDependency) needed to run TypeScript files from the custom server.mjs
+---
+
+## [2026-02-12] - US-020: Create notification tables migration (preferences and notifications)
+Thread: N/A
+Run: 20260212-073743-58254 (iteration 1)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073743-58254-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073743-58254-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 0582b30 [Pass 3/3] docs: finalize US-020 notification tables migration — all criteria verified
+- Post-commit status: clean (for US-020 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (manual review), supabase-postgres-best-practices (pattern comparison)
+- Verification:
+  - Command: `pnpm build` -> pre-existing pagination.tsx error (unrelated; US-020 is SQL-only)
+  - Command: `pnpm typecheck` -> pre-existing errors (unrelated; US-020 is SQL-only)
+  - Command: `pnpm lint` -> pre-existing configuration error (unrelated; US-020 is SQL-only)
+  - Acceptance criteria: all 8 criteria verified and passing
+- Files changed:
+  - .ralph/progress.md (updated)
+- What was implemented:
+  - Code simplifier reviewed migration — no changes needed (clean and consistent with sibling migrations 0013, 0015)
+  - Writing review confirmed all SQL comments are concise and explain purpose not mechanics
+  - Security audit: RLS enabled, org_id policies restrict access, no public exposure
+  - Performance audit: composite index on primary query path, unique constraint covers preferences lookups
+  - Regression audit: no existing tables modified, only new objects created
+- **Acceptance criteria final status:**
+  - [x] notification_preferences table exists with channel toggles and quiet hours columns
+  - [x] notifications table exists with type, read status, channel tracking
+  - [x] Unique constraint on (org_id, user_id) for notification_preferences
+  - [x] RLS policies on both tables restrict to org_id match
+  - [x] Indexes on notifications (org_id, user_id, read, created_at DESC)
+  - [x] Migration runs cleanly on empty database
+  - [x] Example: notification_preferences allows inserting channel/quiet hours values
+  - [x] Negative: Duplicate (org_id, user_id) hits unique constraint and fails cleanly
+- **Learnings for future iterations:**
+  - SQL-only migrations that are already clean may not need code changes in Pass 3 — the value is in the verification
+  - Code simplifier is useful as a second opinion even when no changes result
+---
