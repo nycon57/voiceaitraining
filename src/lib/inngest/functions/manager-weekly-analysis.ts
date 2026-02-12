@@ -6,6 +6,101 @@ import { sendNotification } from '@/lib/notifications'
 
 const AGENT_ID = 'manager-intelligence'
 
+// ── Types ───────────────────────────────────────────────────────────
+
+interface ManagerInfo {
+  userId: string
+  name?: string
+  email?: string
+  lowPriorityAlerts: boolean
+}
+
+interface OrgMemberRow {
+  user_id: string
+}
+
+interface UserRow {
+  clerk_user_id: string
+  first_name: string | null
+  email: string | null
+}
+
+interface NotificationPrefRow {
+  user_id: string
+  low_priority_alerts: boolean | null
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────
+
+function formatError(err: unknown): string {
+  return err instanceof Error ? err.message : String(err)
+}
+
+async function findOrgManagers(orgId: string): Promise<ManagerInfo[]> {
+  const supabase = createServiceClient()
+
+  const { data, error } = await supabase
+    .from('org_members')
+    .select('user_id')
+    .eq('org_id', orgId)
+    .in('role', ['manager', 'admin'])
+
+  if (error) {
+    console.error(
+      `[manager-weekly] Failed to fetch managers for org ${orgId}:`,
+      error.message,
+    )
+    return []
+  }
+
+  const managerIds = ((data ?? []) as OrgMemberRow[]).map((m) => m.user_id)
+  if (managerIds.length === 0) return []
+
+  const [usersResult, prefsResult] = await Promise.all([
+    supabase
+      .from('users')
+      .select('clerk_user_id, first_name, email')
+      .in('clerk_user_id', managerIds),
+    supabase
+      .from('notification_preferences')
+      .select('user_id, low_priority_alerts')
+      .eq('org_id', orgId)
+      .in('user_id', managerIds),
+  ])
+
+  if (usersResult.error) {
+    console.error(
+      '[manager-weekly] Failed to fetch manager details:',
+      usersResult.error.message,
+    )
+  }
+
+  if (prefsResult.error) {
+    console.error(
+      '[manager-weekly] Failed to fetch notification preferences:',
+      prefsResult.error.message,
+    )
+  }
+
+  const users = (usersResult.data ?? []) as UserRow[]
+  const prefs = (prefsResult.data ?? []) as NotificationPrefRow[]
+
+  const userMap = new Map(users.map((u) => [u.clerk_user_id, u]))
+  const prefsMap = new Map(prefs.map((p) => [p.user_id, p]))
+
+  return managerIds.map((id) => {
+    const user = userMap.get(id)
+    return {
+      userId: id,
+      name: user?.first_name ?? undefined,
+      email: user?.email ?? undefined,
+      lowPriorityAlerts: prefsMap.get(id)?.low_priority_alerts ?? true,
+    }
+  })
+}
+
+// ── Main function ───────────────────────────────────────────────────
+
 /**
  * Weekly cron: Monday 9am UTC.
  * Runs team analysis per org, converts to insights, and sends
@@ -27,7 +122,7 @@ export const managerWeeklyAnalysis = inngest.createFunction(
         .or('status.is.null,status.neq.inactive')
 
       if (error) throw new Error(`Failed to fetch orgs: ${error.message}`)
-      return (data ?? []).map((o: { id: string }) => o.id)
+      return ((data ?? []) as Array<{ id: string }>).map((o) => o.id)
     })
 
     let totalInsights = 0
@@ -47,8 +142,6 @@ export const managerWeeklyAnalysis = inngest.createFunction(
         if (insights.length === 0) continue
         totalInsights += insights.length
 
-        // Find managers/admins and send filtered insights in one step
-        // to avoid Inngest Jsonify serialization mismatches across steps.
         const sent = await step.run(`notify-${orgId}`, async () => {
           const managers = await findOrgManagers(orgId)
           if (managers.length === 0) return 0
@@ -83,7 +176,7 @@ export const managerWeeklyAnalysis = inngest.createFunction(
               } catch (err) {
                 console.error(
                   `[manager-weekly] Failed to notify manager ${manager.userId}:`,
-                  err instanceof Error ? err.message : String(err),
+                  formatError(err),
                 )
               }
             }
@@ -96,7 +189,7 @@ export const managerWeeklyAnalysis = inngest.createFunction(
       } catch (err) {
         console.error(
           `[manager-weekly] Failed to process org ${orgId}:`,
-          err instanceof Error ? err.message : String(err),
+          formatError(err),
         )
         failedOrgs.push(orgId)
       }
@@ -111,84 +204,3 @@ export const managerWeeklyAnalysis = inngest.createFunction(
     }
   },
 )
-
-// ── Helpers ─────────────────────────────────────────────────────────
-
-interface ManagerInfo {
-  userId: string
-  name?: string
-  email?: string
-  lowPriorityAlerts: boolean
-}
-
-async function findOrgManagers(orgId: string): Promise<ManagerInfo[]> {
-  const supabase = createServiceClient()
-
-  const { data, error } = await supabase
-    .from('org_members')
-    .select('user_id')
-    .eq('org_id', orgId)
-    .in('role', ['manager', 'admin'])
-
-  if (error) {
-    console.error(
-      `[manager-weekly] Failed to fetch managers for org ${orgId}:`,
-      error.message,
-    )
-    return []
-  }
-
-  if (!data || data.length === 0) return []
-
-  const managerIds = data.map((m: { user_id: string }) => m.user_id)
-
-  const [usersResult, prefsResult] = await Promise.all([
-    supabase
-      .from('users')
-      .select('clerk_user_id, first_name, email')
-      .in('clerk_user_id', managerIds),
-    supabase
-      .from('notification_preferences')
-      .select('user_id, low_priority_alerts')
-      .eq('org_id', orgId)
-      .in('user_id', managerIds),
-  ])
-
-  if (usersResult.error) {
-    console.error(
-      '[manager-weekly] Failed to fetch manager details:',
-      usersResult.error.message,
-    )
-  }
-
-  // low_priority_alerts column may not exist yet; default to true
-  const prefsData = prefsResult.error
-    ? []
-    : ((prefsResult.data ?? []) as Array<{
-        user_id: string
-        low_priority_alerts: boolean | null
-      }>)
-
-  if (prefsResult.error) {
-    console.error(
-      '[manager-weekly] Failed to fetch notification preferences:',
-      prefsResult.error.message,
-    )
-  }
-
-  const users = (usersResult.data ?? []) as Array<{
-    clerk_user_id: string
-    first_name: string | null
-    email: string | null
-  }>
-
-  const userMap = new Map(users.map((u) => [u.clerk_user_id, u]))
-  const prefsMap = new Map(prefsData.map((p) => [p.user_id, p]))
-
-  return managerIds.map((id) => ({
-    userId: id,
-    name: userMap.get(id)?.first_name ?? undefined,
-    email: userMap.get(id)?.email ?? undefined,
-    lowPriorityAlerts: prefsMap.get(id)?.low_priority_alerts ?? true,
-  }))
-}

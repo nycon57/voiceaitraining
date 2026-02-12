@@ -32,18 +32,18 @@ const PRIORITY_ORDER: Record<InsightPriority, number> = {
  * Convert a TeamAnalysis into prioritized, actionable insights for managers.
  *
  * Priority rules:
- * - systemic_gap (3+ reps weak in same skill) → high
- * - at_risk_rep (declining + inactive) → high
- * - engagement_drop (< 50% active) → medium
- * - milestone (top performer) → low
+ * - systemic_gap (3+ reps weak in same skill) -> high
+ * - at_risk_rep (declining + inactive) -> high
+ * - engagement_drop (< 50% active) -> medium
+ * - milestone (top performer) -> low
  */
 export function generateManagerInsights(analysis: TeamAnalysis): ManagerInsight[] {
-  const insights: ManagerInsight[] = []
-
-  addSystemicGapInsights(analysis, insights)
-  addAtRiskRepInsights(analysis, insights)
-  addEngagementDropInsight(analysis, insights)
-  addMilestoneInsights(analysis, insights)
+  const insights: ManagerInsight[] = [
+    ...buildSystemicGapInsights(analysis),
+    ...buildAtRiskRepInsights(analysis),
+    ...buildEngagementDropInsights(analysis),
+    ...buildMilestoneInsights(analysis),
+  ]
 
   insights.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
 
@@ -52,77 +52,76 @@ export function generateManagerInsights(analysis: TeamAnalysis): ManagerInsight[
 
 // ── Insight builders ───────────────────────────────────────────────
 
-function addSystemicGapInsights(analysis: TeamAnalysis, insights: ManagerInsight[]): void {
-  for (const gap of analysis.systemicGaps) {
+function buildSystemicGapInsights(analysis: TeamAnalysis): ManagerInsight[] {
+  return analysis.systemicGaps.map((gap) => {
     const label = gap.skill.replace(/_/g, ' ')
-    insights.push({
+    return {
       type: 'systemic_gap',
       priority: 'high',
       skill: gap.skill,
-      title: `Systemic gap: ${gap.affectedCount} reps struggling with ${label}`,
-      message: `${gap.affectedCount} reps struggling with ${label}, averaging ${gap.avgScore}%. Consider team-wide training on this skill.`,
+      title: `Systemic gap in ${label}: ${gap.affectedCount} reps affected`,
+      message: `${gap.affectedCount} reps are struggling with ${label}, averaging ${gap.avgScore}%. Consider scheduling team-wide training.`,
       metadata: {
         skill: gap.skill,
         affectedCount: gap.affectedCount,
         avgScore: gap.avgScore,
       },
-    })
-  }
-}
-
-function addAtRiskRepInsights(analysis: TeamAnalysis, insights: ManagerInsight[]): void {
-  for (const rep of analysis.atRiskReps) {
-    insights.push({
-      type: 'at_risk_rep',
-      priority: 'high',
-      title: `At-risk rep identified`,
-      message: `A rep is at risk: ${rep.reasons.join(', ')}. Intervention recommended.`,
-      metadata: {
-        userId: rep.userId,
-        reasons: rep.reasons,
-      },
-    })
-  }
-}
-
-function addEngagementDropInsight(analysis: TeamAnalysis, insights: ManagerInsight[]): void {
-  const { teamStats } = analysis
-  if (teamStats.totalTrainees === 0) return
-
-  const activeRatio = teamStats.activeTrainees / teamStats.totalTrainees
-  if (activeRatio >= ENGAGEMENT_THRESHOLD) return
-
-  const pct = Math.round(activeRatio * 100)
-  insights.push({
-    type: 'engagement_drop',
-    priority: 'medium',
-    title: `Low team engagement: ${pct}% active`,
-    message: `Only ${teamStats.activeTrainees} of ${teamStats.totalTrainees} trainees (${pct}%) were active in the last 7 days. Consider sending practice reminders.`,
-    metadata: {
-      activeTrainees: teamStats.activeTrainees,
-      totalTrainees: teamStats.totalTrainees,
-      activePercent: pct,
-    },
+    }
   })
 }
 
-function addMilestoneInsights(analysis: TeamAnalysis, insights: ManagerInsight[]): void {
-  for (const performer of analysis.topPerformers) {
-    if (
-      performer.avgScore >= MILESTONE_SCORE_THRESHOLD &&
-      performer.attemptCount >= MILESTONE_MIN_ATTEMPTS
-    ) {
-      insights.push({
-        type: 'milestone',
-        priority: 'low',
-        title: `Top performer averaging ${performer.avgScore}%`,
-        message: `A team member has an average score of ${performer.avgScore}% across ${performer.attemptCount} attempts. Consider recognizing this achievement.`,
-        metadata: {
-          userId: performer.userId,
-          avgScore: performer.avgScore,
-          attemptCount: performer.attemptCount,
-        },
-      })
-    }
-  }
+function buildAtRiskRepInsights(analysis: TeamAnalysis): ManagerInsight[] {
+  return analysis.atRiskReps.map((rep) => ({
+    type: 'at_risk_rep',
+    priority: 'high',
+    title: `At-risk rep identified`,
+    message: `Rep flagged as at risk: ${rep.reasons.join(', ')}. Consider scheduling a 1:1.`,
+    metadata: {
+      userId: rep.userId,
+      reasons: rep.reasons,
+    },
+  }))
+}
+
+function buildEngagementDropInsights(analysis: TeamAnalysis): ManagerInsight[] {
+  const { teamStats } = analysis
+  if (teamStats.totalTrainees === 0) return []
+
+  const activeRatio = teamStats.activeTrainees / teamStats.totalTrainees
+  if (activeRatio >= ENGAGEMENT_THRESHOLD) return []
+
+  const pct = Math.round(activeRatio * 100)
+  return [
+    {
+      type: 'engagement_drop',
+      priority: 'medium',
+      title: `Low team engagement: ${pct}% active`,
+      message: `Only ${teamStats.activeTrainees} of ${teamStats.totalTrainees} trainees (${pct}%) practiced in the last 7 days. Consider sending reminders.`,
+      metadata: {
+        activeTrainees: teamStats.activeTrainees,
+        totalTrainees: teamStats.totalTrainees,
+        activePercent: pct,
+      },
+    },
+  ]
+}
+
+function buildMilestoneInsights(analysis: TeamAnalysis): ManagerInsight[] {
+  return analysis.topPerformers
+    .filter(
+      (p) =>
+        p.avgScore >= MILESTONE_SCORE_THRESHOLD &&
+        p.attemptCount >= MILESTONE_MIN_ATTEMPTS,
+    )
+    .map((performer) => ({
+      type: 'milestone',
+      priority: 'low',
+      title: `Top performer averaging ${performer.avgScore}%`,
+      message: `A rep is averaging ${performer.avgScore}% across ${performer.attemptCount} attempts. Consider recognizing their achievement.`,
+      metadata: {
+        userId: performer.userId,
+        avgScore: performer.avgScore,
+        attemptCount: performer.attemptCount,
+      },
+    }))
 }
