@@ -313,3 +313,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - `user.orgId!` non-null assertion is safe in analyze route because the auth check at line 57-59 already guards for null orgId
   - For fire-and-forget in async stream callbacks, `.catch()` alone is sufficient — no need for outer try/catch since the emit functions are async (never throw synchronously)
 ---
+
+## [2026-02-11] - US-004: Wire scoring pipeline to emit events after analysis completes
+Thread: N/A
+Run: 20260211-231655-90697 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 18e4548 [Pass 2/3] review: verify scoring pipeline event emission — no issues found
+- Post-commit status: clean (for US-004 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 7.0s; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - .ralph/progress.md (this entry)
+- Code review findings:
+  1. **KPI payload structure mismatch (95%)**: analyze/route.ts uses flat KPIs, score/route.ts uses nested `{global, scenario}`. Both pass `z.record(z.string(), z.unknown())` validation. **Out of scope** — schema was designed in US-002 intentionally permissive.
+  2. **Missing type safety for scoreBreakdown/feedbackSections (90%)**: `z.unknown()` used in schemas. **Out of scope** — tightening schemas is a separate story.
+  3. **Event emission inside stream could delay closure (85%)**: **FALSE POSITIVE** — calling async function without await returns immediately after Zod parse (microseconds). No microtask blocking occurs.
+  4. **Stream errors prevent feedback event emission (85%)**: **Expected behavior** — if stream fails before feedback generation, no feedback to emit. `attempt.scored` emitted separately before stream starts.
+  5. **PII in feedbackSections (80%)**: **Out of scope** — existing concern with analysis pipeline, not introduced by event emission.
+  6. **Fire-and-forget pattern (100%)**: **Verified correct** — `.catch()` handles all errors, no unhandled rejections.
+- **No code changes required** — Pass 1 implementation is correct. All review findings are out of scope, technically incorrect, or expected behavior.
+- **Learnings for future iterations:**
+  - When code review finds no bugs, Pass 2 becomes a verification-only pass (same as US-003 Pass 2)
+  - KPI payload shape inconsistency between scorers is a known design trade-off — `z.record(z.string(), z.unknown())` accommodates this intentionally
+  - Automated reviewers can misunderstand JavaScript async semantics — calling an async function without await does NOT block via microtask queue
+---
