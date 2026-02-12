@@ -2527,3 +2527,38 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Always wrap iterative notification sends in try/catch — one Supabase insert failure shouldn't block remaining recipients
   - code-simplifier:code-simplifier is the correct subagent_type for the simplifier skill
 ---
+
+## 2026-02-12 09:30 UTC - US-028: Build insight generator and weekly manager analysis cron
+Thread: N/A
+Run: 20260212-092751-41796 (iteration 5)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092751-41796-iter-5.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092751-41796-iter-5.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 066fd8d [Pass 1/3] feat: add insight generator and weekly manager analysis cron (US-028)
+- Post-commit status: clean (only pre-existing untracked/modified files remain)
+- Skills invoked: /feature-dev
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in US-028 files; pre-existing errors in pagination.tsx, webhook-form.tsx, analytics.ts, etc.)
+  - Command: pnpm build -> FAIL (pre-existing type error in pagination.tsx, unrelated to US-028)
+  - Command: pnpm lint -> FAIL (pre-existing: next lint removed in Next.js 16)
+- Files changed:
+  - src/lib/agents/manager/insight-generator.ts (created)
+  - src/lib/inngest/functions/manager-weekly-analysis.ts (created)
+  - src/lib/inngest/functions/index.ts (modified — registered managerWeeklyAnalysis)
+  - src/lib/notifications/email-templates.tsx (modified — added weekly_insight type)
+  - db/migrations/0017_add_low_priority_alerts.sql (created)
+- What was implemented:
+  - `generateManagerInsights(analysis)` pure function converting TeamAnalysis to prioritized ManagerInsight[]
+  - Priority mapping: systemic_gap=high, at_risk_rep=high, engagement_drop=medium, milestone=low
+  - Weekly Inngest cron (Monday 9am UTC, id: manager-weekly-analysis)
+  - Cron iterates all orgs, runs analyzeTeamPerformance, generates insights, finds managers+admins, sends filtered notifications
+  - Low-priority alert filtering via notification_preferences.low_priority_alerts column
+  - Migration to add low_priority_alerts boolean (defaults true) to notification_preferences
+  - New `weekly_insight` notification type with email template
+- **Learnings for future iterations:**
+  - Inngest step.run() wraps return types in Jsonify<>, which makes `string | undefined` properties incompatible. Solution: keep data processing within a single step.run callback or use optional (?) properties instead of `| undefined`
+  - pnpm lint/build have pre-existing failures in this repo — verify changes by filtering typecheck output for own files
+  - The notification_preferences table needed a new column for priority filtering — migrations are sometimes needed even when not listed in story's "Files to Modify"
+---
