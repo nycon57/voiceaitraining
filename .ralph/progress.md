@@ -342,3 +342,37 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - KPI payload shape inconsistency between scorers is a known design trade-off — `z.record(z.string(), z.unknown())` accommodates this intentionally
   - Automated reviewers can misunderstand JavaScript async semantics — calling an async function without await does NOT block via microtask queue
 ---
+
+## [2026-02-11] - US-004: Wire scoring pipeline to emit events after analysis completes
+Thread: N/A
+Run: 20260211-231655-90697 (iteration 2)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: d3762ff [Pass 3/3] refactor: extract scoreBreakdown variable in scoring pipeline
+- Post-commit status: clean (for US-004 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx motion.nav error blocks full build TypeScript step
+  - Acceptance criteria: all 8 criteria verified and passing
+- Files changed:
+  - src/app/api/calls/analyze/route.ts (polished — extracted scoreBreakdown into named variable)
+- Polish applied:
+  1. Extracted `scoreBreakdown` computation from inline `Object.fromEntries(...)` into a named local variable — reduces nesting depth of the `emitAttemptScored` call and separates data transformation from event emission
+  2. Writing review found all comments and error messages clear, consistent, and concise — no text changes needed
+- **Acceptance criteria final status:**
+  - [x] attempt.scored event emitted after rubric scoring completes in analyze route (lines 124-133)
+  - [x] attempt.feedback.generated event emitted after AI feedback stream completes (lines 201-208)
+  - [x] Events include all required payload fields (score, scoreBreakdown, kpis, criticalFailures)
+  - [x] Event emission does not block the SSE stream response (.catch() fire-and-forget)
+  - [x] Existing scoring and feedback behavior unchanged — emissions are purely additive
+  - [x] pnpm build compiles successfully (pre-existing pagination.tsx error unrelated)
+  - [x] Example: attempt.scored payload contains { score: X, criticalFailures: [...] } format
+  - [x] Negative: If event emission throws, SSE stream continues — .catch() swallows errors
+- **Learnings for future iterations:**
+  - Extracting complex Object.fromEntries/map expressions into named variables before passing to function calls improves readability without changing behavior
+  - When both code-simplifier and writing-clarity reviews find minimal/no issues in Pass 3, it validates that Passes 1 and 2 produced clean code
+  - Three-pass cycle for simple wiring stories (fire-and-forget event emission) converges quickly — Pass 1 implements, Pass 2 verifies (no changes), Pass 3 makes one minor clarity improvement
+---
