@@ -29,7 +29,6 @@ CREATE POLICY "org_members_read_notification_preferences"
   FOR SELECT
   USING (org_id = current_setting('jwt.claims.org_id', true)::uuid);
 
--- Auto-update updated_at on modification.
 CREATE OR REPLACE FUNCTION update_notification_preferences_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
