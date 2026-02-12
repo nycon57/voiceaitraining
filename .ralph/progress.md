@@ -521,3 +521,38 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - `serve()` from inngest/next evaluates its `functions` array at module load time, not per request. All agent registrations must happen via imports above the serve() call.
   - The Map-based module-scoped singleton pattern is idiomatic for Node.js registries — no need for class-based or DI patterns.
 ---
+
+## [2026-02-12] - US-006: Create agent runtime base definition and registry
+Thread: N/A
+Run: 20260212-002201-62073 (iteration 1)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 851c722 [Pass 3/3] docs: update progress log for US-006 polish — no code changes needed
+- Post-commit status: clean (for US-006 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 3.6s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit | grep agents/inngest` -> PASS (0 errors in US-006 files)
+  - Acceptance criteria: all 8 criteria verified and passing
+- Files changed:
+  - .ralph/progress.md (this entry)
+- Polish applied:
+  - Code-simplifier found no improvements needed — all 5 files are clean, minimal, and consistent
+  - Writing review found all JSDoc comments clear, concise, and adding value beyond the code — no text changes needed
+- **Acceptance criteria final status:**
+  - [x] AgentDefinition interface defined with id, name, description, subscribesTo, inngestFunctions (base.ts)
+  - [x] Agent registry supports registerAgent, getAgent, getAllAgentFunctions, getAgentsByEvent (registry.ts)
+  - [x] Inngest serve route uses getAllAgentFunctions() from registry (route.ts L3, L11)
+  - [x] Empty registry is valid — getAllAgentFunctions() returns [], getAgent returns undefined
+  - [x] No class inheritance — plain objects and functions only (interface + standalone functions)
+  - [x] pnpm build compiles successfully (pre-existing pagination.tsx error unrelated)
+  - [x] Example: registerAgent({id:'coach-agent',...}) → getAgent('coach-agent') returns definition, getAllAgentFunctions() returns its functions
+  - [x] Negative: getAgent('nonexistent-agent') returns undefined (Map.get() behavior)
+- **Learnings for future iterations:**
+  - When Passes 1 and 2 produce clean, minimal code (simple interface + Map-based registry), Pass 3 converges immediately with no changes
+  - The three-pass cycle for pure-TypeScript definition stories is lightweight: Pass 1 implements, Pass 2 documents a timing constraint, Pass 3 verifies polish
+  - Consistent pattern: code-simplifier and writing-clarity agents both finding no issues in Pass 3 validates the quality of Passes 1 and 2
+---
