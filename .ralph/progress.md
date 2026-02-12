@@ -1998,3 +1998,28 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - The `Object.fromEntries(Object.entries(...).map(...))` pattern with `as Record<K, V>` is the clean way to build typed maps from config objects in TypeScript
   - Pre-existing build failures (pagination.tsx) have been present since at least US-004; not a blocker for notification work
 ---
+
+## [2026-02-12 08:30] - US-021: Build notification dispatcher with email templates
+Run: 20260212-080746-74816 (iteration 2)
+Pass: 3/3 - Polish & Finalize (continued)
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080746-74816-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080746-74816-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 866a4e2 [Pass 3/3] refactor: polish notification dispatcher and templates (US-021)
+- Post-commit status: clean (for US-021 files)
+- Skills invoked: code-simplifier:code-simplifier, writing-clearly-and-concisely (reviewed — no changes needed)
+- Verification:
+  - Command: `npx tsc --noEmit | grep src/lib/notifications` -> PASS (0 errors)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build
+- Files changed:
+  - src/lib/notifications/dispatcher.ts — remove section comments, remove `as string` cast, rename `_resend` to `resendClient`
+  - src/lib/notifications/email-templates.tsx — extract TemplateConfig interface, remove section comments
+- What was implemented:
+  - Code simplifier applied: removed 6 self-evident section comments, unnecessary `as string` type assertion, renamed underscore-prefixed module var, extracted duplicated inline type into TemplateConfig interface
+  - User-facing text reviewed — email headings, CTA labels, and footer text are clear and concise; no changes needed
+  - All 8 acceptance criteria verified against code
+  - Security, performance, and regression audit passed
+- **Learnings for future iterations:**
+  - Section comments that restate function names add noise; JSDoc comments that document non-obvious behavior (fail-open semantics, overnight range support) are the ones worth keeping
+---
