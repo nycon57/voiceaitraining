@@ -117,7 +117,8 @@ export function NotificationPreferences() {
       }
     }
     load()
-  }, [form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function onSubmit(values: FormValues) {
     startTransition(async () => {
