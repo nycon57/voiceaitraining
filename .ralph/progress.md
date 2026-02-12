@@ -2401,3 +2401,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When spreading an interface into function params, verify the spread fields match the expected schema exactly to avoid silent type mismatches
   - The `pnpm build` and `pnpm lint` failures are pre-existing and unrelated — document this in each pass to avoid confusion
 ---
+
+## [2026-02-12] - US-027: Build Manager Intelligence Agent definition and team analyzer
+Thread: N/A
+Run: 20260212-092751-41796 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092751-41796-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092751-41796-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 4eaba17 [Pass 2/3] fix: reuse Supabase client and improve at-risk detection in team analyzer (US-027)
+- Post-commit status: clean (only pre-existing unrelated unstaged changes)
+- Skills invoked: code-review (manual + subagent reviewer)
+- Verification:
+  - Command: `pnpm typecheck 2>&1 | grep manager` -> PASS (0 errors in story files)
+  - Command: `pnpm build` -> FAIL (pre-existing pagination.tsx error, unrelated to US-027)
+  - Command: `pnpm lint` -> FAIL (pre-existing Next.js 16 dropped lint subcommand + ESLint circular config, unrelated)
+- Files changed:
+  - `src/lib/agents/manager/team-analyzer.ts`
+- What was implemented:
+  - Code review identified 3 issues; fixed the 2 real ones:
+    1. Reused single Supabase client across all queries instead of creating 3 separate instances (performance)
+    2. Fixed at-risk declining score detection to require at least 2 weakness profiles before flagging (reduces false positives from limited data); also switched to Math.ceil for clearer majority threshold
+  - Dismissed reviewer's false positive: "missing org_id filtering" was incorrect — all queries already had .eq('org_id', orgId)
+  - Dismissed over-engineering suggestion: batching .in() for large arrays — unnecessary for practical org sizes
+- **Learnings for future iterations:**
+  - Code review subagents can produce false positives — always verify findings against actual code
+  - createServiceClient() should be called once and passed to helpers, not created fresh in each function
+  - At-risk detection with < 2 data points produces noisy results — require minimum evidence before flagging
+---
