@@ -1200,3 +1200,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - FILLER_PATTERN regex needs `gi` flags for case-insensitive global matching
   - Inngest step names must be unique within a function — using `embed-${i}` pattern for loop-based steps
 ---
+
+## [2026-02-12] - US-013: Embed transcript segments after scoring for semantic memory
+Run: 20260212-041723-20350 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: f70e29d [Pass 2/3] fix: prevent double-counting and add idempotency to embed-attempt-memory (US-013)
+- Post-commit status: clean (for US-013 files; pre-existing unrelated changes remain unstaged)
+- Skills invoked: /code-review (CodeRabbit CLI failed in non-TTY; used feature-dev:code-reviewer agent instead)
+- Verification:
+  - Command: npx tsc --noEmit (US-013 files) -> PASS (0 errors in changed files)
+  - Command: pnpm build -> PASS (compiled successfully; pre-existing pagination.tsx type error unrelated)
+- Files changed:
+  - src/lib/inngest/functions/embed-attempt-memory.ts (modified)
+- What was fixed:
+  - **Double-counting bug**: A weak trainee response to an agent question could be classified as both `unanswered_question` (at index i) AND `fumble` (at index i+1). Fixed by tracking consumed segment indices in a Set and skipping already-processed segments.
+  - **Idempotency**: Added Step 0 (`check-existing`) that queries `memory_embeddings` for existing embeddings with the same `source_id` + `org_id` before proceeding. Prevents duplicate embeddings on event replay or duplicate delivery.
+  - **embeddedCount simplification**: Replaced mutable `embeddedCount` counter with `toEmbed.length` — cleaner and immune to any edge case with step retry semantics.
+- Issues reviewed but not fixed (with reasoning):
+  - Zod validation on event payload: Inngest already validates at event emission via eventSchemas; adding redundant validation in the consumer is over-engineering. Project guideline applies to server actions/API handlers, not internal event consumers.
+  - Filler word false positives (well, so, like): The >=2 threshold mitigates single false positives, and the heuristic is intentionally simple. Complex lookbehind regex would be fragile and hard to maintain.
+- **Learnings for future iterations:**
+  - CodeRabbit CLI requires TTY (raw mode) — doesn't work in non-interactive environments. Use feature-dev:code-reviewer agent as fallback.
+  - When extracting segments by looking ahead (nextSeg), always track consumed indices to prevent the looked-ahead segment from being re-evaluated in the next iteration.
+  - Inngest functions should include idempotency checks when duplicate event delivery could cause duplicate side effects (embeddings, emails, etc.).
+---
