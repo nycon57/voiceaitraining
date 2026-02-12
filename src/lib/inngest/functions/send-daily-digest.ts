@@ -1,7 +1,7 @@
-import { EVENT_NAMES, type CoachRecommendationReadyPayload } from '@/lib/events/types'
-import { inngest } from '@/lib/inngest/client'
 import { logAgentActivity } from '@/lib/agents/activity-log'
 import { generateTraineeDigest, type TraineeDigest } from '@/lib/agents/coach/daily-digest'
+import { EVENT_NAMES, type CoachRecommendationReadyPayload } from '@/lib/events/types'
+import { inngest } from '@/lib/inngest/client'
 import { createServiceClient } from '@/lib/memory/supabase'
 
 const AGENT_ID = 'coach-agent'
@@ -14,13 +14,7 @@ interface ActiveTrainee {
   userId: string
 }
 
-/**
- * Daily cron: generates a progress digest for each active trainee
- * and emits coach.recommendation.ready events with type 'daily_digest'.
- *
- * Active trainees = users with at least one completed attempt in the last 14 days.
- * Runs at 8am UTC daily.
- */
+/** Active trainees = users with at least one completed attempt in the last 14 days. */
 export const sendDailyDigest = inngest.createFunction(
   { id: 'coach/send-daily-digest', name: 'Coach: Send Daily Digest' },
   { cron: '0 8 * * *' },
@@ -66,7 +60,7 @@ export const sendDailyDigest = inngest.createFunction(
 
     for (const trainee of activeTrainees) {
       try {
-        const digest: TraineeDigest = await step.run(
+        const digest = await step.run(
           `generate-digest-${trainee.orgId}-${trainee.userId}`,
           async () => {
             return generateTraineeDigest(trainee.orgId, trainee.userId)
@@ -96,13 +90,11 @@ export const sendDailyDigest = inngest.createFunction(
         await step.run(
           `emit-digest-${trainee.orgId}-${trainee.userId}`,
           async () => {
-            const message = formatDigestMessage(digest)
-
             const payload: CoachRecommendationReadyPayload = {
               userId: trainee.userId,
               orgId: trainee.orgId,
               recommendationType: 'daily_digest',
-              message,
+              message: formatDigestMessage(digest),
             }
 
             await inngest.send({
@@ -115,7 +107,7 @@ export const sendDailyDigest = inngest.createFunction(
         digestCount++
       } catch (error) {
         console.error(
-          `[coach-agent] Failed to process digest for ${trainee.userId}:`,
+          `[coach-agent] Failed to generate digest for user ${trainee.userId} in org ${trainee.orgId}:`,
           error instanceof Error ? error.message : error,
         )
         failures++
@@ -126,35 +118,34 @@ export const sendDailyDigest = inngest.createFunction(
   },
 )
 
-/** Build a human-readable digest message from the structured data. */
 function formatDigestMessage(digest: TraineeDigest): string {
   if (digest.noRecentActivity) {
     const streakNote =
-      digest.streak > 0 ? ` You have a ${digest.streak}-day streak — don't lose it!` : ''
-    return `No practice sessions in the last 24 hours.${streakNote} ${digest.nextActions[0] ?? ''}`
+      digest.streak > 0 ? ` You're on a ${digest.streak}-day streak.` : ''
+    return `You haven't practiced in the last 24 hours.${streakNote} ${digest.nextActions[0] ?? ''}`
   }
 
   const parts: string[] = []
 
   const { attempts, avgScore, trend } = digest.summary
   const sessionLabel = attempts === 1 ? 'session' : 'sessions'
-  parts.push(`You completed ${attempts} practice ${sessionLabel} yesterday`)
+  parts.push(`You completed ${attempts} practice ${sessionLabel} in the last 24 hours`)
   if (avgScore != null) {
     parts[0] += ` with an average score of ${avgScore}%`
   }
   parts[0] += '.'
 
-  if (trend === 'improving') parts.push('Your scores are trending upward.')
-  else if (trend === 'declining') parts.push('Your scores dipped compared to the previous day.')
+  if (trend === 'improving') parts.push('Your scores are trending up.')
+  else if (trend === 'declining') parts.push('Your scores dropped compared to the previous 24 hours.')
 
   if (digest.topImprovement) {
     const [key, delta] = splitDelta(digest.topImprovement)
-    parts.push(`Top improvement: ${key.replace(/_/g, ' ')} (${delta}).`)
+    parts.push(`Biggest improvement: ${key.replace(/_/g, ' ')} (${delta}).`)
   }
 
   if (digest.topDecline) {
     const [key, delta] = splitDelta(digest.topDecline)
-    parts.push(`Needs attention: ${key.replace(/_/g, ' ')} (${delta}).`)
+    parts.push(`Area to focus: ${key.replace(/_/g, ' ')} (${delta}).`)
   }
 
   if (digest.streak > 0) {
