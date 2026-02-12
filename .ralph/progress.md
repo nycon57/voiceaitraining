@@ -1816,3 +1816,39 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - SQL-only migrations that are already clean may not need code changes in Pass 3 — the value is in the verification
   - Code simplifier is useful as a second opinion even when no changes result
 ---
+
+## [2026-02-12 07:45] - US-020: Create notification tables migration (preferences and notifications)
+Thread: N/A
+Run: 20260212-073742-58060 (iteration 1)
+Pass: 3/3 - Polish & Finalize (re-run after prior crash)
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073742-58060-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073742-58060-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 66474bc [Pass 3/3] refactor: remove self-explanatory trigger comment from notification migration (US-020)
+- Post-commit status: clean (for US-020 files)
+- Skills invoked: supabase-postgres-best-practices, code-simplifier (code-simplifier:code-simplifier agent)
+- Verification:
+  - Command: `pnpm build` -> pre-existing pagination.tsx error (unrelated; US-020 is SQL-only)
+  - Command: `pnpm typecheck` -> pre-existing errors (unrelated; US-020 is SQL-only)
+  - Acceptance criteria: all 8 criteria verified and passing
+- Files changed:
+  - db/migrations/0016_create_notification_tables.sql (removed self-explanatory trigger comment for consistency with 0015)
+- What was implemented:
+  - Removed "Auto-update updated_at on modification" comment — function name `update_notification_preferences_updated_at()` is self-documenting, consistent with 0015_create_user_memory.sql pattern
+  - Security audit: RLS enabled, org_id policies restrict SELECT access, writes via service-role bypass RLS
+  - Performance audit: composite index covers primary query path, unique constraint covers preferences FK lookups
+  - Regression audit: no existing tables modified, single comment deletion in new migration
+- **Acceptance criteria final status:**
+  - [x] notification_preferences table exists with channel toggles and quiet hours columns
+  - [x] notifications table exists with type, read status, channel tracking
+  - [x] Unique constraint on (org_id, user_id) for notification_preferences
+  - [x] RLS policies on both tables restrict to org_id match
+  - [x] Indexes on notifications (org_id, user_id, read, created_at DESC)
+  - [x] Migration runs cleanly on empty database
+  - [x] Example: notification_preferences allows inserting channel/quiet hours values
+  - [x] Negative: Duplicate (org_id, user_id) hits unique constraint and fails cleanly
+- **Learnings for future iterations:**
+  - When a prior Pass 3/3 crashes after commit but before completion signal, re-run should still look for genuine polish opportunities rather than just re-signaling
+  - Trigger function names that follow the pattern `update_{table}_updated_at()` are self-documenting and don't need comments
+---
