@@ -1017,3 +1017,30 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Querying with ascending:false + limit + reverse() is the correct pattern to get "last N items in oldest-first order" from Supabase.
   - The codebase uses `.eq('status', 'completed')` not `.eq('attempt_status', 'completed')` — confirmed by 15+ existing queries.
 ---
+
+## [2026-02-12] - US-011: Build weakness profile generator from attempt history
+Thread: N/A
+Run: 20260212-023714-54409 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-023714-54409-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-023714-54409-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: ea1be0c [Pass 2/3] fix: add defensive NaN guard in weightedScore
+- Post-commit status: clean (for US-011 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep weakness-profiler` -> PASS (0 errors in US-011 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - src/lib/memory/weakness-profiler.ts (modified — added defensive weightSum === 0 guard)
+- Code review findings:
+  1. **FALSE POSITIVE (100%)**: Reviewer claimed column name `status` should be `attempt_status`. Verified against 15+ existing queries across 7+ files — `status` is the correct original column. Migration 0012 added `attempt_status` as a separate new column.
+  2. **OUT OF SCOPE (95%)**: Missing RLS write policies on user_memory table. This was created in US-010 and follows the established SELECT-only RLS convention for service-role-written tables (0013, 0014, 0015 all follow this pattern).
+  3. **OUT OF SCOPE (85%)**: Service role client pattern inconsistency. The `createServiceClient()` JSDoc already explains why it's used. This is the established pattern from US-007/US-009/US-010.
+  4. **VALID (80%)**: Potential NaN from division by zero in `weightedScore()`. With RECENCY_DECAY=0.85 and length > 0 guard, weightSum can never practically be 0, but added a defensive `if (weightSum === 0) return 0` guard for safety.
+- **Learnings for future iterations:**
+  - Code reviewers frequently misidentify `status` vs `attempt_status` — the `status` column is the original column used by the vast majority of queries. Migration 0012 added `attempt_status` as a separate column.
+  - When code review finds only one low-impact valid issue and 3 false positives/out-of-scope items, the Pass 1 implementation was clean.
+  - Defensive guards for division-by-zero in weighted scoring are cheap insurance even when the guard condition is practically unreachable.
+---
