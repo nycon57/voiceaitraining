@@ -1,6 +1,11 @@
-import { Inngest } from 'inngest'
+import { EventSchemas, Inngest } from 'inngest'
 
-export const inngest = new Inngest({ id: 'voiceai-training' })
+import { eventSchemas } from '@/lib/events/types'
+
+export const inngest = new Inngest({
+  id: 'voiceai-training',
+  schemas: new EventSchemas().fromSchema(eventSchemas),
+})
 
 const REQUIRED_ENV_VARS = ['INNGEST_EVENT_KEY', 'INNGEST_SIGNING_KEY'] as const
 
