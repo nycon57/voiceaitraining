@@ -1131,3 +1131,40 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Code reviewers may flag column name issues when a migration adds a new column without dropping the old one — always verify against actual usage patterns in the codebase
   - When multiple computations need the same DB data, extract a shared fetch function and pass results to pure computation functions
 ---
+
+## [2026-02-12 04:05] - US-012: Build memory query API for agent context retrieval
+Run: 20260212-033720-75936 (iteration 4)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-033720-75936-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-033720-75936-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: cb8b844 [Pass 3/3] refactor: simplify memory query module for clarity (US-012)
+- Post-commit status: clean (US-012 files committed; pre-existing untracked files remain)
+- Skills invoked: code-simplifier:code-simplifier, writing-clearly-and-concisely (manual review)
+- Verification:
+  - Command: npx tsc --noEmit | grep src/lib/memory/ -> PASS (0 errors in memory module)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx error, not related to US-012)
+- Files changed:
+  - src/lib/memory/query.ts (simplified)
+- Polish applied:
+  - Removed noise section comments (// Types, // Constants, // Helpers, // Functions)
+  - Converted informational comment to JSDoc (/** Row shapes from Supabase joins */)
+  - Extracted average() as a named module-level helper (was inline arrow in computeTrajectory)
+  - Consolidated duplicate guard clauses in computeTrajectory (scores.length === 0 already covered by < TREND_RECENT_COUNT)
+  - Extracted named variable in getRecentAttemptSummaries for readability
+  - Removed redundant optional chaining in buildInsights (best?.score → best.score, inside length > 0 guard)
+- All 9 acceptance criteria verified:
+  - [x] getAgentContext() returns comprehensive user context
+  - [x] getRecentAttemptSummaries() joins scenario_attempts with scenarios
+  - [x] getPracticePattern() calculates avgAttemptsPerWeek, lastAttemptDaysAgo, streakDays
+  - [x] All queries org-scoped using createServiceClient()
+  - [x] No N+1 queries
+  - [x] Well-typed interfaces with no any
+  - [x] pnpm typecheck passes (0 errors in memory module)
+  - [x] Example: getAgentContext returns expected shape
+  - [x] Negative: user with no attempts returns empty arrays, trajectory 'new'
+- **Learnings for future iterations:**
+  - Code simplifier pass is most effective after quality review — the code is already correct, so simplification can focus purely on clarity
+  - Section divider comments (// Types, // Helpers) add noise in files under 300 lines where structure is obvious
+---
