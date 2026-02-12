@@ -1,17 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
-import { EVENT_NAMES } from '@/lib/events/types'
+import { EVENT_NAMES, type UserInactivePayload } from '@/lib/events/types'
 import { inngest } from '@/lib/inngest/client'
 
 const INACTIVITY_THRESHOLD_DAYS = 3
+const MS_PER_DAY = 1000 * 60 * 60 * 24
 const PAGE_SIZE = 1000
 
 /**
- * Daily cron that detects trainees inactive for 3+ days and emits
- * user.inactive events so the Coach Agent can send practice reminders.
+ * Daily cron: emits user.inactive events for trainees idle 3+ days
+ * so the Coach Agent can send practice reminders.
  *
- * Uses the bare supabase-js client with the service-role key because
- * Inngest cron jobs have no Next.js request context (no cookies()).
+ * Uses supabase-js with the service-role key directly because
+ * Inngest crons run outside Next.js request context (no cookies()).
  */
 export const detectInactiveUsers = inngest.createFunction(
   { id: 'detect-inactive-users', name: 'Detect Inactive Users' },
@@ -23,9 +24,8 @@ export const detectInactiveUsers = inngest.createFunction(
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
       )
 
-      // Fetch all completed attempts with pagination. PostgREST defaults
-      // to 1000 rows — paginate to avoid silent truncation.
-      // Grouping happens in TypeScript because PostgREST lacks GROUP BY.
+      // PostgREST caps responses at 1000 rows and lacks GROUP BY,
+      // so we paginate and group by user in TypeScript.
       const latestByUser = new Map<
         string,
         { orgId: string; userId: string; lastAttemptAt: Date }
@@ -65,18 +65,13 @@ export const detectInactiveUsers = inngest.createFunction(
         offset += PAGE_SIZE
       }
 
-      // Filter to users whose last completed attempt is 3+ days ago
+      // Keep only users past the inactivity threshold
       const now = new Date()
-      const inactive: Array<{
-        userId: string
-        orgId: string
-        lastAttemptAt: string
-        daysSinceLastAttempt: number
-      }> = []
+      const inactive: UserInactivePayload[] = []
 
       for (const user of latestByUser.values()) {
         const daysSince = Math.floor(
-          (now.getTime() - user.lastAttemptAt.getTime()) / (1000 * 60 * 60 * 24),
+          (now.getTime() - user.lastAttemptAt.getTime()) / MS_PER_DAY,
         )
 
         if (daysSince >= INACTIVITY_THRESHOLD_DAYS) {
@@ -92,12 +87,12 @@ export const detectInactiveUsers = inngest.createFunction(
       return inactive
     })
 
-    // Batch-emit all user.inactive events in a single Inngest send call
+    // Single send call to batch all events
     if (inactiveUsers.length > 0) {
       await step.sendEvent(
         'emit-inactive-events',
         inactiveUsers.map((user) => ({
-          name: EVENT_NAMES.USER_INACTIVE as typeof EVENT_NAMES.USER_INACTIVE,
+          name: EVENT_NAMES.USER_INACTIVE,
           data: user,
         })),
       )
