@@ -225,6 +225,7 @@ function weightedScore(scores: number[]): number {
     valueSum += scores[i] * weight
     weightSum += weight
   }
+  if (weightSum === 0) return 0
   return Math.round(valueSum / weightSum)
 }
 
