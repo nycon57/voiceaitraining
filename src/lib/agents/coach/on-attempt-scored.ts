@@ -1,13 +1,21 @@
-import { EVENT_NAMES, type CoachWeaknessUpdatedPayload } from '@/lib/events/types'
+import {
+  EVENT_NAMES,
+  type CoachWeaknessUpdatedPayload,
+  type CoachRecommendationReadyPayload,
+} from '@/lib/events/types'
 import { inngest } from '@/lib/inngest/client'
 import { logAgentActivity } from '@/lib/agents/activity-log'
 import { generateWeaknessProfile, type DimensionResult } from '@/lib/memory/weakness-profiler'
+import { getAgentContext } from '@/lib/memory/query'
+import { analyzeSkillGaps } from './skill-gap-analyzer'
+import { recommendNextScenario } from './scenario-recommender'
 
 const AGENT_ID = 'coach-agent'
 
 /**
  * Recalculates the trainee's weakness profile after a scored attempt,
- * logs the activity, and emits a weakness-updated event for downstream agents.
+ * logs the activity, emits a weakness-updated event, then runs gap analysis
+ * and recommends the next scenario for downstream consumers.
  *
  * Each step.run() is independently retryable by Inngest.
  */
@@ -59,7 +67,35 @@ export const onAttemptScored = inngest.createFunction(
       })
     })
 
-    return { updated: profile.length }
+    // Gap analysis → scenario recommendation → emit recommendation event
+    const gapAnalysis = await step.run('analyze-skill-gaps', async () => {
+      const context = await getAgentContext({ orgId, userId })
+      return analyzeSkillGaps(context)
+    })
+
+    const recommendation = await step.run('recommend-next-scenario', async () => {
+      if (gapAnalysis.topGaps.length === 0) return null
+      return recommendNextScenario(orgId, userId, gapAnalysis.topGaps)
+    })
+
+    if (recommendation) {
+      await step.run('emit-recommendation', async () => {
+        const payload: CoachRecommendationReadyPayload = {
+          userId,
+          orgId,
+          recommendationType: 'next_scenario',
+          scenarioId: recommendation.scenarioId,
+          message: recommendation.reason,
+        }
+
+        await inngest.send({
+          name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
+          data: payload,
+        })
+      })
+    }
+
+    return { updated: profile.length, recommendation: recommendation?.scenarioId ?? null }
   },
 )
 
