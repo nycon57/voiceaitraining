@@ -80,12 +80,13 @@ export function NotificationCenter({ onClose, onCountChange }: NotificationCente
     if (!notification.read) {
       try {
         await markAsRead(notification.id)
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
-        )
-        onCountChange(
-          notifications.filter((n) => !n.read && n.id !== notification.id).length,
-        )
+        setNotifications((prev) => {
+          const updated = prev.map((n) =>
+            n.id === notification.id ? { ...n, read: true } : n,
+          )
+          onCountChange(updated.filter((n) => !n.read).length)
+          return updated
+        })
       } catch {
         // Continue with navigation even if mark-as-read fails
       }
