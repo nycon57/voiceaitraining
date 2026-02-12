@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { downloadAndStoreRecording } from '@/lib/supabase/recordings'
+import { emitAttemptCompleted } from '@/lib/events'
 import { z } from 'zod'
 
 // Vapi webhook payload schema
@@ -164,6 +165,22 @@ export async function POST(req: NextRequest) {
         { error: 'Failed to update attempt' },
         { status: 500 }
       )
+    }
+
+    // Emit attempt.completed event (fire-and-forget)
+    try {
+      emitAttemptCompleted({
+        attemptId: attempt.id,
+        userId: attempt.clerk_user_id,
+        orgId: attempt.org_id,
+        scenarioId: attempt.scenario_id,
+        durationSeconds,
+        vapiCallId: message.call.id,
+      }).catch((err) => {
+        console.error('Failed to emit attempt.completed event:', err)
+      })
+    } catch (err) {
+      console.error('Failed to emit attempt.completed event:', err)
     }
 
     // Trigger scoring in background (async, don't await)
