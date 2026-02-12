@@ -1,27 +1,28 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
 import { z } from 'zod'
+
 import { generateCoachingBrief } from '@/lib/agents/manager/coaching-brief'
+import { getCurrentUser } from '@/lib/auth'
+
+const ALLOWED_ROLES = new Set(['manager', 'admin'])
 
 const querySchema = z.object({
   traineeId: z.string().min(1),
 })
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const user = await getCurrentUser()
     if (!user?.orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Require manager or admin role
-    if (!user.role || !['manager', 'admin'].includes(user.role)) {
+    if (!user.role || !ALLOWED_ROLES.has(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const { searchParams } = req.nextUrl
     const parsed = querySchema.safeParse({
-      traineeId: searchParams.get('traineeId'),
+      traineeId: req.nextUrl.searchParams.get('traineeId'),
     })
 
     if (!parsed.success) {

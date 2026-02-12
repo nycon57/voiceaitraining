@@ -1,6 +1,7 @@
+import { google } from '@ai-sdk/google'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { generateText } from 'ai'
-import { google } from '@ai-sdk/google'
+
 import { createServiceClient } from '@/lib/memory/supabase'
 import {
   getWeaknessProfile,
@@ -60,6 +61,11 @@ interface ScenarioRow {
   rubric: ScenarioRubric | null
 }
 
+interface RecentCountRow {
+  scenarioId: string
+  count: number
+}
+
 // ── Constants ──────────────────────────────────────────────────────
 
 const MAX_RECENT_SCORES = 10
@@ -68,14 +74,15 @@ const MAX_AREAS_TO_DISCUSS = 3
 const MAX_RECOMMENDED_ASSIGNMENTS = 3
 const RECENT_DAYS = 7
 const RECENT_ATTEMPT_THRESHOLD = 3
+const COMPARISON_THRESHOLD = 5
 
-/** Map from gap keys to the ScenarioRubric fields that address them. */
+/** Rubric fields that target each gap key. */
 const GAP_TO_RUBRIC_FIELD: Record<string, keyof ScenarioRubric> = {
   objection_handling: 'objections_handled',
   question_handling: 'open_questions',
 }
 
-/** Gap keys addressed by the conversation_quality rubric section. */
+/** Gap keys covered by the conversation_quality rubric section. */
 const CONVERSATION_QUALITY_GAPS = new Set([
   'clarity',
   'professionalism',
@@ -84,16 +91,59 @@ const CONVERSATION_QUALITY_GAPS = new Set([
   'filler_words',
 ])
 
+const SKILL_LABELS: Record<string, string> = {
+  objection_handling: 'Objection handling',
+  question_handling: 'Asking questions',
+  clarity: 'Communication clarity',
+  professionalism: 'Professional tone',
+  empathy: 'Empathy and rapport',
+  talk_listen_balance: 'Talk/listen balance',
+  filler_words: 'Minimal filler words',
+  confidence: 'Confidence',
+  goal_achievement: 'Goal achievement',
+  rapport_building: 'Rapport building',
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+
+function roundedMean(values: number[]): number {
+  return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length)
+}
+
+function mean(values: number[]): number {
+  return values.reduce((sum, v) => sum + v, 0) / values.length
+}
+
+function extractScores(attempts: AttemptRow[]): number[] {
+  return attempts.map((a) => a.score).filter((s): s is number => s != null)
+}
+
+function formatName(trainee: TraineeRow): string {
+  const name = [trainee.first_name, trainee.last_name].filter(Boolean).join(' ').trim()
+  return name || trainee.email || 'Unknown'
+}
+
+function skillLabel(key: string): string {
+  return SKILL_LABELS[key] ?? key.replace(/_/g, ' ')
+}
+
+/** Check whether a scenario rubric addresses a given weakness key. */
+function rubricMatchesGap(rubric: ScenarioRubric | null, gapKey: string): boolean {
+  const rubricField = GAP_TO_RUBRIC_FIELD[gapKey]
+  if (rubricField && rubric?.[rubricField]) return true
+  if (rubric?.conversation_quality && CONVERSATION_QUALITY_GAPS.has(gapKey)) return true
+  return false
+}
+
+function trendSuffix(trend: WeaknessEntry['trend']): string {
+  if (trend === 'declining') return ' (declining)'
+  if (trend === 'stable') return ' (not improving)'
+  return ''
+}
+
 // ── Main entry point ───────────────────────────────────────────────
 
-/**
- * Generate a comprehensive 1:1 coaching brief for a manager about a specific trainee.
- *
- * - Performance summary is deterministic (computed from attempts + team avg).
- * - Strengths and areas to discuss come from the memory layer.
- * - Talking points are the only LLM call (Gemini Flash).
- * - Recommended assignments match scenarios to the weakness profile.
- */
+/** Generate a 1:1 coaching brief for a manager about a specific trainee. */
 export async function generateCoachingBrief(
   orgId: string,
   _managerId: string,
@@ -101,7 +151,6 @@ export async function generateCoachingBrief(
 ): Promise<CoachingBrief> {
   const supabase = createServiceClient()
 
-  // Fetch all data in parallel
   const [trainee, weaknesses, strengths, traineeAttempts, teamAttempts, scenarios] =
     await Promise.all([
       fetchTrainee(supabase, orgId, traineeId),
@@ -149,7 +198,6 @@ async function fetchTrainee(
   orgId: string,
   traineeId: string,
 ): Promise<TraineeRow> {
-  // Verify trainee belongs to the requesting org before returning user data
   const { data: member, error: memberError } = await supabase
     .from('org_members')
     .select('user_id')
@@ -158,7 +206,7 @@ async function fetchTrainee(
     .single()
 
   if (memberError || !member) {
-    throw new Error(`Failed to fetch trainee: user not found in organization`)
+    throw new Error('Failed to fetch trainee: user not found in organization')
   }
 
   const { data, error } = await supabase
@@ -235,31 +283,18 @@ function buildPerformanceSummary(
   traineeAttempts: AttemptRow[],
   teamAttempts: AttemptRow[],
 ): PerformanceSummary {
-  const traineeScores = traineeAttempts
-    .map((a) => a.score)
-    .filter((s): s is number => s != null)
-
+  const traineeScores = extractScores(traineeAttempts)
   const recentScores = traineeScores.slice(0, MAX_RECENT_SCORES)
-  const overallScore =
-    traineeScores.length > 0
-      ? Math.round(traineeScores.reduce((sum, s) => sum + s, 0) / traineeScores.length)
-      : null
-
+  const overallScore = traineeScores.length > 0 ? roundedMean(traineeScores) : null
   const trend = computeTrend(traineeScores)
 
-  // Team average across all members
-  const allTeamScores = teamAttempts
-    .map((a) => a.score)
-    .filter((s): s is number => s != null)
-  const teamAvgScore =
-    allTeamScores.length > 0
-      ? Math.round(allTeamScores.reduce((sum, s) => sum + s, 0) / allTeamScores.length)
-      : null
+  const teamScores = extractScores(teamAttempts)
+  const teamAvgScore = teamScores.length > 0 ? roundedMean(teamScores) : null
 
   let comparedToTeam: PerformanceSummary['comparedToTeam'] = null
   if (overallScore != null && teamAvgScore != null) {
-    if (overallScore > teamAvgScore + 5) comparedToTeam = 'above'
-    else if (overallScore < teamAvgScore - 5) comparedToTeam = 'below'
+    if (overallScore > teamAvgScore + COMPARISON_THRESHOLD) comparedToTeam = 'above'
+    else if (overallScore < teamAvgScore - COMPARISON_THRESHOLD) comparedToTeam = 'below'
     else comparedToTeam = 'at'
   }
 
@@ -277,39 +312,19 @@ function computeTrend(scores: number[]): PerformanceSummary['trend'] {
   if (scores.length < 4) return 'stable'
 
   const midPoint = Math.floor(scores.length / 2)
-  // scores are newest-first; first half = recent, second half = older
-  const recentHalf = scores.slice(0, midPoint)
-  const olderHalf = scores.slice(midPoint)
+  // Scores are newest-first: first half = recent, second half = older
+  const recentAvg = mean(scores.slice(0, midPoint))
+  const olderAvg = mean(scores.slice(midPoint))
 
-  const recentAvg = recentHalf.reduce((s, v) => s + v, 0) / recentHalf.length
-  const olderAvg = olderHalf.reduce((s, v) => s + v, 0) / olderHalf.length
-
-  if (recentAvg > olderAvg + 5) return 'up'
-  if (recentAvg < olderAvg - 5) return 'down'
+  if (recentAvg > olderAvg + COMPARISON_THRESHOLD) return 'up'
+  if (recentAvg < olderAvg - COMPARISON_THRESHOLD) return 'down'
   return 'stable'
 }
 
 // ── Strengths ──────────────────────────────────────────────────────
 
-const SKILL_LABELS: Record<string, string> = {
-  objection_handling: 'Objection handling',
-  question_handling: 'Asking questions',
-  clarity: 'Communication clarity',
-  professionalism: 'Professional tone',
-  empathy: 'Empathy and rapport',
-  talk_listen_balance: 'Talk/listen balance',
-  filler_words: 'Minimal filler words',
-  confidence: 'Confidence',
-  goal_achievement: 'Goal achievement',
-  rapport_building: 'Rapport building',
-}
-
-function skillLabel(key: string): string {
-  return SKILL_LABELS[key] ?? key.replace(/_/g, ' ')
-}
-
 function buildStrengths(strengths: SkillLevel[]): string[] {
-  if (strengths.length === 0) return ['No strengths identified yet — more practice data needed']
+  if (strengths.length === 0) return ['No strengths identified yet — needs more practice']
 
   return strengths.map((s) => {
     const label = skillLabel(s.key)
@@ -320,13 +335,14 @@ function buildStrengths(strengths: SkillLevel[]): string[] {
 // ── Areas to discuss ───────────────────────────────────────────────
 
 function buildAreasToDiscuss(weaknesses: WeaknessEntry[]): string[] {
-  if (weaknesses.length === 0)
-    return ['No specific weaknesses identified yet — encourage more practice sessions']
+  if (weaknesses.length === 0) {
+    return ['No weaknesses identified yet — encourage more practice']
+  }
 
   return weaknesses.slice(0, MAX_AREAS_TO_DISCUSS).map((w) => {
     const label = skillLabel(w.key)
-    const trendNote = w.trend === 'declining' ? ' (declining)' : w.trend === 'stable' ? ' (not improving)' : ''
-    return w.score != null ? `${label} at ${w.score}%${trendNote}` : `${label}${trendNote}`
+    const suffix = trendSuffix(w.trend)
+    return w.score != null ? `${label} at ${w.score}%${suffix}` : `${label}${suffix}`
   })
 }
 
@@ -341,7 +357,6 @@ async function buildRecommendedAssignments(
 ): Promise<RecommendedAssignment[]> {
   if (weaknesses.length === 0 || scenarios.length === 0) return []
 
-  // Filter out scenarios the trainee has practiced 3+ times recently
   const recentCutoff = new Date(Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000).toISOString()
   const recentCounts = await getRecentAttemptCounts(supabase, orgId, traineeId, recentCutoff)
   const overPracticed = new Set(
@@ -353,7 +368,6 @@ async function buildRecommendedAssignments(
   const candidates = scenarios.filter((s) => !overPracticed.has(s.id))
   if (candidates.length === 0) return []
 
-  // Score each scenario against the trainee's weaknesses
   const scored = candidates.map((scenario) => ({
     scenario,
     score: scoreScenarioForWeaknesses(scenario, weaknesses),
@@ -376,7 +390,6 @@ function scoreScenarioForWeaknesses(
   scenario: ScenarioRow,
   weaknesses: WeaknessEntry[],
 ): number {
-  const { rubric } = scenario
   let score = 0
 
   for (let i = 0; i < weaknesses.length; i++) {
@@ -384,11 +397,11 @@ function scoreScenarioForWeaknesses(
     const positionWeight = weaknesses.length - i
 
     const rubricField = GAP_TO_RUBRIC_FIELD[w.key]
-    if (rubricField && rubric?.[rubricField]) {
+    if (rubricField && scenario.rubric?.[rubricField]) {
       score += 10 * positionWeight
     }
 
-    if (rubric?.conversation_quality && CONVERSATION_QUALITY_GAPS.has(w.key)) {
+    if (scenario.rubric?.conversation_quality && CONVERSATION_QUALITY_GAPS.has(w.key)) {
       score += 3 * positionWeight
     }
   }
@@ -401,23 +414,13 @@ function buildAssignmentReason(
   weaknesses: WeaknessEntry[],
 ): string {
   const matched = weaknesses
-    .filter((w) => {
-      const rubricField = GAP_TO_RUBRIC_FIELD[w.key]
-      if (rubricField && scenario.rubric?.[rubricField]) return true
-      if (scenario.rubric?.conversation_quality && CONVERSATION_QUALITY_GAPS.has(w.key)) return true
-      return false
-    })
+    .filter((w) => rubricMatchesGap(scenario.rubric, w.key))
     .map((w) => skillLabel(w.key).toLowerCase())
 
   if (matched.length > 0) {
     return `Targets weak areas: ${matched.join(', ')}.`
   }
-  return 'Recommended based on current skill gaps.'
-}
-
-interface RecentCountRow {
-  scenarioId: string
-  count: number
+  return 'Recommended based on skill gaps.'
 }
 
 async function getRecentAttemptCounts(
@@ -503,7 +506,7 @@ function buildFallbackTalkingPoints(
   for (const area of areasToDiscuss) {
     const label = area.split(' at ')[0].toLowerCase()
     if (label.includes('objection')) {
-      points.push('Ask about specific objections encountered and review the feel-felt-found technique.')
+      points.push('Review objections encountered and practice the feel-felt-found technique.')
     } else if (label.includes('question')) {
       points.push('Practice framing open-ended questions that uncover prospect needs.')
     } else {
@@ -517,12 +520,5 @@ function buildFallbackTalkingPoints(
 
   return points.length > 0
     ? points
-    : ['Review recent call recordings together.', 'Set specific goals for the next practice session.']
-}
-
-// ── Helpers ────────────────────────────────────────────────────────
-
-function formatName(trainee: TraineeRow): string {
-  const name = [trainee.first_name, trainee.last_name].filter(Boolean).join(' ').trim()
-  return name || trainee.email || 'Unknown'
+    : ['Review recent call recordings together.', 'Set goals for the next practice session.']
 }
