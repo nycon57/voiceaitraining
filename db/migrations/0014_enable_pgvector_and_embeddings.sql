@@ -22,7 +22,7 @@ CREATE POLICY "org_members_read_embeddings"
   USING (org_id = current_setting('jwt.claims.org_id', true)::uuid);
 
 -- IVFFlat index for cosine similarity search
--- lists=100 is a starting point; tune after data volume grows (sqrt of row count)
+-- lists=100 is a starting point; re-tune to sqrt(row count) as data grows
 CREATE INDEX idx_memory_embeddings_cosine
   ON memory_embeddings
   USING ivfflat (embedding vector_cosine_ops)
@@ -32,7 +32,7 @@ CREATE INDEX idx_memory_embeddings_cosine
 CREATE INDEX idx_memory_embeddings_org_user_type
   ON memory_embeddings (org_id, user_id, content_type);
 
--- Similarity search function for use via supabase.rpc()
+-- Similarity search with optional user and content-type filters
 CREATE OR REPLACE FUNCTION match_memory_embeddings(
   query_embedding vector(1536),
   match_org_id uuid,
