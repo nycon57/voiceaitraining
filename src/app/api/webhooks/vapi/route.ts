@@ -167,21 +167,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Emit attempt.completed event (fire-and-forget)
-    try {
-      emitAttemptCompleted({
-        attemptId: attempt.id,
-        userId: attempt.clerk_user_id,
-        orgId: attempt.org_id,
-        scenarioId: attempt.scenario_id,
-        durationSeconds,
-        vapiCallId: message.call.id,
-      }).catch((err) => {
-        console.error('Failed to emit attempt.completed event:', err)
-      })
-    } catch (err) {
+    // Fire-and-forget: notify subscribers that the attempt finished
+    emitAttemptCompleted({
+      attemptId: attempt.id,
+      userId: attempt.clerk_user_id,
+      orgId: attempt.org_id,
+      scenarioId: attempt.scenario_id,
+      durationSeconds,
+      vapiCallId: message.call.id,
+    }).catch((err) => {
       console.error('Failed to emit attempt.completed event:', err)
-    }
+    })
 
     // Trigger scoring in background (async, don't await)
     fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/attempts/${attempt.id}/score`, {
