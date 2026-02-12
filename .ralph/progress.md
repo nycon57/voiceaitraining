@@ -983,3 +983,37 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When 4+ functions follow the same query pattern with minor variations (type, sort direction, limit), extract a private helper — reduces ~60 lines of near-identical code to one-liner delegations
   - Three-pass cycle for infrastructure stories: Pass 1 implements, Pass 2 verifies (no changes), Pass 3 deduplicates types and extracts helpers
 ---
+
+## [2026-02-12] - US-011: Build weakness profile generator from attempt history
+Thread: N/A
+Run: 20260212-023714-54409 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-023714-54409-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-023714-54409-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 744f14a [Pass 1/3] feat: build weakness profile generator from attempt history
+- Post-commit status: clean (for US-011 files; pre-existing untracked/modified files remain)
+- Skills invoked: none (pure TypeScript data processing — no UI/DB migration/framework skills needed)
+- Verification:
+  - Command: `npx tsc --noEmit | grep weakness-profiler` -> PASS (0 errors in US-011 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - src/lib/memory/weakness-profiler.ts (new) — generateWeaknessProfile(), 10 dimension extractors, weighted scoring, trend calculation
+  - src/lib/memory/index.ts (modified — added generateWeaknessProfile re-export)
+- What was implemented:
+  - `generateWeaknessProfile(orgId, userId)` queries last 20 completed attempts (newest first, reversed to oldest-first for weighting)
+  - Extracts KPIs from both flat AttemptKPIs format and nested `{ global: GlobalKPIs, scenario: ScenarioKPIs }` format
+  - 10 dimensions: question_handling, confidence, professionalism, clarity, talk_listen_balance, filler_words, response_time, empathy, objection_handling, dead_air
+  - Each dimension has custom normalization: 0-100 scores already direct, counts inverted/capped, ratios scored against ideal ranges
+  - Weighted scoring with exponential decay (RECENCY_DECAY=0.85): newer attempts count more
+  - Trend calculation: last 5 vs previous 5 scores, with TREND_THRESHOLD=5 for improving/declining
+  - Calls upsertMemory() for each dimension: weakness_profile if score < 70, skill_level if >= 70
+  - 0 attempts returns empty array (no crash). Dimensions with no extractable data are skipped.
+  - objection_handling extraction handles 4 score_breakdown formats: direct number, {score: 0-1} from calculateOverallScore, {percentage} from rubric scorer, and nested scenario KPI success_rate
+- **Learnings for future iterations:**
+  - The `kpis` jsonb column stores different shapes depending on the scoring path: flat AttemptKPIs from the client, nested `{ global, scenario }` from calculateOverallScore, or camelCase from the analyze route. Extractors must handle all formats.
+  - The `score_breakdown` column also varies: ScoreBreakdown interface (flat numbers), `{ score, weight, max_points }` from calculateOverallScore (prefixed keys like `scenario_objection_handling`), and `{ score, maxScore, percentage }` from rubric scorer.
+  - Querying with ascending:false + limit + reverse() is the correct pattern to get "last N items in oldest-first order" from Supabase.
+  - The codebase uses `.eq('status', 'completed')` not `.eq('attempt_status', 'completed')` — confirmed by 15+ existing queries.
+---
