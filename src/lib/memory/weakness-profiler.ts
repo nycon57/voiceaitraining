@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServiceClient } from './supabase'
 import { upsertMemory, type MemoryType, type Trend } from './user-memory'
 
 // Types
@@ -11,7 +11,7 @@ interface AttemptRow {
   started_at: string
 }
 
-interface DimensionResult {
+export interface DimensionResult {
   key: string
   score: number
   trend: Trend
@@ -31,114 +31,6 @@ const WEAKNESS_THRESHOLD = 70
 const RECENCY_DECAY = 0.85
 const TREND_WINDOW = 5
 const TREND_THRESHOLD = 5
-
-/**
- * Service-role Supabase client for background jobs where cookies() is unavailable.
- */
-function createServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-}
-
-// Dimension extraction + normalization
-
-const DIMENSIONS: DimensionConfig[] = [
-  {
-    key: 'question_handling',
-    extract: (a) => {
-      const flat = getFlat(a.kpis, 'unanswered_questions_count')
-      if (flat != null) return inverseCount(flat, 5)
-      return null
-    },
-  },
-  {
-    key: 'confidence',
-    extract: (a) => clampScore(getFlat(a.kpis, 'confidence_score')),
-  },
-  {
-    key: 'professionalism',
-    extract: (a) => clampScore(getFlat(a.kpis, 'professionalism_score')),
-  },
-  {
-    key: 'clarity',
-    extract: (a) => clampScore(getFlat(a.kpis, 'clarity_score')),
-  },
-  {
-    key: 'talk_listen_balance',
-    extract: (a) => {
-      // Flat format: string like "60:40" or a number
-      const flat = a.kpis?.talk_listen_ratio
-      if (typeof flat === 'string') {
-        const parts = flat.split(':').map(Number)
-        if (parts.length === 2 && !isNaN(parts[0])) return talkRatioScore(parts[0])
-      }
-      if (typeof flat === 'number') return talkRatioScore(flat)
-      // Nested format: global.talk_listen_ratio.user_percentage
-      const nested = getNested(a.kpis, ['global', 'talk_listen_ratio', 'user_percentage'])
-      if (nested != null) return talkRatioScore(nested)
-      return null
-    },
-  },
-  {
-    key: 'filler_words',
-    extract: (a) => {
-      const flat = getFlat(a.kpis, 'filler_words_count')
-      if (flat != null) return inverseCount(flat, 20)
-      // Nested: global.filler_words.rate_per_minute
-      const rate = getNested(a.kpis, ['global', 'filler_words', 'rate_per_minute'])
-      if (rate != null) return fillerRateScore(rate)
-      const count = getNested(a.kpis, ['global', 'filler_words', 'count'])
-      if (count != null) return inverseCount(count, 20)
-      return null
-    },
-  },
-  {
-    key: 'response_time',
-    extract: (a) => {
-      const flat = getFlat(a.kpis, 'avg_response_time_ms')
-      if (flat != null) return responseTimeScore(flat)
-      const nested = getNested(a.kpis, ['global', 'response_time', 'average_ms'])
-      if (nested != null) return responseTimeScore(nested)
-      return null
-    },
-  },
-  {
-    key: 'empathy',
-    extract: (a) => {
-      const flat = getFlat(a.kpis, 'empathy_signals_count')
-      if (flat != null) return countScore(flat, 10)
-      return null
-    },
-  },
-  {
-    key: 'objection_handling',
-    extract: (a) => {
-      // score_breakdown formats vary by scoring path:
-      // 1. Direct number (ScoreBreakdown.objection_handling)
-      const direct = a.score_breakdown?.objection_handling
-      if (typeof direct === 'number') return clamp(direct, 0, 100)
-      // 2. { score: 0-1, weight, max_points } from calculateOverallScore
-      const scenarioOH = a.score_breakdown?.scenario_objection_handling
-      if (isScoreObject(scenarioOH)) return clamp(scenarioOH.score * 100, 0, 100)
-      // 3. { score, maxScore, percentage } from rubric scorer
-      if (isPercentageObject(direct)) return clamp(direct.percentage, 0, 100)
-      // 4. Nested scenario KPIs (success_rate is already 0-100)
-      const rate = getNested(a.kpis, ['scenario', 'objection_handling', 'success_rate'])
-      if (rate != null) return clamp(rate, 0, 100)
-      return null
-    },
-  },
-  {
-    key: 'dead_air',
-    extract: (a) => {
-      const flat = getFlat(a.kpis, 'dead_air_instances')
-      if (flat != null) return inverseCount(flat, 5)
-      return null
-    },
-  },
-]
 
 // Normalization helpers
 
@@ -173,7 +65,7 @@ function fillerRateScore(ratePerMinute: number): number {
   return clamp(100 - (ratePerMinute / 6) * 100, 0, 100)
 }
 
-/** Response time scoring: <1s = 100, >5s = 0. */
+/** Response time scoring: <=1s = 100, >=5s = 0. */
 function responseTimeScore(avgMs: number): number {
   if (avgMs <= 1000) return 100
   if (avgMs >= 5000) return 0
@@ -210,7 +102,95 @@ function getNested(kpis: Record<string, unknown> | null, path: string[]): number
   return typeof current === 'number' && !isNaN(current) ? current : null
 }
 
+// Dimension factory helpers
+
+/** Create a dimension that reads a flat KPI and clamps it to 0-100. */
+function flatScoreDimension(key: string, kpiKey: string): DimensionConfig {
+  return { key, extract: (a) => clampScore(getFlat(a.kpis, kpiKey)) }
+}
+
+/** Create a dimension that reads a flat KPI count and inverts it. */
+function flatInverseDimension(key: string, kpiKey: string, maxBad: number): DimensionConfig {
+  return {
+    key,
+    extract: (a) => {
+      const val = getFlat(a.kpis, kpiKey)
+      return val != null ? inverseCount(val, maxBad) : null
+    },
+  }
+}
+
+// Dimension extraction + normalization
+
+const DIMENSIONS: DimensionConfig[] = [
+  flatInverseDimension('question_handling', 'unanswered_questions_count', 5),
+  flatScoreDimension('confidence', 'confidence_score'),
+  flatScoreDimension('professionalism', 'professionalism_score'),
+  flatScoreDimension('clarity', 'clarity_score'),
+  {
+    key: 'talk_listen_balance',
+    extract: (a) => {
+      const flat = a.kpis?.talk_listen_ratio
+      if (typeof flat === 'string') {
+        const parts = flat.split(':').map(Number)
+        if (parts.length === 2 && !isNaN(parts[0])) return talkRatioScore(parts[0])
+      }
+      if (typeof flat === 'number') return talkRatioScore(flat)
+      const nested = getNested(a.kpis, ['global', 'talk_listen_ratio', 'user_percentage'])
+      return nested != null ? talkRatioScore(nested) : null
+    },
+  },
+  {
+    key: 'filler_words',
+    extract: (a) => {
+      const flat = getFlat(a.kpis, 'filler_words_count')
+      if (flat != null) return inverseCount(flat, 20)
+      const rate = getNested(a.kpis, ['global', 'filler_words', 'rate_per_minute'])
+      if (rate != null) return fillerRateScore(rate)
+      const count = getNested(a.kpis, ['global', 'filler_words', 'count'])
+      return count != null ? inverseCount(count, 20) : null
+    },
+  },
+  {
+    key: 'response_time',
+    extract: (a) => {
+      const flat = getFlat(a.kpis, 'avg_response_time_ms')
+      if (flat != null) return responseTimeScore(flat)
+      const nested = getNested(a.kpis, ['global', 'response_time', 'average_ms'])
+      return nested != null ? responseTimeScore(nested) : null
+    },
+  },
+  {
+    key: 'empathy',
+    extract: (a) => {
+      const flat = getFlat(a.kpis, 'empathy_signals_count')
+      return flat != null ? countScore(flat, 10) : null
+    },
+  },
+  {
+    key: 'objection_handling',
+    extract: (a) => {
+      // Direct number from ScoreBreakdown.objection_handling
+      const direct = a.score_breakdown?.objection_handling
+      if (typeof direct === 'number') return clamp(direct, 0, 100)
+      // { score: 0-1, weight, max_points } from calculateOverallScore
+      const scenarioOH = a.score_breakdown?.scenario_objection_handling
+      if (isScoreObject(scenarioOH)) return clamp(scenarioOH.score * 100, 0, 100)
+      // { score, maxScore, percentage } from rubric scorer
+      if (isPercentageObject(direct)) return clamp(direct.percentage, 0, 100)
+      // Nested scenario KPIs (success_rate is already 0-100)
+      const rate = getNested(a.kpis, ['scenario', 'objection_handling', 'success_rate'])
+      return rate != null ? clamp(rate, 0, 100) : null
+    },
+  },
+  flatInverseDimension('dead_air', 'dead_air_instances', 5),
+]
+
 // Core profiling logic
+
+function average(values: number[]): number {
+  return values.reduce((sum, v) => sum + v, 0) / values.length
+}
 
 /**
  * Calculate a weighted score for a dimension across multiple attempts.
@@ -235,13 +215,9 @@ function calculateTrend(scores: number[]): Trend {
 
   const recent = scores.slice(-TREND_WINDOW)
   const previous = scores.slice(-TREND_WINDOW * 2, -TREND_WINDOW)
-
   if (previous.length === 0) return 'new'
 
-  const recentAvg = recent.reduce((s, v) => s + v, 0) / recent.length
-  const prevAvg = previous.reduce((s, v) => s + v, 0) / previous.length
-  const diff = recentAvg - prevAvg
-
+  const diff = average(recent) - average(previous)
   if (diff > TREND_THRESHOLD) return 'improving'
   if (diff < -TREND_THRESHOLD) return 'declining'
   return 'stable'

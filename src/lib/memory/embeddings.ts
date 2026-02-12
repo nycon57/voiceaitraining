@@ -1,21 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
 import { embed } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
+import { createServiceClient } from './supabase'
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
-
-/**
- * Service-role Supabase client for use outside Next.js request context
- * (e.g. Inngest background jobs where cookies() is unavailable).
- */
-function createServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-}
 
 // Types
 

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServiceClient } from './supabase'
 
 // Types
 
@@ -51,17 +51,6 @@ interface UserMemoryRow {
   evidence_count: number
   created_at: string
   updated_at: string
-}
-
-/**
- * Service-role Supabase client for use outside Next.js request context
- * (e.g. Inngest background jobs where cookies() is unavailable).
- */
-function createServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
 }
 
 // Functions
