@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
 import { z } from 'zod'
 import { generatePreCallBriefing } from '@/lib/agents/coach/pre-call-briefing'
@@ -10,7 +10,7 @@ const querySchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser()
-    if (!user || !user.orgId) {
+    if (!user?.orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
