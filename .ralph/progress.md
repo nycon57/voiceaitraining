@@ -809,3 +809,30 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Embedding vectors must be passed to Supabase as JSON.stringify(array) — the JS client serializes them for the vector column
   - Pre-existing pagination.tsx motion.nav type error continues to block full pnpm build TypeScript step
 ---
+
+## [2026-02-12] - US-009: Enable pgvector and create embeddings infrastructure
+Thread: N/A
+Run: 20260212-015711-11780 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 6c000d8 [Pass 2/3] fix: pass embedding array directly to Supabase RPC
+- Post-commit status: clean (for US-009 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit | grep memory/embeddings` -> PASS (0 errors in US-009 files)
+- Files changed:
+  - src/lib/memory/embeddings.ts (modified — removed JSON.stringify from RPC call)
+- Code review findings:
+  1. **VALID (100%)**: `searchSimilar()` passed `JSON.stringify(queryEmbedding)` to `.rpc()`, which double-serialized the vector. Supabase `.rpc()` serializes parameters automatically — passing the raw array is correct. Fixed by removing `JSON.stringify()` on line 94.
+  2. **FALSE POSITIVE (95%)**: Reviewer suggested adding INSERT RLS policy. The `agent_activity_log` (0013) follows the exact same pattern — SELECT-only RLS with service-role inserts for background jobs. This is the established convention for system-written tables.
+  3. **Verified safe (85%)**: SQL injection — plpgsql with typed parameters, no dynamic SQL.
+  4. **Out of scope (80%)**: Missing env var validation — consistent with existing codebase pattern in `activity-log.ts` and `detect-inactive-users.ts`.
+- **Learnings for future iterations:**
+  - Supabase `.rpc()` serializes parameters automatically. Use raw arrays for vector parameters, not `JSON.stringify()`. However, `.insert()` on vector columns does need `JSON.stringify()` because PostgREST handles them differently.
+  - When code review suggests adding RLS policies, always check existing migration patterns first. SELECT-only RLS is the established convention for system-written tables (background jobs via service-role key).
+  - Code review produced 1 valid fix and 3 non-issues — always verify findings against codebase conventions before accepting.
+---
