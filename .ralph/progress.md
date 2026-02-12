@@ -911,3 +911,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - The `createServiceClient()` pattern from embeddings.ts was reused here for background job compatibility
   - Pre-existing pagination.tsx motion.nav type error continues to block full pnpm build TypeScript step
 ---
+
+## [2026-02-12] - US-010: Create user_memory table for structured weakness profiles
+Thread: N/A
+Run: 20260212-015711-11780 (iteration 4)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-015711-11780-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: a05b72f [Pass 2/3] review: verify user_memory implementation — no issues found
+- Post-commit status: clean (for US-010 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep memory/user-memory` -> PASS (0 errors in US-010 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - .ralph/progress.md (this entry)
+- Code review findings:
+  1. **Acceptance criteria mismatch (100%)**: Criteria says "All functions use createAdminClient() for writes" but implementation uses bare `createServiceClient()`. This is the **correct** pattern for background job compatibility — `createAdminClient()` depends on `cookies()` which fails in Inngest. Matches established pattern in `embeddings.ts` and `activity-log.ts`. No code change needed.
+  2. **SELECT-only RLS policy (85%)**: Only SELECT policy exists, no INSERT/UPDATE/DELETE. Matches established convention for service-role-writable tables (0013, 0014 follow same pattern). No change needed.
+  3. **Null score sorting (80%)**: `nullsFirst: false` means null-scored items appear last in both weakness and strength queries. Reasonable behavior — focus on scored items. Product decision, not a bug.
+  4. **Env var assertions (75%)**: `process.env.NEXT_PUBLIC_SUPABASE_URL!` without runtime validation. Consistent with existing codebase pattern in embeddings.ts and activity-log.ts.
+- **No code changes required** — Pass 1 implementation is correct and follows established patterns.
+- **Learnings for future iterations:**
+  - When acceptance criteria mentions `createAdminClient()` but the function runs in background jobs, use `createServiceClient()` instead — `createAdminClient()` depends on `cookies()` from next/headers
+  - Code review produced 0 actionable fixes — a clean Pass 1 for a well-understood pattern (matching embeddings.ts) results in a verification-only Pass 2
+  - SELECT-only RLS is the established convention for tables written exclusively by service-role clients (background jobs)
+---
