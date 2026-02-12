@@ -21,8 +21,6 @@ export const onUserInactive = inngest.createFunction(
       return getAgentContext({ orgId, userId })
     })
 
-    const message = buildReminderMessage(context.weaknesses, daysSinceLastAttempt)
-
     await step.run('log-activity', async () => {
       await logAgentActivity({
         orgId,
@@ -38,15 +36,13 @@ export const onUserInactive = inngest.createFunction(
     })
 
     await step.run('emit-recommendation', async () => {
-      const scenarioId = context.weaknesses[0]
-        ? undefined // Scenario selection left to downstream consumers
-        : undefined
+      const message = buildReminderMessage(context.weaknesses, daysSinceLastAttempt)
 
       const payload: CoachRecommendationReadyPayload = {
         userId,
         orgId,
         recommendationType: 'practice_reminder',
-        scenarioId,
+        scenarioId: undefined,
         message,
       }
 

@@ -17,8 +17,14 @@ export const onAttemptScored = inngest.createFunction(
   async ({ event, step }) => {
     const { orgId, userId, attemptId } = event.data
 
+    // Catch errors so subsequent steps still execute (acceptance criteria).
     const profile = await step.run('update-weakness-profile', async () => {
-      return generateWeaknessProfile(orgId, userId)
+      try {
+        return await generateWeaknessProfile(orgId, userId)
+      } catch (error) {
+        console.error('[coach-agent] Failed to generate weakness profile:', error)
+        return []
+      }
     })
 
     await step.run('log-activity', async () => {
