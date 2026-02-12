@@ -585,3 +585,30 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - The existing createAdminClient() depends on cookies() from next/headers, which is unavailable in Inngest background jobs. Use @supabase/supabase-js createClient() directly for background/system operations that don't have request context.
   - Pre-existing pagination.tsx motion.nav type error continues to block full pnpm build TypeScript step.
 ---
+
+## [2026-02-12] - US-007: Create agent activity logging table and API
+Thread: N/A
+Run: 20260212-002201-62073 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: a601bfc [Pass 2/3] fix: move migration to db/migrations with sequential numbering
+- Post-commit status: clean (for US-007 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit` (US-007 files) -> PASS (0 errors in agent-activity and activity-log files)
+- Files changed:
+  - supabase/migrations/20260212_create_agent_activity_log.sql -> db/migrations/0013_create_agent_activity_log.sql (moved to correct directory with sequential numbering)
+- Code review findings:
+  1. **VALID (90%)**: Migration file was in `supabase/migrations/` instead of `db/migrations/` where all other project migrations reside. Also used date-based naming instead of sequential numbering. Fixed by moving to `db/migrations/0013_create_agent_activity_log.sql`.
+  2. **FALSE POSITIVE (85%)**: Reviewer suggested ON DELETE CASCADE for org_id FK. No existing migration in this project uses ON DELETE CASCADE — not an established pattern.
+  3. **Verified safe (100%)**: logAgentActivity using @supabase/supabase-js createClient directly is correct — avoids cookies() dependency for Inngest background jobs.
+  4. **Verified safe (100%)**: Server actions use withOrgGuard/withRoleGuard correctly, matching established patterns.
+  5. **Verified safe (100%)**: Zod pagination validation, .eq('org_id', orgId) defense-in-depth, error handling all match existing conventions.
+- **Learnings for future iterations:**
+  - Always check the existing migration directory (`db/migrations/`) and naming convention (sequential 0NNN_) before creating new migrations. The PRD suggested `supabase/migrations/` but the actual convention is different.
+  - When code review suggests ON DELETE CASCADE, verify against existing project patterns first — not every FK needs CASCADE.
+---
