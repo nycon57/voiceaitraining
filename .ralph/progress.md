@@ -2430,3 +2430,35 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - createServiceClient() should be called once and passed to helpers, not created fresh in each function
   - At-risk detection with < 2 data points produces noisy results — require minimum evidence before flagging
 ---
+
+## [2026-02-12T09:30:00] - US-030: Real-time manager alerts on critical scoring events
+Run: 20260212-092752-41851 (iteration 4)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: b61d83b [Pass 1/3] feat: add real-time manager alerts on critical scoring events (US-030)
+- Post-commit status: clean (US-030 files only)
+- Skills invoked: none (backend Inngest function, no UI)
+- Verification:
+  - Command: pnpm typecheck (changed files) -> PASS (no errors in manager-alerts.ts, email-templates.tsx, index.ts)
+  - Command: pnpm build -> FAIL (pre-existing errors in pagination.tsx, not from US-030)
+  - Command: pnpm lint -> FAIL (pre-existing ESLint circular dependency issue)
+- Files changed:
+  - src/lib/inngest/functions/manager-alerts.ts (created)
+  - src/lib/inngest/functions/index.ts (registered managerAlerts)
+  - src/lib/notifications/email-templates.tsx (added critical_score, declining_trend, achievement types)
+- Implemented manager-alerts Inngest function subscribing to attempt.scored:
+  - Score < 40 triggers critical alert with trainee name, scenario, and score
+  - 3+ consecutive declining scores triggers trend alert
+  - First attempt > 90 triggers achievement notification
+  - Queries org_members for managers (role='manager') in the org
+  - Sends notifications via sendNotification() which respects preferences
+  - Uses step.run() for retryable Inngest steps
+- **Learnings for future iterations:**
+  - Inngest step.run() serializes return values through JSON, causing JsonifyObject type — use Promise<T> return type annotation instead of variable type annotation
+  - org_members.user_id maps to users.clerk_user_id
+  - ESLint and build have pre-existing failures unrelated to US-030
+  - Supabase untyped client returns unknown — cast with named interfaces following team-analyzer pattern
+---
