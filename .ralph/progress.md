@@ -2748,3 +2748,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Professional notification text should avoid exclamation marks and use specific actionable CTAs
   - Pre-existing build failures in pagination.tsx, analytics.ts, vapi.ts persist across all US-030 passes — not related to this story
 ---
+
+## 2026-02-12 - US-029: Auto-generated 1:1 coaching briefs for managers
+Run: 20260212-102255-38146 (iteration 4)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: ecca87f [Pass 2/3] fix: add org-scoped trainee validation and batch concurrency to coaching briefs (US-029)
+- Post-commit status: clean (US-029 files only; pre-existing untracked files remain)
+- Skills invoked: /code-review (manual — CodeRabbit CLI unavailable in non-TTY), /next-best-practices, /supabase-postgres-best-practices
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in US-029 files; pre-existing errors in pagination.tsx, webhook-form.tsx, analytics.ts, etc.)
+  - Command: npx tsc --noEmit | grep coaching -> PASS (0 errors in coaching brief files)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx error, unrelated to US-029)
+  - Command: pnpm lint -> FAIL (pre-existing project-level next lint config issue)
+- Files changed:
+  - src/lib/agents/manager/coaching-brief.ts
+  - src/actions/coaching-briefs.ts
+- What was implemented:
+  - **Security fix**: fetchTrainee now verifies trainee belongs to the requesting org via org_members lookup before returning user data, preventing cross-org information disclosure
+  - **Performance fix**: getTeamBriefs batches brief generation in groups of 5 instead of unbounded Promise.all, preventing DB connection exhaustion and LLM rate limit hits for large teams
+  - **Code quality**: Replaced verbose `ReturnType<typeof createServiceClient>` with `SupabaseClient` type import, matching team-analyzer.ts convention
+- **Learnings for future iterations:**
+  - Service client bypasses RLS entirely — always verify org membership explicitly before returning user PII
+  - Unbounded Promise.all over user lists is a common perf/reliability footgun when each iteration makes multiple I/O calls
+  - CodeRabbit CLI requires TTY (raw mode) — falls back to manual code review in non-interactive terminals
+---
