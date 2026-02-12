@@ -376,3 +376,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When both code-simplifier and writing-clarity reviews find minimal/no issues in Pass 3, it validates that Passes 1 and 2 produced clean code
   - Three-pass cycle for simple wiring stories (fire-and-forget event emission) converges quickly — Pass 1 implements, Pass 2 verifies (no changes), Pass 3 makes one minor clarity improvement
 ---
+
+## [2026-02-11] - US-005: Wire server actions to emit events on key mutations
+Thread: N/A
+Run: 20260211-231655-90697 (iteration 3)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: ca1e196 [Pass 1/3] feat: wire server actions to emit assignment.created and user.joined.org events
+- Post-commit status: clean (for US-005 files; pre-existing untracked/modified files remain)
+- Skills invoked: none (pure TypeScript event wiring — no UI/DB/framework skills needed)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx motion.nav error blocks full build TypeScript step
+  - Command: `pnpm typecheck` (US-005 files) -> PASS (0 errors in assignments.ts and clerk/route.ts)
+- Files changed:
+  - src/actions/assignments.ts (modified — added emitAssignmentCreated import and fire-and-forget call after DB insert, removed dead TODO/commented-out webhook code)
+  - src/app/api/webhooks/clerk/route.ts (modified — added emitUserJoinedOrg import and fire-and-forget call after organizationMembership.created upsert)
+- What was implemented:
+  - In `createAssignment()`: after successful DB insert, emit `assignment.created` with assignmentId, userId (assignee), orgId, scenarioId, trackId, dueAt, assignedBy
+  - In Clerk webhook `organizationMembership.created`: after successful upsert, emit `user.joined.org` with userId, orgId, role, email, name
+  - Both emissions use `.catch()` fire-and-forget pattern — consistent with US-003/US-004 patterns
+  - Removed 35 lines of dead commented-out webhook code that the event emission replaces
+- **Learnings for future iterations:**
+  - The story said "modify src/actions/org.ts" but user join actually happens in the Clerk webhook handler at `src/app/api/webhooks/clerk/route.ts` (organizationMembership.created). The "(or wherever user join/invite is handled)" clause gave the flexibility to find the right location.
+  - Clerk webhook `organizationMembership.created` case already has the user's email and name from a prior DB query (`clerkUser`) and from `public_user_data` — no additional DB lookups needed for the event payload.
+  - Pre-existing `pagination.tsx` motion.nav type error continues to block full `pnpm build` TypeScript step.
+---
