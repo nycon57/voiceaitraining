@@ -54,15 +54,15 @@ async function fetchPeriodAttempts(
     .order('started_at', { ascending: true })
 
   if (error) {
-    throw new Error(`Failed to fetch period attempts: ${error.message}`)
+    throw new Error(`Failed to fetch attempts for digest: ${error.message}`)
   }
 
   return (data ?? []) as AttemptRow[]
 }
 
 /**
- * Find the dimension with the largest positive/negative delta between two periods.
- * Returns a formatted string like 'objection_handling +6' or null if no change.
+ * Find dimension with largest change between periods.
+ * Returns formatted string like 'objection_handling +6' or null.
  */
 function findTopDelta(
   current: Map<string, number>,
@@ -100,9 +100,9 @@ function buildNextActions(
   if (!hasRecentActivity) {
     if (worstDimension) {
       const label = worstDimension.replace(/_/g, ' ')
-      return [`Practice a session focused on ${label} to maintain progress.`]
+      return [`Try a session focused on ${label} to strengthen this skill.`]
     }
-    return ['Start a practice session to build your skills.']
+    return ['Complete a practice session to build momentum.']
   }
 
   const actions: string[] = []
@@ -110,18 +110,18 @@ function buildNextActions(
   if (topDecline) {
     const dimKey = topDecline.split(' ')[0]
     const label = dimKey.replace(/_/g, ' ')
-    actions.push(`Focus on ${label} — it dropped recently.`)
+    actions.push(`Practice ${label} to reverse the recent dip.`)
   }
 
   if (worstDimension) {
     const label = worstDimension.replace(/_/g, ' ')
     if (!actions.some((a) => a.includes(label))) {
-      actions.push(`Continue working on ${label}, your weakest area.`)
+      actions.push(`Strengthen ${label} with focused practice.`)
     }
   }
 
   if (actions.length === 0) {
-    actions.push('Keep up the momentum with another practice session.')
+    actions.push('Complete another session to keep building your skills.')
   }
 
   return actions
@@ -132,9 +132,8 @@ function buildNextActions(
 /**
  * Generate a daily progress digest for a trainee.
  *
- * Compares the last 24h of completed attempts against the previous 24h
- * to produce a summary with trend, top improvement/decline, and next actions.
- * Users with 0 attempts in the last 24h receive a digest with noRecentActivity=true.
+ * Compares last 24h of attempts against previous 24h to identify trends,
+ * top improvement/decline, and recommended next actions.
  */
 export async function generateTraineeDigest(
   orgId: string,
@@ -157,7 +156,6 @@ export async function generateTraineeDigest(
   const bestDimension =
     strengths.length > 0 ? strengths[strengths.length - 1].key : null
 
-  // No attempts in the last 24h
   if (currentAttempts.length === 0) {
     return {
       summary: {
@@ -175,7 +173,6 @@ export async function generateTraineeDigest(
     }
   }
 
-  // Compute average score for both periods
   const scores = currentAttempts
     .map((a) => a.score)
     .filter((s): s is number => s != null)
@@ -195,7 +192,6 @@ export async function generateTraineeDigest(
     else trend = 'stable'
   }
 
-  // Per-dimension comparison between the two periods
   const currentDims = extractDimensionAverages(currentAttempts)
   const previousDims = extractDimensionAverages(previousAttempts)
 
