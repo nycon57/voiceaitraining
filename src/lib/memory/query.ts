@@ -103,6 +103,15 @@ export async function getPracticePattern(
   orgId: string,
   userId: string,
 ): Promise<PracticePattern> {
+  const rows = await fetchCompletedAttempts(orgId, userId)
+  return computePracticePattern(rows)
+}
+
+/** Fetch all completed attempts for a user (newest first). */
+async function fetchCompletedAttempts(
+  orgId: string,
+  userId: string,
+): Promise<AttemptTimestampRow[]> {
   const { data, error } = await createServiceClient()
     .from('scenario_attempts')
     .select('started_at, score')
@@ -112,11 +121,14 @@ export async function getPracticePattern(
     .order('started_at', { ascending: false })
 
   if (error) {
-    throw new Error(`Failed to fetch practice pattern: ${error.message}`)
+    throw new Error(`Failed to fetch completed attempts: ${error.message}`)
   }
 
-  const rows = (data ?? []) as AttemptTimestampRow[]
+  return (data ?? []) as AttemptTimestampRow[]
+}
 
+/** Compute practice pattern from pre-fetched attempt rows. */
+function computePracticePattern(rows: AttemptTimestampRow[]): PracticePattern {
   if (rows.length === 0) {
     return {
       totalAttempts: 0,
@@ -203,6 +215,7 @@ function computeTrajectory(attempts: AttemptTimestampRow[]): Trend {
 /**
  * Return comprehensive user context for agent consumption.
  * Runs weakness/strength/attempts/pattern queries in parallel.
+ * Completed attempts are fetched once and reused for both practice pattern and trajectory.
  */
 export async function getAgentContext(params: {
   orgId: string
@@ -210,32 +223,19 @@ export async function getAgentContext(params: {
 }): Promise<AgentContext> {
   const { orgId, userId } = params
 
-  const [weaknesses, strengths, recentAttempts, practicePattern, trajectoryData] =
+  const [weaknesses, strengths, recentAttempts, completedAttempts] =
     await Promise.all([
       getWeaknessProfile(orgId, userId),
       getSkillLevels(orgId, userId),
       getRecentAttemptSummaries(orgId, userId),
-      getPracticePattern(orgId, userId),
-      // Fetch completed attempts for trajectory (reuses service client)
-      createServiceClient()
-        .from('scenario_attempts')
-        .select('started_at, score')
-        .eq('org_id', orgId)
-        .eq('clerk_user_id', userId)
-        .eq('status', 'completed')
-        .order('started_at', { ascending: false })
-        .limit(TREND_RECENT_COUNT * 2),
+      fetchCompletedAttempts(orgId, userId),
     ])
 
-  if (trajectoryData.error) {
-    throw new Error(`Failed to fetch trajectory data: ${trajectoryData.error.message}`)
-  }
-
+  const practicePattern = computePracticePattern(completedAttempts)
   const trajectory = computeTrajectory(
-    (trajectoryData.data ?? []) as AttemptTimestampRow[],
+    completedAttempts.slice(0, TREND_RECENT_COUNT * 2),
   )
 
-  // Build insights from the collected data
   const relevantInsights = buildInsights(weaknesses, strengths, practicePattern, trajectory)
 
   return {
