@@ -1425,3 +1425,36 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When acceptance criteria say "returns null with a reason", design the return type to carry a reason string alongside the nullable payload
   - PostgREST `.or()` string interpolation is safe for the Supabase JS client — values are URL query params, not raw SQL
 ---
+
+## [2026-02-12] - US-015: Coach Agent skill gap analysis and scenario recommendation engine
+Thread: N/A
+Run: 20260212-055233-66214 (iteration 2)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-055233-66214-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-055233-66214-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 65c84ef [Pass 3/3] polish: simplify skill gap analyzer and scenario recommender (US-015)
+- Post-commit status: clean (US-015 files committed; pre-existing unrelated changes remain)
+- Skills invoked: code-simplifier, writing-clearly-and-concisely (review only — no changes needed)
+- Verification:
+  - Command: npx tsc --noEmit | grep coach/ -> PASS (0 errors in US-015 files)
+  - Command: pnpm typecheck | grep coach/ -> PASS (0 errors in US-015 files)
+- Files changed:
+  - src/lib/agents/coach/skill-gap-analyzer.ts — extracted trendLabel() switch from nested ternary
+  - src/lib/agents/coach/scenario-recommender.ts — extracted CONVERSATION_QUALITY_GAPS constant, rubricMatchesGap() helper, simplified buildRecommendationReason, removed type cast
+  - src/lib/agents/coach/on-attempt-scored.ts — added explicit return type to toDimensionSummary
+- All 9 acceptance criteria verified:
+  - [x] analyzeSkillGaps() identifies top 3 gaps prioritized by trend (declining > stable > new > improving)
+  - [x] recommendNextScenario() queries org scenarios and matches to gaps using rubric configuration
+  - [x] Recommendation avoids recently-practiced scenarios (3+ times in 7 days)
+  - [x] Matching logic considers rubric fields from ScenarioRubric type
+  - [x] coach.recommendation.ready event emitted with recommendation data
+  - [x] All functions well-typed, no any
+  - [x] pnpm typecheck passes (0 errors in coach files)
+  - [x] Example: declining objection_handling at 35 sorts before stable clarity at 42
+  - [x] Negative: empty org scenario library returns null with reason
+- **Learnings for future iterations:**
+  - Duplicated inline arrays are a reliable code-simplifier target — extract to module-level Set constants
+  - Exhaustive switch statements on union types provide compile-time safety when the union grows
+---
