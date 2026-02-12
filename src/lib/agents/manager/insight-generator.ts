@@ -74,8 +74,8 @@ function buildAtRiskRepInsights(analysis: TeamAnalysis): ManagerInsight[] {
   return analysis.atRiskReps.map((rep) => ({
     type: 'at_risk_rep',
     priority: 'high',
-    title: `At-risk rep identified`,
-    message: `Rep flagged as at risk: ${rep.reasons.join(', ')}. Consider scheduling a 1:1.`,
+    title: `At-risk rep detected`,
+    message: `A rep shows risk signs: ${rep.reasons.join(', ')}. Reach out with a 1:1.`,
     metadata: {
       userId: rep.userId,
       reasons: rep.reasons,
@@ -96,7 +96,7 @@ function buildEngagementDropInsights(analysis: TeamAnalysis): ManagerInsight[] {
       type: 'engagement_drop',
       priority: 'medium',
       title: `Low team engagement: ${pct}% active`,
-      message: `Only ${teamStats.activeTrainees} of ${teamStats.totalTrainees} trainees (${pct}%) practiced in the last 7 days. Consider sending reminders.`,
+      message: `Only ${teamStats.activeTrainees} of ${teamStats.totalTrainees} trainees (${pct}%) practiced this week. Send reminders to re-engage the team.`,
       metadata: {
         activeTrainees: teamStats.activeTrainees,
         totalTrainees: teamStats.totalTrainees,
@@ -117,7 +117,7 @@ function buildMilestoneInsights(analysis: TeamAnalysis): ManagerInsight[] {
       type: 'milestone',
       priority: 'low',
       title: `Top performer averaging ${performer.avgScore}%`,
-      message: `A rep is averaging ${performer.avgScore}% across ${performer.attemptCount} attempts. Consider recognizing their achievement.`,
+      message: `A rep averaged ${performer.avgScore}% across ${performer.attemptCount} attempts. Recognize their achievement.`,
       metadata: {
         userId: performer.userId,
         avgScore: performer.avgScore,
