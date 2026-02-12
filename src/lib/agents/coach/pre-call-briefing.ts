@@ -2,10 +2,8 @@ import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
 import { createServiceClient } from '@/lib/memory/supabase'
 import { getTopWeaknesses } from '@/lib/memory/user-memory'
-import type { ScenarioRubric } from '@/types/scenario'
+import type { ScenarioDifficulty, ScenarioRubric } from '@/types/scenario'
 import type { WeaknessEntry } from '@/lib/memory/user-memory'
-
-// Types
 
 export interface PreviousAttemptSummary {
   attemptId: string
@@ -19,7 +17,7 @@ export interface PreCallBriefing {
   scenarioTips: string[]
   previousAttempts: PreviousAttemptSummary[]
   motivationalNote: string
-  estimatedDifficulty: 'easy' | 'medium' | 'hard' | 'unknown'
+  estimatedDifficulty: ScenarioDifficulty | 'unknown'
 }
 
 interface ScenarioRow {
@@ -40,6 +38,13 @@ interface AttemptRow {
 const MAX_FOCUS_AREAS = 3
 const MAX_TIPS = 3
 const MAX_PREVIOUS_ATTEMPTS = 3
+const VALID_DIFFICULTIES = new Set<ScenarioDifficulty>(['easy', 'medium', 'hard'])
+
+const DEFAULT_FOCUS_AREAS = [
+  'Focus on clear communication',
+  'Listen actively to the prospect',
+  'Ask open-ended questions',
+]
 
 /**
  * Generate a personalized pre-call briefing for a trainee about to practice a scenario.
@@ -82,8 +87,6 @@ export async function generatePreCallBriefing(
   }
 }
 
-// Data fetching
-
 async function fetchScenario(
   supabase: ReturnType<typeof createServiceClient>,
   orgId: string,
@@ -97,11 +100,10 @@ async function fetchScenario(
     .single()
 
   if (error) {
-    throw new Error(`Failed to fetch scenario ${scenarioId}: ${error.message}`)
-  }
-
-  if (!data) {
-    throw new Error(`Scenario not found: ${scenarioId}`)
+    const message = error.code === 'PGRST116'
+      ? `Scenario not found: ${scenarioId}`
+      : `Failed to fetch scenario ${scenarioId}: ${error.message}`
+    throw new Error(message)
   }
 
   return data as ScenarioRow
@@ -129,8 +131,6 @@ async function fetchPreviousAttempts(
   return (data ?? []) as AttemptRow[]
 }
 
-// Deterministic builders
-
 /**
  * Build focus areas from the trainee's weakness profile, filtered to
  * weaknesses relevant to this scenario's rubric when possible.
@@ -139,9 +139,7 @@ function buildFocusAreas(
   weaknesses: WeaknessEntry[],
   rubric: ScenarioRubric | null,
 ): string[] {
-  if (weaknesses.length === 0) {
-    return ['Focus on clear communication', 'Listen actively to the prospect', 'Ask open-ended questions']
-  }
+  if (weaknesses.length === 0) return DEFAULT_FOCUS_AREAS
 
   const areas: string[] = []
 
@@ -152,41 +150,36 @@ function buildFocusAreas(
   }
 
   // Fill remaining slots with generic tips if we don't have enough
-  const fallbacks = [
-    'Focus on clear communication',
-    'Listen actively to the prospect',
-    'Ask open-ended questions',
-  ]
-  for (const fallback of fallbacks) {
+  for (const fallback of DEFAULT_FOCUS_AREAS) {
     if (areas.length >= MAX_FOCUS_AREAS) break
     if (!areas.includes(fallback)) areas.push(fallback)
   }
 
-  return areas.slice(0, MAX_FOCUS_AREAS)
+  return areas
+}
+
+const WEAKNESS_FOCUS_MAP: Record<string, string> = {
+  objection_handling: 'Listen for objections and address them with empathy',
+  question_handling: 'Prepare thoughtful open-ended questions',
+  clarity: 'Speak clearly and avoid jargon',
+  professionalism: 'Maintain a professional and confident tone',
+  empathy: 'Show genuine understanding of the prospect\'s situation',
+  talk_listen_balance: 'Let the prospect speak — aim for a balanced conversation',
+  filler_words: 'Reduce filler words (um, uh, like)',
+  confidence: 'Project confidence in your product knowledge',
+  goal_achievement: 'Stay focused on the call objective',
+  rapport_building: 'Build rapport early in the conversation',
 }
 
 /** Map a weakness key to an actionable focus area string. */
 function weaknessToFocusArea(key: string, rubric: ScenarioRubric | null): string | null {
-  const focusMap: Record<string, string> = {
-    objection_handling: 'Listen for objections and address them with empathy',
-    question_handling: 'Prepare thoughtful open-ended questions',
-    clarity: 'Speak clearly and avoid jargon',
-    professionalism: 'Maintain a professional and confident tone',
-    empathy: 'Show genuine understanding of the prospect\'s situation',
-    talk_listen_balance: 'Let the prospect speak — aim for a balanced conversation',
-    filler_words: 'Reduce filler words (um, uh, like)',
-    confidence: 'Project confidence in your product knowledge',
-    goal_achievement: 'Stay focused on the call objective',
-    rapport_building: 'Build rapport early in the conversation',
-  }
-
   // If the rubric has objections defined, make the tip more specific
   if (key === 'objection_handling' && rubric?.objections_handled?.objection_types?.length) {
     const types = rubric.objections_handled.objection_types.slice(0, 2).join(' and ')
     return `Listen for ${types} objections and use feel-felt-found technique`
   }
 
-  return focusMap[key] ?? null
+  return WEAKNESS_FOCUS_MAP[key] ?? null
 }
 
 /** Build scenario-specific tips from the rubric configuration. */
@@ -221,8 +214,6 @@ function buildScenarioTips(rubric: ScenarioRubric | null): string[] {
   return tips.slice(0, MAX_TIPS)
 }
 
-// LLM call
-
 async function generateMotivationalNote(
   focusAreas: string[],
   previousAttempts: PreviousAttemptSummary[],
@@ -246,8 +237,6 @@ async function generateMotivationalNote(
   }
 }
 
-// Helpers
-
 function toAttemptSummary(row: AttemptRow): PreviousAttemptSummary {
   return {
     attemptId: row.id,
@@ -258,6 +247,6 @@ function toAttemptSummary(row: AttemptRow): PreviousAttemptSummary {
 }
 
 function normalizeDifficulty(value: string | null): PreCallBriefing['estimatedDifficulty'] {
-  if (value === 'easy' || value === 'medium' || value === 'hard') return value
+  if (value && VALID_DIFFICULTIES.has(value as ScenarioDifficulty)) return value as ScenarioDifficulty
   return 'unknown'
 }
