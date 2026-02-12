@@ -1,2 +1,5 @@
 export type { ContentType, StoreEmbeddingParams, SearchSimilarParams, SimilarResult } from './embeddings'
 export { generateEmbedding, storeEmbedding, searchSimilar } from './embeddings'
+
+export type { MemoryType, Trend, WeaknessEntry, SkillLevel, TrajectoryPoint, UpsertMemoryParams } from './user-memory'
+export { upsertMemory, getWeaknessProfile, getSkillLevels, getTopWeaknesses, getTopStrengths } from './user-memory'
