@@ -1077,3 +1077,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Factory helpers for config arrays (like DIMENSIONS) are a clean way to reduce boilerplate when 3+ entries follow the same shape
   - Three-pass cycle for data processing stories: Pass 1 implements with full coverage, Pass 2 catches edge cases, Pass 3 extracts shared code and reduces duplication
 ---
+
+## [2026-02-12 03:43] - US-012: Build memory query API for agent context retrieval
+Run: 20260212-033720-75936 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-033720-75936-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-033720-75936-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 4204c90 [Pass 1/3] feat: add memory query API for agent context retrieval (US-012)
+- Post-commit status: clean (US-012 files committed; pre-existing untracked files remain)
+- Skills invoked: /feature-dev
+- Verification:
+  - Command: npx tsc --noEmit | grep src/lib/memory/ -> PASS (0 errors in memory module)
+  - Command: ESLINT_USE_FLAT_CONFIG=false npx eslint src/lib/memory/query.ts src/lib/memory/index.ts -> PASS
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx error, not related to US-012)
+- Files changed:
+  - src/lib/memory/query.ts (new — 289 lines)
+  - src/lib/memory/index.ts (added 3 export lines)
+- Implemented 3 functions in `src/lib/memory/query.ts`:
+  - `getAgentContext({ orgId, userId })` — returns comprehensive user context (weaknesses, strengths, recentAttempts, trajectory, practicePattern, relevantInsights) by running 5 queries in parallel via Promise.all
+  - `getRecentAttemptSummaries(orgId, userId, limit?)` — single query joining scenario_attempts with scenarios for titles, returns simplified AttemptSummary[]
+  - `getPracticePattern(orgId, userId)` — calculates avgAttemptsPerWeek, lastAttemptDaysAgo, streakDays from completed attempt timestamps
+- All use createServiceClient() (service-role, no cookies) for Inngest compatibility
+- Updated barrel exports in index.ts
+- **Learnings for future iterations:**
+  - Supabase foreign-key joins can return arrays or objects depending on relationship cardinality — always handle both shapes (Array.isArray check)
+  - `next lint` is broken in Next.js 16 (treats "lint" as directory arg) — use ESLINT_USE_FLAT_CONFIG=false npx eslint directly
+  - ESLint rule `@typescript-eslint/non-nullable-type-assertion-style` prefers `x!` over `x as Type` after a null-filter
+---
