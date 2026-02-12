@@ -404,3 +404,29 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Clerk webhook `organizationMembership.created` case already has the user's email and name from a prior DB query (`clerkUser`) and from `public_user_data` — no additional DB lookups needed for the event payload.
   - Pre-existing `pagination.tsx` motion.nav type error continues to block full `pnpm build` TypeScript step.
 ---
+
+## [2026-02-11] - US-005: Wire server actions to emit events on key mutations
+Thread: N/A
+Run: 20260211-231655-90697 (iteration 4)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-231655-90697-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: db017b5 [Pass 2/3] fix: add name fallback in user.joined.org event emission
+- Post-commit status: clean (for US-005 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx motion.nav error blocks full build TypeScript step
+- Files changed:
+  - src/app/api/webhooks/clerk/route.ts (modified — added name fallback to email when firstName+lastName are empty)
+- Code review findings:
+  1. **VALID (95%)**: Empty `name` field in `user.joined.org` when both firstName and lastName are empty strings. Fixed by falling back to email: `name: fullName || email`.
+  2. **No issues** with assignment.created event — all payload fields match schema exactly.
+  3. **Verified correct**: Fire-and-forget pattern with `.catch()` handles all errors, no unhandled rejections.
+  4. **No regression risk**: Both changes are purely additive, placed after successful DB operations.
+  5. **No security concerns**: Event payloads contain only IDs and non-sensitive metadata appropriate for the event purpose.
+- **Learnings for future iterations:**
+  - When composing name from firstName + lastName, always provide a fallback for the empty-string case. `z.string()` allows empty strings, so Zod won't catch this.
+  - One code fix in Pass 2 validates the code review process — finding and fixing a data quality issue before it reaches production.
+---
