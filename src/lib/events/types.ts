@@ -1,8 +1,6 @@
 import { z } from 'zod'
 
-// ---------------------------------------------------------------------------
-// Domain event Zod schemas
-// ---------------------------------------------------------------------------
+// Domain event schemas
 
 export const attemptCompletedSchema = z.object({
   attemptId: z.string(),
@@ -89,9 +87,7 @@ export const recordingUploadedSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
-// ---------------------------------------------------------------------------
 // Event name constants
-// ---------------------------------------------------------------------------
 
 export const EVENT_NAMES = {
   ATTEMPT_COMPLETED: 'voiceai/attempt.completed',
@@ -106,10 +102,7 @@ export const EVENT_NAMES = {
   RECORDING_UPLOADED: 'voiceai/recording.uploaded',
 } as const
 
-// ---------------------------------------------------------------------------
-// Map of event names → Zod schemas (used by Inngest + runtime validation)
-// ---------------------------------------------------------------------------
-
+/** Event name to Zod schema map, used by Inngest and runtime validation. */
 export const eventSchemas = {
   [EVENT_NAMES.ATTEMPT_COMPLETED]: attemptCompletedSchema,
   [EVENT_NAMES.ATTEMPT_SCORED]: attemptScoredSchema,
@@ -123,9 +116,7 @@ export const eventSchemas = {
   [EVENT_NAMES.RECORDING_UPLOADED]: recordingUploadedSchema,
 } as const
 
-// ---------------------------------------------------------------------------
-// Inferred TypeScript types from Zod schemas
-// ---------------------------------------------------------------------------
+// Inferred payload types
 
 export type AttemptCompletedPayload = z.infer<typeof attemptCompletedSchema>
 export type AttemptScoredPayload = z.infer<typeof attemptScoredSchema>
@@ -138,9 +129,7 @@ export type CoachRecommendationReadyPayload = z.infer<typeof coachRecommendation
 export type CoachWeaknessUpdatedPayload = z.infer<typeof coachWeaknessUpdatedSchema>
 export type RecordingUploadedPayload = z.infer<typeof recordingUploadedSchema>
 
-// ---------------------------------------------------------------------------
-// Discriminated union of all domain events (for consumers)
-// ---------------------------------------------------------------------------
+// Discriminated union of all domain events
 
 export type DomainEvent =
   | { name: typeof EVENT_NAMES.ATTEMPT_COMPLETED; data: AttemptCompletedPayload }
@@ -154,7 +143,7 @@ export type DomainEvent =
   | { name: typeof EVENT_NAMES.COACH_WEAKNESS_UPDATED; data: CoachWeaknessUpdatedPayload }
   | { name: typeof EVENT_NAMES.RECORDING_UPLOADED; data: RecordingUploadedPayload }
 
-/** Maps event name → payload type. */
+/** Event name → payload type lookup. */
 export type EventPayloadMap = {
   [EVENT_NAMES.ATTEMPT_COMPLETED]: AttemptCompletedPayload
   [EVENT_NAMES.ATTEMPT_SCORED]: AttemptScoredPayload

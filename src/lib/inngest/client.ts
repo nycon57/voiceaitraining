@@ -9,10 +9,7 @@ export const inngest = new Inngest({
 
 const REQUIRED_ENV_VARS = ['INNGEST_EVENT_KEY', 'INNGEST_SIGNING_KEY'] as const
 
-/**
- * Validates that required Inngest env vars are set in production.
- * Call at app startup -- not at module load time, since CI injects env vars at deploy.
- */
+/** Asserts required Inngest env vars in production. Call at startup, not module load. */
 export function assertInngestEnv(): void {
   if (process.env.NODE_ENV !== 'production') return
 
