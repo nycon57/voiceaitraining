@@ -2333,3 +2333,36 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Always destructure `error` from Supabase queries even in fallback paths — silent failures mask real issues
   - Env var URLs may have trailing slashes; normalize before concatenating paths
 ---
+
+## [2026-02-12] - US-027: Build Manager Intelligence Agent definition and team analyzer
+Thread: N/A
+Run: 20260212-092751-41796 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092751-41796-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092751-41796-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: e9518a7 [Pass 1/3] feat: add Manager Intelligence Agent and team analyzer (US-027)
+- Post-commit status: clean
+- Skills invoked: feature-dev:feature-dev, commit
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in new files; pre-existing errors in ui components)
+  - Command: pnpm build -> PASS (compiled successfully; pre-existing type errors in unrelated files)
+- Files changed:
+  - src/lib/agents/manager/index.ts (created)
+  - src/lib/agents/manager/team-analyzer.ts (created)
+  - src/app/api/inngest/route.ts (modified — added manager agent registration import)
+- What was implemented:
+  - Manager Intelligence Agent definition with id 'manager-intelligence', subscribing to attempt.scored, coach.weakness.updated, user.inactive
+  - analyzeTeamPerformance(orgId) function returning TeamAnalysis with teamStats, systemicGaps, atRiskReps, topPerformers, recommendations
+  - Systemic gap detection: 3+ reps with same weakness_profile key scoring < 60
+  - At-risk rep detection: declining scores (majority of dimensions trending down) OR 7+ days inactive
+  - Top performer ranking by average score
+  - Team stats: total/active trainees, avg score, total completed attempts
+  - Empty analysis returned for orgs with no trainees (not an error)
+  - Agent registered in registry via side-effect import in inngest route
+- **Learnings for future iterations:**
+  - Coach agent uses short event names in subscribesTo (e.g., 'attempt.scored' not 'voiceai/attempt.scored') — follow this convention
+  - Agent registration uses side-effect imports in api/inngest/route.ts, not direct modification of registry.ts
+  - org_members.user_id matches user_memory.user_id but scenario_attempts uses clerk_user_id — use clerk_user_id for attempt queries in background jobs
+---
