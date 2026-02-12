@@ -57,7 +57,7 @@ export async function generatePreCallBriefing(
 
   // Fetch scenario, weaknesses, and previous attempts in parallel
   const [scenario, weaknesses, attempts] = await Promise.all([
-    fetchScenario(supabase, scenarioId),
+    fetchScenario(supabase, orgId, scenarioId),
     getTopWeaknesses(orgId, userId, MAX_FOCUS_AREAS),
     fetchPreviousAttempts(supabase, orgId, userId, scenarioId),
   ])
@@ -86,15 +86,21 @@ export async function generatePreCallBriefing(
 
 async function fetchScenario(
   supabase: ReturnType<typeof createServiceClient>,
+  orgId: string,
   scenarioId: string,
 ): Promise<ScenarioRow> {
   const { data, error } = await supabase
     .from('scenarios')
     .select('id, title, difficulty, rubric, description')
     .eq('id', scenarioId)
+    .or(`visibility.eq.universal,org_id.eq.${orgId}`)
     .single()
 
-  if (error || !data) {
+  if (error) {
+    throw new Error(`Failed to fetch scenario ${scenarioId}: ${error.message}`)
+  }
+
+  if (!data) {
     throw new Error(`Scenario not found: ${scenarioId}`)
   }
 
