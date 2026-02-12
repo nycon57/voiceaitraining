@@ -102,3 +102,100 @@ export async function updateNotificationPreferences(
     return data
   })
 }
+
+// ============================================================================
+// Notification CRUD (US-022)
+// ============================================================================
+
+export interface Notification {
+  id: string
+  type: string
+  title: string
+  body: string
+  action_url: string | null
+  agent_id: string | null
+  read: boolean
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+const paginationSchema = z.object({
+  limit: z.number().int().min(1).max(100).default(20),
+  offset: z.number().int().min(0).default(0),
+})
+
+export async function getNotifications(
+  limit = 20,
+  offset = 0,
+): Promise<Notification[]> {
+  const { limit: validLimit, offset: validOffset } = paginationSchema.parse({ limit, offset })
+
+  return withOrgGuard(async (user, orgId, supabase) => {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('id, type, title, body, action_url, agent_id, read, metadata, created_at')
+      .eq('org_id', orgId)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(validOffset, validOffset + validLimit - 1)
+
+    if (error) {
+      throw new Error(`Failed to fetch notifications: ${error.message}`)
+    }
+
+    return data ?? []
+  })
+}
+
+export async function getUnreadCount(): Promise<number> {
+  return withOrgGuard(async (user, orgId, supabase) => {
+    const { count, error } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+      .eq('user_id', user.id)
+      .eq('read', false)
+
+    if (error) {
+      throw new Error(`Failed to fetch unread count: ${error.message}`)
+    }
+
+    return count ?? 0
+  })
+}
+
+const markAsReadSchema = z.object({
+  id: z.string().uuid(),
+})
+
+export async function markAsRead(id: string): Promise<void> {
+  const { id: validId } = markAsReadSchema.parse({ id })
+
+  return withOrgGuard(async (user, orgId, supabase) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', validId)
+      .eq('org_id', orgId)
+      .eq('user_id', user.id)
+
+    if (error) {
+      throw new Error(`Failed to mark notification as read: ${error.message}`)
+    }
+  })
+}
+
+export async function markAllAsRead(): Promise<void> {
+  return withOrgGuard(async (user, orgId, supabase) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('org_id', orgId)
+      .eq('user_id', user.id)
+      .eq('read', false)
+
+    if (error) {
+      throw new Error(`Failed to mark all notifications as read: ${error.message}`)
+    }
+  })
+}

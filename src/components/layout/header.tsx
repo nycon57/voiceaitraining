@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Search } from "@/components/search"
 import { ThemeSwitch } from "@/components/theme-switch"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 export function Header() {
   return (
@@ -14,9 +15,12 @@ export function Header() {
     >
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 h-4" />
-      <div className="flex w-full justify-between">
+      <div className="flex w-full items-center justify-between">
         <Search />
-        <ThemeSwitch />
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <ThemeSwitch />
+        </div>
       </div>
     </header>
   )
