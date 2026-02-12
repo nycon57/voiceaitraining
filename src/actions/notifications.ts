@@ -125,10 +125,10 @@ const paginationSchema = z.object({
 })
 
 export async function getNotifications(
-  limit = 20,
-  offset = 0,
+  limit: number = 20,
+  offset: number = 0,
 ): Promise<Notification[]> {
-  const { limit: validLimit, offset: validOffset } = paginationSchema.parse({ limit, offset })
+  const validated = paginationSchema.parse({ limit, offset })
 
   return withOrgGuard(async (user, orgId, supabase) => {
     const { data, error } = await supabase
@@ -137,7 +137,7 @@ export async function getNotifications(
       .eq('org_id', orgId)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .range(validOffset, validOffset + validLimit - 1)
+      .range(validated.offset, validated.offset + validated.limit - 1)
 
     if (error) {
       throw new Error(`Failed to fetch notifications: ${error.message}`)
@@ -164,13 +164,11 @@ export async function getUnreadCount(): Promise<number> {
   })
 }
 
-const markAsReadSchema = z.object({
-  id: z.string().uuid(),
-})
+const markAsReadSchema = z.string().uuid()
 
 export async function markAsRead(id: string): Promise<void> {
   await assertHuman()
-  const { id: validId } = markAsReadSchema.parse({ id })
+  const validId = markAsReadSchema.parse(id)
 
   return withOrgGuard(async (user, orgId, supabase) => {
     const { error } = await supabase
