@@ -3,7 +3,6 @@
 import { useEffect, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -30,10 +29,13 @@ import { toast } from 'sonner'
 import {
   getNotificationPreferences,
   updateNotificationPreferences,
+  notificationPreferencesSchema,
   type NotificationPreferencesInput,
 } from '@/actions/notifications'
+import type { LucideIcon } from 'lucide-react'
+import type { ControllerRenderProps } from 'react-hook-form'
 
-const COMMON_TIMEZONE_VALUES = [
+const COMMON_TIMEZONES = [
   'America/New_York',
   'America/Chicago',
   'America/Denver',
@@ -50,39 +52,52 @@ const COMMON_TIMEZONE_VALUES = [
   'UTC',
 ]
 
-function isValidTimezone(tz: string): boolean {
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: tz })
-    return true
-  } catch {
-    return false
-  }
+const CHANNEL_TOGGLES: Array<{
+  name: keyof Pick<NotificationPreferencesInput, 'channel_email' | 'channel_push' | 'channel_in_app'>
+  label: string
+  description: string
+  icon: LucideIcon
+}> = [
+  { name: 'channel_email', label: 'Email notifications', description: 'Receive notifications via email', icon: Mail },
+  { name: 'channel_push', label: 'Push notifications', description: 'Receive browser push notifications', icon: Bell },
+  { name: 'channel_in_app', label: 'In-app notifications', description: 'Show notifications in the app', icon: Monitor },
+]
+
+interface ChannelToggleProps {
+  field: ControllerRenderProps<NotificationPreferencesInput, 'channel_email' | 'channel_push' | 'channel_in_app'>
+  label: string
+  description: string
+  icon: LucideIcon
 }
 
-const formSchema = z.object({
-  channel_email: z.boolean(),
-  channel_push: z.boolean(),
-  channel_in_app: z.boolean(),
-  quiet_hours_start: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM format').nullable(),
-  quiet_hours_end: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM format').nullable(),
-  quiet_hours_timezone: z
-    .string()
-    .refine(isValidTimezone, {
-      message: 'Invalid timezone. Please select a valid IANA timezone.',
-    }),
-  digest_frequency: z.enum(['daily', 'weekly', 'none']),
-  coach_nudges: z.boolean(),
-})
-
-type FormValues = z.infer<typeof formSchema>
-
+function ChannelToggle({ field, label, description, icon: Icon }: ChannelToggleProps) {
+  return (
+    <FormItem className="flex items-center justify-between" animated={false}>
+      <div className="space-y-0.5">
+        <FormLabel className="text-base cursor-pointer flex items-center gap-2">
+          <Icon className="h-4 w-4" />
+          {label}
+        </FormLabel>
+        <FormDescription animated={false}>
+          {description}
+        </FormDescription>
+      </div>
+      <FormControl>
+        <Switch
+          checked={field.value}
+          onCheckedChange={field.onChange}
+        />
+      </FormControl>
+    </FormItem>
+  )
+}
 
 export function NotificationPreferences() {
   const [isLoading, setIsLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<NotificationPreferencesInput>({
+    resolver: zodResolver(notificationPreferencesSchema),
     defaultValues: {
       channel_email: true,
       channel_push: true,
@@ -98,17 +113,8 @@ export function NotificationPreferences() {
   useEffect(() => {
     async function load() {
       try {
-        const prefs = await getNotificationPreferences()
-        form.reset({
-          channel_email: prefs.channel_email,
-          channel_push: prefs.channel_push,
-          channel_in_app: prefs.channel_in_app,
-          quiet_hours_start: prefs.quiet_hours_start,
-          quiet_hours_end: prefs.quiet_hours_end,
-          quiet_hours_timezone: prefs.quiet_hours_timezone,
-          digest_frequency: prefs.digest_frequency as 'daily' | 'weekly' | 'none',
-          coach_nudges: prefs.coach_nudges,
-        })
+        const { id: _, ...prefs } = await getNotificationPreferences()
+        form.reset(prefs)
       } catch (err) {
         console.error('Failed to load notification preferences:', err)
         toast.error('Failed to load notification preferences')
@@ -120,10 +126,10 @@ export function NotificationPreferences() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function onSubmit(values: FormValues) {
+  function onSubmit(values: NotificationPreferencesInput) {
     startTransition(async () => {
       try {
-        await updateNotificationPreferences(values as NotificationPreferencesInput)
+        await updateNotificationPreferences(values)
         form.reset(values)
         toast.success('Notification preferences saved')
       } catch (err) {
@@ -160,81 +166,23 @@ export function NotificationPreferences() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="channel_email"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between" animated={false}>
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base cursor-pointer flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email notifications
-                    </FormLabel>
-                    <FormDescription animated={false}>
-                      Receive notifications via email
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+            {CHANNEL_TOGGLES.map((toggle, index) => (
+              <div key={toggle.name}>
+                {index > 0 && <Separator className="mb-4" />}
+                <FormField
+                  control={form.control}
+                  name={toggle.name}
+                  render={({ field }) => (
+                    <ChannelToggle
+                      field={field}
+                      label={toggle.label}
+                      description={toggle.description}
+                      icon={toggle.icon}
                     />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <Separator />
-
-            <FormField
-              control={form.control}
-              name="channel_push"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between" animated={false}>
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base cursor-pointer flex items-center gap-2">
-                      <Bell className="h-4 w-4" />
-                      Push notifications
-                    </FormLabel>
-                    <FormDescription animated={false}>
-                      Receive browser push notifications
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <Separator />
-
-            <FormField
-              control={form.control}
-              name="channel_in_app"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between" animated={false}>
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base cursor-pointer flex items-center gap-2">
-                      <Monitor className="h-4 w-4" />
-                      In-app notifications
-                    </FormLabel>
-                    <FormDescription animated={false}>
-                      Show notifications inside the application
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                  )}
+                />
+              </div>
+            ))}
           </CardContent>
         </Card>
 
@@ -300,7 +248,7 @@ export function NotificationPreferences() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {COMMON_TIMEZONE_VALUES.map((tz) => (
+                      {COMMON_TIMEZONES.map((tz) => (
                         <SelectItem key={tz} value={tz}>
                           {tz.replace(/_/g, ' ')}
                         </SelectItem>
@@ -322,7 +270,7 @@ export function NotificationPreferences() {
               Coaching & Digest
             </CardTitle>
             <CardDescription>
-              Control coaching nudges and digest emails
+              Manage coaching tips and activity digests
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -390,7 +338,7 @@ export function NotificationPreferences() {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            {isPending ? 'Saving...' : 'Save notification preferences'}
+            {isPending ? 'Saving...' : 'Save preferences'}
           </Button>
         </div>
       </form>
