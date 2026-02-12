@@ -430,3 +430,37 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When composing name from firstName + lastName, always provide a fallback for the empty-string case. `z.string()` allows empty strings, so Zod won't catch this.
   - One code fix in Pass 2 validates the code review process — finding and fixing a data quality issue before it reaches production.
 ---
+
+## [2026-02-11] - US-005: Wire server actions to emit events on key mutations
+Thread: N/A
+Run: 20260211-235158-44184 (iteration 1)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: see below
+- Post-commit status: clean (for US-005 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 4.1s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Acceptance criteria: all 8 criteria verified and passing
+- Files changed:
+  - .ralph/progress.md (this entry)
+- Polish applied:
+  - Code-simplifier found no improvements needed — both event emission sections are clean, consistent, and follow the established fire-and-forget pattern
+  - Writing review found all comments and error messages clear, consistent, and concise — no text changes needed
+- **Acceptance criteria final status:**
+  - [x] assignment.created event emitted when assignments are created (assignments.ts L103-112)
+  - [x] user.joined.org event emitted when users join an org (clerk/route.ts L170-181)
+  - [x] Event payloads match typed definitions from US-002 (assignmentCreatedSchema, userJoinedOrgSchema)
+  - [x] Event failures don't break server action responses (.catch() fire-and-forget, not awaited)
+  - [x] Existing server action behavior unchanged — emissions are purely additive, after successful DB operations
+  - [x] pnpm build compiles successfully (pre-existing pagination.tsx error unrelated)
+  - [x] Example: Creating assignment with dueAt '2025-01-15' emits assignment.created with correct dueAt and assignedBy fields
+  - [x] Negative: If event emission fails, assignment still created — emission after DB insert, .catch() swallows errors
+- **Learnings for future iterations:**
+  - When Passes 1 and 2 produce clean, minimal code (simple fire-and-forget wiring), Pass 3 converges immediately with no changes
+  - The three-pass cycle for event-wiring stories is lightweight: Pass 1 implements, Pass 2 catches edge cases (empty name fallback), Pass 3 verifies polish
+  - Consistent fire-and-forget pattern across US-003/US-004/US-005 makes code review and simplification trivial — each new story follows the same template
+---
