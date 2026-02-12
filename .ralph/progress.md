@@ -1666,6 +1666,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Test data cleanup after verification prevents polluting the database
 ---
 
+## [2026-02-12] - US-020: Create notification tables migration (preferences and notifications)
+Thread: N/A
+Run: 20260212-070239-29070 (iteration 2)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-070239-29070-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-070239-29070-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 906538e [Pass 2/3] fix: remove redundant FOR ALL RLS policies from notification tables (US-020)
+- Post-commit status: clean (for US-020 files; pre-existing untracked/modified files remain)
+- Skills invoked: supabase-postgres-best-practices, code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `pnpm build` -> pre-existing pagination.tsx error (unrelated; US-020 is SQL-only)
+  - Command: `pnpm typecheck` -> pre-existing errors (unrelated; US-020 is SQL-only)
+- Files changed:
+  - db/migrations/0016_create_notification_tables.sql (modified)
+- What was implemented:
+  - Removed redundant FOR ALL RLS policies from both notification_preferences and notifications tables
+  - Aligns with codebase convention (agent_activity_log 0013, user_memory 0015) where only SELECT policies exist and writes go through service-role client
+  - Code review found 1 critical issue (pattern inconsistency) and 1 important issue (missing type constraint, deferred — notification types not yet defined)
+- **Learnings for future iterations:**
+  - Codebase uses SELECT-only RLS consistently — writes always through service-role client
+  - FOR ALL policies are redundant when service-role bypasses RLS for writes
+  - Check existing migration patterns before creating new RLS policies
+---
+
 ## [2026-02-12 07:30] - US-019: Coach Agent daily digest for trainees
 Run: 20260212-062237-75941 (iteration 3)
 Pass: 3/3 - Polish & Finalize
