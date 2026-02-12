@@ -105,7 +105,7 @@ export const onAttemptScored = inngest.createFunction(
   },
 )
 
-function toDimensionSummary(d: DimensionResult) {
+function toDimensionSummary(d: DimensionResult): Pick<DimensionResult, 'key' | 'score' | 'trend' | 'evidenceCount'> {
   return { key: d.key, score: d.score, trend: d.trend, evidenceCount: d.evidenceCount }
 }
 

@@ -59,17 +59,19 @@ export function analyzeSkillGaps(context: AgentContext): SkillGapAnalysis {
   return { topGaps, focusArea, reasoning }
 }
 
+function trendLabel(trend: Trend): string {
+  switch (trend) {
+    case 'declining': return 'declining'
+    case 'stable': return 'not improving'
+    case 'new': return 'newly identified'
+    case 'improving': return 'improving'
+  }
+}
+
 function buildReasoning(gaps: SkillGap[]): string {
   const parts = gaps.map((gap) => {
     const label = gap.key.replace(/_/g, ' ')
-    const trendLabel = gap.trend === 'declining'
-      ? 'declining'
-      : gap.trend === 'stable'
-        ? 'not improving'
-        : gap.trend === 'new'
-          ? 'newly identified'
-          : 'improving'
-    return `${label} at ${gap.score}% (${trendLabel})`
+    return `${label} at ${gap.score}% (${trendLabel(gap.trend)})`
   })
 
   return `Top gaps: ${parts.join(', ')}.`
