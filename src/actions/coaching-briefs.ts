@@ -1,31 +1,25 @@
 'use server'
 
-import { withRoleGuard } from '@/lib/auth'
-import { generateCoachingBrief } from '@/lib/agents/manager/coaching-brief'
-import type { CoachingBrief } from '@/lib/agents/manager/coaching-brief'
 import { z } from 'zod'
 
-const traineeIdSchema = z.string().min(1, 'traineeId is required')
+import { generateCoachingBrief, type CoachingBrief } from '@/lib/agents/manager/coaching-brief'
+import { withRoleGuard } from '@/lib/auth'
 
-/**
- * Get a coaching brief for a specific trainee.
- * Requires manager or admin role.
- */
+const traineeIdSchema = z.string().min(1, 'traineeId is required')
+const BATCH_SIZE = 5
+
+/** Get a coaching brief for a specific trainee. Requires manager or admin role. */
 export async function getCoachingBrief(traineeId: string): Promise<CoachingBrief> {
   const validated = traineeIdSchema.parse(traineeId)
 
-  return withRoleGuard(['manager', 'admin'], async (user, orgId) => {
-    return generateCoachingBrief(orgId, user.id, validated)
-  })
+  return withRoleGuard(['manager', 'admin'], (user, orgId) =>
+    generateCoachingBrief(orgId, user.id, validated),
+  )
 }
 
-/**
- * Get coaching briefs for all direct reports.
- * Requires manager or admin role.
- */
+/** Get coaching briefs for all trainees in the org. Requires manager or admin role. */
 export async function getTeamBriefs(): Promise<CoachingBrief[]> {
   return withRoleGuard(['manager', 'admin'], async (user, orgId, supabase) => {
-    // Get all trainees in the org
     const { data: members, error } = await supabase
       .from('org_members')
       .select('user_id')
@@ -37,11 +31,8 @@ export async function getTeamBriefs(): Promise<CoachingBrief[]> {
     }
 
     const traineeIds = (members ?? []).map((m: { user_id: string }) => m.user_id)
-
     if (traineeIds.length === 0) return []
 
-    // Generate briefs in batches to avoid overwhelming DB + LLM rate limits
-    const BATCH_SIZE = 5
     const briefs: CoachingBrief[] = []
     for (let i = 0; i < traineeIds.length; i += BATCH_SIZE) {
       const batch = traineeIds.slice(i, i + BATCH_SIZE)
