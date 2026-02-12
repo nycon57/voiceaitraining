@@ -2142,3 +2142,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
 - **Learnings for future iterations:**
   - Parallel Ralph runs can produce identical changes — check git log before committing
 ---
+
+## [2026-02-12 09:05] - US-023: Notification preferences settings page
+Thread: N/A
+Run: 20260212-084249-21034 (iteration 2)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084249-21034-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084249-21034-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: none — the single actionable fix (useEffect deps) was already committed by concurrent US-022 Pass 3 agent (commit 2281cf4)
+- Post-commit status: clean (no US-023-specific uncommitted changes)
+- Skills invoked: code-review (CodeRabbit CLI failed due to raw mode; used feature-dev:code-reviewer agent instead)
+- Verification:
+  - Command: `pnpm typecheck | grep notifications` -> PASS (0 errors in US-023 files)
+  - Command: `pnpm build` -> Compiled successfully in 4.1s; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed: none (fix already in HEAD from concurrent agent)
+- Code review findings:
+  - **False positive**: Missing RLS INSERT/UPDATE policies — withOrgGuard uses admin client which bypasses RLS
+  - **Actionable (already fixed)**: useEffect with `form` dependency changed to empty deps array — already committed by US-022 agent in 2281cf4
+  - **Minor inconsistency**: DB CHECK allows 'realtime' for digest_frequency but Zod/UI only exposes daily/weekly/none — Zod being stricter is safe
+  - **Acceptable**: `as NotificationPreferencesInput` cast required because client/server schemas are separate Zod instances
+  - **Design decision**: Read operations skip assertHuman() — consistent with codebase pattern
+- Security audit: assertHuman() on mutations, withOrgGuard on all actions, Zod validation on both sides, no injection vectors
+- Performance audit: single query get, single upsert update, useTransition for non-blocking save
+- Regression audit: only Notifications tab changed, other tabs unaffected
+- **Learnings for future iterations:**
+  - Concurrent Ralph agents may fix issues in shared files — always check HEAD before committing
+  - CodeRabbit CLI requires TTY raw mode — not usable in non-interactive agent context, use feature-dev:code-reviewer instead
+---
