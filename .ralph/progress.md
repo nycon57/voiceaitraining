@@ -2811,3 +2811,38 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Running code-simplifier and writing-review agents in parallel can create small merge conflicts when both edit the same file — reconcile manually after both complete
   - Pre-existing build failures in pagination.tsx persist across all US-029 passes — not caused by this story
 ---
+
+## 2026-02-12 - US-029: Auto-generated 1:1 coaching briefs for managers
+Run: 20260212-110758-95723 (iteration 1)
+Pass: 3/3 - Polish & Finalize (continued)
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-110758-95723-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-110758-95723-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: fd85fe3 [Pass 3/3] refactor: improve coaching brief copy for clarity and conciseness (US-029)
+- Post-commit status: clean (US-029 files only; pre-existing untracked files remain)
+- Skills invoked: code-simplifier:code-simplifier, writing-clearly-and-concisely
+- Verification:
+  - Command: pnpm typecheck | grep coaching -> PASS (0 errors in US-029 files)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx error, unrelated to US-029)
+  - Command: pnpm lint | grep coaching -> PASS (0 lint errors in US-029 files)
+  - All 7 acceptance criteria verified -> PASS
+- Files changed:
+  - src/lib/agents/manager/coaching-brief.ts
+- What was implemented:
+  - Applied writing-clearly-and-concisely principles to user-facing text
+  - Replaced vague empty-state messages with actionable manager guidance ("Not enough data yet — assign more practice scenarios")
+  - Made assignment reason text more direct ("Addresses current skill gaps")
+  - Updated fallback guard string to match new copy
+- Acceptance criteria final verification:
+  1. generateCoachingBrief() produces comprehensive brief with performance vs team comparison — PASS
+  2. Talking points generated via Gemini Flash — PASS
+  3. Recommended assignments based on weakness profile — PASS
+  4. API route and server action require manager or admin role — PASS
+  5. pnpm typecheck passes (0 errors in story files) — PASS
+  6. Example: declining objection_handling returns feel-felt-found talking points and objection scenarios — PASS
+  7. Negative: trainee gets 403 from coaching brief API — PASS
+- **Learnings for future iterations:**
+  - When a prior Pass 3 already committed code-simplifier changes, focus the next iteration on copy and text quality
+  - Linters may revert file changes if they auto-format on save — re-apply text edits after linter runs
+---
