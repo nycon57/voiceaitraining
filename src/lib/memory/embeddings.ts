@@ -6,6 +6,19 @@ const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+/**
+ * Service-role Supabase client for use outside Next.js request context
+ * (e.g. Inngest background jobs where cookies() is unavailable).
+ */
+function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
+
+// Types
+
 export type ContentType =
   | 'transcript_segment'
   | 'feedback_summary'
@@ -21,6 +34,14 @@ export interface StoreEmbeddingParams {
   metadata?: Record<string, unknown>
 }
 
+export interface SearchSimilarParams {
+  orgId: string
+  userId?: string
+  query: string
+  contentType?: ContentType
+  limit?: number
+}
+
 export interface SimilarResult {
   id: string
   content: string
@@ -29,6 +50,18 @@ export interface SimilarResult {
   sourceId: string | null
   metadata: Record<string, unknown> | null
 }
+
+/** Row shape returned by the match_memory_embeddings RPC. */
+interface MatchRow {
+  id: string
+  content: string
+  content_type: string
+  similarity: number
+  source_id: string | null
+  metadata: Record<string, unknown> | null
+}
+
+// Functions
 
 /** Generate a 1536-dimensional embedding using OpenAI text-embedding-3-small. */
 export async function generateEmbedding(text: string): Promise<number[]> {
@@ -39,22 +72,11 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   return embedding
 }
 
-/**
- * Generate an embedding for the given content and store it in one call.
- *
- * Uses the bare supabase-js client with the service-role key so it can be
- * called from background jobs (Inngest) where Next.js cookie context is
- * unavailable.
- */
+/** Generate an embedding and store it in a single call. */
 export async function storeEmbedding(params: StoreEmbeddingParams): Promise<string> {
   const embedding = await generateEmbedding(params.content)
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-
-  const { data, error } = await supabase
+  const { data, error } = await createServiceClient()
     .from('memory_embeddings')
     .insert({
       org_id: params.orgId,
@@ -76,21 +98,10 @@ export async function storeEmbedding(params: StoreEmbeddingParams): Promise<stri
 }
 
 /** Vector similarity search scoped by org, with optional user and content type filters. */
-export async function searchSimilar(params: {
-  orgId: string
-  userId?: string
-  query: string
-  contentType?: ContentType
-  limit?: number
-}): Promise<SimilarResult[]> {
+export async function searchSimilar(params: SearchSimilarParams): Promise<SimilarResult[]> {
   const queryEmbedding = await generateEmbedding(params.query)
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-
-  const { data, error } = await supabase.rpc('match_memory_embeddings', {
+  const { data, error } = await createServiceClient().rpc('match_memory_embeddings', {
     query_embedding: queryEmbedding,
     match_org_id: params.orgId,
     match_user_id: params.userId ?? null,
@@ -102,14 +113,7 @@ export async function searchSimilar(params: {
     throw new Error(`Failed to search embeddings: ${error.message}`)
   }
 
-  return (data ?? []).map((row: {
-    id: string
-    content: string
-    content_type: string
-    similarity: number
-    source_id: string | null
-    metadata: Record<string, unknown> | null
-  }) => ({
+  return (data ?? []).map((row: MatchRow) => ({
     id: row.id,
     content: row.content,
     contentType: row.content_type as ContentType,
