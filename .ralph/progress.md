@@ -655,3 +655,62 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Exporting internal interfaces from barrel files enables better type reuse by consumers
   - Architectural JSDoc (explaining "why" not "what") is especially valuable when an unconventional pattern is used intentionally
 ---
+
+## [2026-02-12] - US-008: Create Inngest cron for user inactivity detection
+Thread: N/A
+Run: 20260212-005705-93020 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-005705-93020-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-005705-93020-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: b32a0e0 [Pass 1/3] feat: create Inngest cron for user inactivity detection
+- Post-commit status: clean (for inngest files; pre-existing untracked/modified files remain)
+- Skills invoked: none (pure TypeScript + Inngest SDK + Supabase client — no UI/DB migration/framework skills needed)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 4.2s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit | grep detect-inactive` -> PASS (0 errors in US-008 files)
+- Files changed:
+  - src/lib/inngest/functions/detect-inactive-users.ts (new) — Inngest cron function running daily at 9am UTC
+  - src/lib/inngest/functions/index.ts (modified — added detectInactiveUsers to standalone functions array)
+- What was implemented:
+  - Inngest cron function with id 'detect-inactive-users', schedule '0 9 * * *' (daily 9am UTC)
+  - Single DB query fetches all completed attempts' (org_id, clerk_user_id, started_at), grouped in TypeScript by (org_id, clerk_user_id) keeping latest started_at per user
+  - Users with last completed attempt >= 3 days ago get user.inactive events emitted
+  - Event payload: userId, orgId, lastAttemptAt (ISO string), daysSinceLastAttempt (integer)
+  - Batch emission via step.sendEvent() — all inactive user events sent in one Inngest call
+  - Uses bare @supabase/supabase-js createClient with service-role key (same pattern as US-007 activity-log.ts) for background job compatibility
+  - No changes needed to route.ts — standalone functions array is already spread into serve()
+- **Learnings for future iterations:**
+  - PostgREST (Supabase JS client) does not support GROUP BY. For aggregation queries, either create a Postgres function/view (requires migration) or do a single fetch + group in TypeScript. For a daily cron, the TypeScript approach is pragmatic and avoids migration scope creep.
+  - The `scenario_attempts` table uses `clerk_user_id` (not `user_id`) for the user identifier column. The `analytics.ts` file references `user_id` — this may be a naming inconsistency in the codebase.
+  - `step.sendEvent()` accepts arrays for batch event emission, which is more efficient than N individual `emitUserInactive()` calls.
+  - Pre-existing `pagination.tsx` motion.nav type error continues to block full `pnpm build` TypeScript step.
+---
+
+## [2026-02-12] - US-008: Create Inngest cron for user inactivity detection
+Thread: N/A
+Run: 20260212-005705-93020 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-005705-93020-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-005705-93020-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 1b7830d [Pass 2/3] fix: add pagination and null guard to inactivity cron query
+- Post-commit status: clean (for inngest files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep detect-inactive` -> PASS (0 errors in US-008 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - src/lib/inngest/functions/detect-inactive-users.ts (modified — added pagination and null guard)
+- Code review findings:
+  1. **VALID (90%)**: PostgREST silently truncates results at 1000 rows. The original query fetched all completed attempts without pagination, meaning users beyond row 1000 could be silently missed. Fixed by adding `.range()` pagination loop with PAGE_SIZE=1000.
+  2. **VALID (85%)**: NULL clerk_user_id rows could corrupt the grouping Map key (concatenating null as string). Fixed by adding `if (!row.clerk_user_id) continue` guard.
+  3. **FALSE POSITIVE (95%)**: Reviewer suggested using `attempt_status` instead of `status`. The `status` column is the original column used by 15+ queries across 7 files. Using it is consistent with the codebase majority.
+  4. **FALSE POSITIVE (80%)**: Reviewer questioned Math.floor() date rounding. Math.floor() correctly implements "3+ full days" — a user at 2 days 23 hours has NOT been inactive for 3+ days.
+- **Learnings for future iterations:**
+  - PostgREST (Supabase) defaults to 1000 rows max per query. Always use `.range()` for queries that may exceed this limit, or the results will be silently truncated.
+  - When grouping by composite key using string concatenation, guard against NULL values to prevent incorrect grouping (e.g., `"org1|null"` would group all NULL users together).
+  - Code review produced 2 valid fixes and 2 false positives — always verify findings against codebase conventions before accepting.
+---
