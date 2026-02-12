@@ -753,3 +753,24 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - `as const` objects already have literal types on their values — type assertions like `as typeof X.Y` are redundant noise
   - Three-pass cycle for cron function stories: Pass 1 implements core logic, Pass 2 catches pagination/null edge cases, Pass 3 deduplicates types and tightens comments
 ---
+
+## [2026-02-12] - US-008: Create Inngest cron for user inactivity detection
+Thread: N/A
+Run: 20260212-013208-22035 (iteration 1)
+Pass: Re-verification — story already complete (3/3 passes done in prior run 20260212-005705-93020)
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-013208-22035-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-013208-22035-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: none (no changes — prior commits b32a0e0, 1b7830d, 1e93482 are intact)
+- Post-commit status: clean (for US-008 files)
+- Skills invoked: none (verification only)
+- Verification:
+  - Command: `npx tsc --noEmit | grep detect-inactive` -> PASS (0 errors in US-008 files)
+  - Command: `pnpm build` -> pre-existing pagination.tsx error; US-008 files compile successfully
+  - Code intact: detect-inactive-users.ts, functions/index.ts, route.ts all match Pass 3/3 state
+- Files changed: none
+- Prior run (20260212-005705-93020) completed all 3 passes and output COMPLETE signal, but process stalled before exiting. This run verifies integrity and re-signals.
+- **Learnings for future iterations:**
+  - When a prior run completes all 3 passes and outputs COMPLETE but stalls, simply verify code integrity and re-signal — no need to re-run passes
+---
