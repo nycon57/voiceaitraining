@@ -75,6 +75,7 @@ export const NOTIFICATION_TYPES = [
   'critical_score',
   'declining_trend',
   'achievement',
+  'weekly_insight',
 ] as const
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
@@ -166,6 +167,10 @@ const TEMPLATE_CONFIG: Record<NotificationType, TemplateConfig> = {
   achievement: {
     headingText: (name) => (name ? `${name}, great news!` : 'Great news!'),
     ctaLabel: 'View details',
+  },
+  weekly_insight: {
+    headingText: (name) => (name ? `${name}, your weekly team report` : 'Your weekly team report'),
+    ctaLabel: 'View dashboard',
   },
 }
 
