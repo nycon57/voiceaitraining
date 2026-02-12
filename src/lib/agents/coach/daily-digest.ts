@@ -33,6 +33,7 @@ const TREND_THRESHOLD = 3
 // Helpers
 
 function average(arr: number[]): number {
+  if (arr.length === 0) return 0
   return arr.reduce((sum, v) => sum + v, 0) / arr.length
 }
 
