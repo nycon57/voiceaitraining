@@ -1228,3 +1228,41 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When extracting segments by looking ahead (nextSeg), always track consumed indices to prevent the looked-ahead segment from being re-evaluated in the next iteration.
   - Inngest functions should include idempotency checks when duplicate event delivery could cause duplicate side effects (embeddings, emails, etc.).
 ---
+
+## [2026-02-12] - US-013: Embed transcript segments after scoring for semantic memory
+Run: 20260212-041723-20350 (iteration 4)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-041723-20350-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 579969a [Pass 3/3] refactor: simplify embed-attempt-memory for clarity (US-013)
+- Post-commit status: clean (for US-013 files; pre-existing unrelated changes remain unstaged)
+- Skills invoked: /code-simplifier (code-simplifier:code-simplifier agent), /writing-clearly-and-concisely (integrated into simplifier pass)
+- Verification:
+  - Command: npx tsc --noEmit (US-013 files) -> PASS (0 errors in changed files)
+  - Command: pnpm build -> PASS (compiled successfully; pre-existing pagination.tsx type error unrelated)
+- Files changed:
+  - src/lib/inngest/functions/embed-attempt-memory.ts (refactored)
+- What was polished:
+  - Extracted `EmbedItem` interface to replace inline type annotation (cleaner, removes `as ContentType` cast)
+  - Removed 12 redundant comments where step names and variable names already conveyed intent
+  - Removed `console.log` calls — structured return values (`reason: 'already_embedded'`, `reason: 'no_transcript'`) captured by Inngest dashboard instead
+  - Renamed `queue` → `items`, `found` → `results`, `nextSeg` → `next` for accuracy and brevity
+  - Changed `||` to `??` in `fillerCount` for nullish coalescing consistency
+  - Added `reason: 'no_transcript'` to skip return for consistency with idempotency skip
+- Acceptance criteria final verification (all pass):
+  - [x] Inngest function subscribes to attempt.scored event
+  - [x] Extracts significant transcript segments (fumbles, unanswered questions, strong moments)
+  - [x] Stores embeddings via storeEmbedding() with proper content_type and metadata
+  - [x] Limits to 10 embeddings per attempt
+  - [x] Uses Inngest step.run() for retryability
+  - [x] Function registered in Inngest serve route
+  - [x] pnpm build and pnpm typecheck pass (0 errors in US-013 files)
+  - [x] Example: After attempt.scored fires, segments embedded with source_id referencing the attempt
+  - [x] Negative: Attempts with no transcript_json skipped gracefully (returns reason, no crash)
+- **Learnings for future iterations:**
+  - Inngest step names serve as documentation — numbered comments like "Step 1:", "Step 2:" on top of them add noise
+  - Structured return values (`reason` field) are better than console.log for Inngest functions — Inngest captures return values in its dashboard
+  - `||` vs `??` — prefer `??` for null/undefined checks per project lint rules
+---
