@@ -2366,3 +2366,38 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Agent registration uses side-effect imports in api/inngest/route.ts, not direct modification of registry.ts
   - org_members.user_id matches user_memory.user_id but scenario_attempts uses clerk_user_id — use clerk_user_id for attempt queries in background jobs
 ---
+
+## [2026-02-12 09:45] - US-024: Wire Coach Agent recommendations to notification dispatcher
+Run: 20260212-092752-41851 (iteration 3)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 71ecc03 [Pass 3/3] refactor: simplify coach notification dispatcher imports and params (US-024)
+- Post-commit status: clean (only pre-existing unrelated unstaged changes)
+- Skills invoked: code-simplifier:code-simplifier, writing-clearly-and-concisely (manual review)
+- Verification:
+  - Command: `pnpm typecheck 2>&1 | grep dispatch-coach-notification` -> PASS (0 errors in story files)
+  - Command: `pnpm build` -> FAIL (pre-existing pagination.tsx error, unrelated to US-024)
+  - Command: `pnpm lint` -> FAIL (pre-existing Next.js config issue, unrelated to US-024)
+- Files changed:
+  - `src/lib/inngest/functions/dispatch-coach-notification.ts`
+- What was implemented:
+  - Code simplifier consolidated duplicate imports from `@/lib/notifications` into single import line
+  - Replaced verbose field-by-field `SendNotificationParams` construction with object spread (`...content`), removing intermediate variable
+  - Removed unused `SendNotificationParams` type import
+  - Reviewed all user-facing notification text for clarity — titles are concise and actionable, no changes needed
+  - Verified all 8 acceptance criteria pass:
+    1. Inngest function subscribes to coach.recommendation.ready event
+    2. All 4 recommendation types mapped to proper title/body/actionUrl
+    3. sendNotification() called from dispatcher
+    4. All action URLs point to valid existing routes (/training, /training/scenarios/[id], /dashboard)
+    5. Agent activity logged for each dispatched notification
+    6. Zero typecheck errors in story files (pre-existing errors in unrelated files)
+    7. next_scenario with scenarioId creates correct actionUrl
+    8. Deleted scenario falls back to /training
+- **Learnings for future iterations:**
+  - When spreading an interface into function params, verify the spread fields match the expected schema exactly to avoid silent type mismatches
+  - The `pnpm build` and `pnpm lint` failures are pre-existing and unrelated — document this in each pass to avoid confusion
+---
