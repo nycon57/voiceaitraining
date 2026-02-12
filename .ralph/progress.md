@@ -2171,3 +2171,36 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Concurrent Ralph agents may fix issues in shared files — always check HEAD before committing
   - CodeRabbit CLI requires TTY raw mode — not usable in non-interactive agent context, use feature-dev:code-reviewer instead
 ---
+
+## [2026-02-12 09:05] - US-024: Wire Coach Agent recommendations to notification dispatcher
+Run: 20260212-084248-20942 (iteration 3)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084248-20942-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084248-20942-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 9f6d003 [Pass 1/3] feat: wire coach recommendations to notification dispatcher (US-024)
+- Post-commit status: clean (only pre-existing unrelated unstaged changes)
+- Skills invoked: none required for backend Inngest function
+- Verification:
+  - Command: `npx tsc --noEmit | grep dispatch-coach-notification` -> PASS (0 errors in new files)
+  - Command: `pnpm build` -> Compiled successfully (pre-existing pagination.tsx TS error unrelated)
+- Files changed:
+  - `src/lib/inngest/functions/dispatch-coach-notification.ts` (new)
+  - `src/lib/inngest/functions/index.ts` (modified)
+- Implemented:
+  - Inngest function `dispatch-coach-notification` subscribes to `coach.recommendation.ready` event
+  - Maps all 4 recommendation types to notification content:
+    - `next_scenario` → title: 'Your coach recommends...', type: `coach_recommendation`, actionUrl: `/training/scenarios/{id}`
+    - `practice_reminder` → title: 'Time to practice!', type: `practice_reminder`, actionUrl: `/training`
+    - `review_drill` → title: 'Skill review due', type: `coach_recommendation`, actionUrl: `/training/scenarios/{id}`
+    - `daily_digest` → title: 'Your daily progress', type: `daily_digest`, actionUrl: `/dashboard`
+  - Calls `sendNotification()` from dispatcher with Zod-validated absolute URLs via `NEXT_PUBLIC_APP_URL`
+  - Verifies scenario existence before building actionUrl; falls back to `/training` for deleted scenarios
+  - Logs agent activity via `logAgentActivity()` with recommendation type, notification ID, and email status
+  - Registered in `src/lib/inngest/functions/index.ts`
+- **Learnings for future iterations:**
+  - `sendNotification` schema uses `z.string().url()` which requires absolute URLs — must prefix paths with `NEXT_PUBLIC_APP_URL`
+  - No `/coach` page exists yet; used `/dashboard` as the closest valid route for daily digest actionUrl
+  - ESLint config is broken (circular structure) — pre-existing, not fixable in story scope
+---
