@@ -1370,3 +1370,58 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Duplicate `.map()` callbacks are a strong signal to extract a named function — even for 4-line callbacks
   - Three-pass cycle for agent stories: Pass 1 implements handlers, Pass 2 catches error resilience issues, Pass 3 deduplicates mappers and improves user-facing text
 ---
+
+## [2026-02-12] - US-015: Coach Agent skill gap analysis and scenario recommendation engine
+Run: 20260212-052230-57966 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-052230-57966-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-052230-57966-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: ddc507d [Pass 1/3] feat: add skill gap analyzer and scenario recommender to Coach Agent (US-015)
+- Post-commit status: clean (coach agent files)
+- Skills invoked: none (backend-only Inngest functions, no UI)
+- Verification:
+  - Command: npx tsc --noEmit | grep coach/ -> PASS (0 errors in US-015 files)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx error, unrelated)
+- Files changed:
+  - src/lib/agents/coach/skill-gap-analyzer.ts (new)
+  - src/lib/agents/coach/scenario-recommender.ts (new)
+  - src/lib/agents/coach/on-attempt-scored.ts (modified)
+- Implemented skill gap analyzer that identifies top 3 weaknesses prioritized by trend (declining > stable > new > improving) with score tiebreaker
+- Implemented scenario recommender that queries org scenarios, matches against gaps via rubric fields, and filters out recently-practiced scenarios
+- Wired both into on-attempt-scored Inngest function with 3 new steps: analyze-skill-gaps, recommend-next-scenario, emit-recommendation
+- **Learnings for future iterations:**
+  - The `getAgentContext` query provides fresh weakness data after `generateWeaknessProfile` updates the user_memory table
+  - Supabase JS client doesn't support GROUP BY — use JS-side aggregation for counts
+  - Pre-existing build failures in pagination.tsx, progress.tsx, analytics.ts etc. are known and unrelated
+---
+
+## [2026-02-12] - US-015: Coach Agent skill gap analysis and scenario recommendation engine
+Run: 20260212-055233-66214 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-055233-66214-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-055233-66214-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 416e08e [Pass 2/3] fix: add null recommendation reasons and remove unnecessary type cast (US-015)
+- Post-commit status: clean (US-015 files committed; pre-existing unrelated changes remain)
+- Skills invoked: /code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: npx tsc --noEmit | grep coach/ -> PASS (0 errors in US-015 files)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx error, unrelated)
+  - Command: pnpm typecheck | grep coach/ -> PASS (0 errors in US-015 files)
+- Files changed:
+  - src/lib/agents/coach/skill-gap-analyzer.ts (modified)
+  - src/lib/agents/coach/scenario-recommender.ts (modified)
+  - src/lib/agents/coach/on-attempt-scored.ts (modified)
+- Code review found 2 valid issues, both fixed:
+  1. `recommendNextScenario()` returned plain `null` without a reason, violating acceptance criteria. Changed return type to `RecommendationResult { recommendation, reason }` with descriptive reasons for all 4 null paths (no gaps, empty library, all over-practiced, no match)
+  2. Removed unnecessary `(w.trend as Trend)` cast in skill-gap-analyzer — `w.trend` is already `Trend | null`, and `?? 'new'` handles the null case
+- Rejected issues from review:
+  - SQL injection in `.or()` filter: Not valid — this is a PostgREST query parameter, not raw SQL, and the pattern is used extensively in the codebase
+  - Inngest step idempotency: Not valid — Inngest memoizes step results by ID, so steps are not re-executed on retry
+- **Learnings for future iterations:**
+  - When acceptance criteria say "returns null with a reason", design the return type to carry a reason string alongside the nullable payload
+  - PostgREST `.or()` string interpolation is safe for the Supabase JS client — values are URL query params, not raw SQL
+---
