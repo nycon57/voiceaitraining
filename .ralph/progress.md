@@ -2023,3 +2023,59 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
 - **Learnings for future iterations:**
   - Section comments that restate function names add noise; JSDoc comments that document non-obvious behavior (fail-open semantics, overnight range support) are the ones worth keeping
 ---
+
+## [2026-02-12 08:25:00] - US-022: In-app notification bell and notification center UI
+Thread: run-20260212-080745-74639-iter-3
+Run: 20260212-080745-74639 (iteration 3)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080745-74639-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080745-74639-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: f04752d [Pass 1/3] feat: add notification bell and notification center UI (US-022)
+- Post-commit status: clean (US-022 files)
+- Skills invoked: none (Pass 1 — implementation focus)
+- Verification:
+  - Command: npx tsc --noEmit (US-022 files) -> PASS (0 errors in US-022 files; pre-existing errors in pagination.tsx, analytics.ts, etc.)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx onDrag type error — unrelated to US-022)
+- Files changed:
+  - src/actions/notifications.ts (added getNotifications, getUnreadCount, markAsRead, markAllAsRead)
+  - src/components/notifications/notification-bell.tsx (new)
+  - src/components/notifications/notification-center.tsx (new)
+  - src/components/notifications/index.ts (updated barrel export)
+  - src/components/layout/header.tsx (added NotificationBell to header)
+- Implemented notification bell with 30s polling, popover notification center with icons per type, relative time, read/unread state, mark-all-as-read, empty state, and click-to-navigate
+- **Learnings for future iterations:**
+  - Header component is `src/components/layout/header.tsx`, used per-page (not in layout.tsx)
+  - NotificationType is defined in `email-templates.tsx` — reuse for icon mapping
+  - Pre-existing pagination.tsx build error blocks `pnpm build` but doesn't affect US-022 code
+  - ESLint config is broken (circular JSON in .eslintrc.cjs) — pre-existing issue
+---
+
+## [2026-02-12 08:45:00] - US-022: In-app notification bell and notification center UI
+Thread: run-20260212-084248-20942-iter-1
+Run: 20260212-084248-20942 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084248-20942-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084248-20942-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: dda8aaa [Pass 2/3] fix: add bot protection and fix race condition in notification center (US-022)
+- Post-commit status: clean
+- Skills invoked: /code-review (feature-dev:code-reviewer)
+- Verification:
+  - Command: npx tsc --noEmit (US-022 files) -> PASS (0 errors)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx onDrag type error — unrelated to US-022)
+- Files changed:
+  - src/actions/notifications.ts (added assertHuman() to markAsRead and markAllAsRead)
+  - src/components/notifications/notification-center.tsx (fixed stale state race condition in handleClick)
+- Code review found 2 valid issues, 3 false positives:
+  - Fixed: Race condition in unread count — used functional state update to compute count from fresh state
+  - Fixed: Missing assertHuman() bot protection on markAsRead and markAllAsRead mutation actions
+  - False positive: Optimistic update revert — code correctly awaits server call before state update
+  - False positive: XSS via notification content — React auto-escapes JSX text content
+  - Out of scope: useEffect deps in notification-preferences.tsx (US-023)
+- **Learnings for future iterations:**
+  - Always use functional state updater when computing derived values (like counts) from updated state
+  - All mutation server actions should have assertHuman() — match the pattern consistently
+---
