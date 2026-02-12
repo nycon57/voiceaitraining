@@ -6,3 +6,6 @@ export { upsertMemory, getWeaknessProfile, getSkillLevels, getTopWeaknesses, get
 
 export type { DimensionResult } from './weakness-profiler'
 export { generateWeaknessProfile } from './weakness-profiler'
+
+export type { AttemptSummary, PracticePattern, AgentContext } from './query'
+export { getAgentContext, getRecentAttemptSummaries, getPracticePattern } from './query'
