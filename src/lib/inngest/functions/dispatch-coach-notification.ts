@@ -8,7 +8,7 @@ import type { NotificationType } from '@/lib/notifications'
 const AGENT_ID = 'coach-agent'
 
 function appUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(/\/+$/, '')
   return `${base}${path}`
 }
 
@@ -76,11 +76,19 @@ async function resolveScenarioPath(scenarioId: string | undefined): Promise<stri
   if (!scenarioId) return '/training'
 
   const supabase = createServiceClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('scenarios')
     .select('id')
     .eq('id', scenarioId)
     .maybeSingle()
+
+  if (error) {
+    console.error(
+      `[dispatch-coach-notification] Failed to verify scenario ${scenarioId}:`,
+      error.message,
+    )
+    return '/training'
+  }
 
   if (!data) return '/training'
 
