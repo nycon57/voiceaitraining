@@ -2562,3 +2562,33 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - pnpm lint/build have pre-existing failures in this repo — verify changes by filtering typecheck output for own files
   - The notification_preferences table needed a new column for priority filtering — migrations are sometimes needed even when not listed in story's "Files to Modify"
 ---
+
+## 2026-02-12 10:25 UTC - US-028: Build insight generator and weekly manager analysis cron
+Thread: run-20260212-102255-38146
+Run: 20260212-102255-38146 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 22c9628 [Pass 2/3] fix: harden weekly analysis cron with error tracking and type cleanup (US-028)
+- Post-commit status: clean (US-028 files only; other untracked/modified files are pre-existing)
+- Skills invoked: /code-review (via code-reviewer agent)
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in US-028 files; pre-existing errors in pagination.tsx, webhook-form.tsx, analytics.ts, etc.)
+  - Command: pnpm lint -> FAIL (pre-existing: next lint config broken, ESLint circular reference in .eslintrc.cjs)
+  - Command: pnpm build -> FAIL (pre-existing: type error in pagination.tsx, unrelated to US-028)
+  - Command: eslint (direct on US-028 files) -> FAIL (pre-existing ESLint config circular reference)
+- Files changed:
+  - src/lib/inngest/functions/manager-weekly-analysis.ts
+- What was implemented (quality review fixes):
+  - Removed unnecessary `as NotificationType` and `as InsightPriority` type casts
+  - Replaced `failures` counter with `failedOrgs: string[]` array for better production debugging
+  - Added early `continue` when filtered insights are empty for a manager (perf)
+  - Added JSDoc documenting service client usage in cron context (security clarity)
+  - Removed unused `InsightPriority` and `NotificationType` imports
+- **Learnings for future iterations:**
+  - Service client usage in Inngest crons is appropriate — RLS bypass is documented, queries filter by org_id explicitly
+  - Type casts are a code smell — if the type system already has the correct types, casts are unnecessary
+  - failedOrgs array pattern is better than a simple counter for production debugging
+---
