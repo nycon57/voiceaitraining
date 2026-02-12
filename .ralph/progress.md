@@ -2204,3 +2204,45 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - No `/coach` page exists yet; used `/dashboard` as the closest valid route for daily digest actionUrl
   - ESLint config is broken (circular structure) — pre-existing, not fixable in story scope
 ---
+
+## [2026-02-12 09:15] - US-023: Notification preferences settings page
+Run: 20260212-084249-21034 (iteration 3)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084249-21034-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084249-21034-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 32042f1 [Pass 3/3] refactor: simplify notification preferences and polish text (US-023)
+- Post-commit status: clean (no US-023-specific uncommitted changes)
+- Skills invoked: code-simplifier, writing-clearly-and-concisely (manual review)
+- Verification:
+  - Command: `pnpm typecheck | grep notification` -> PASS (0 errors in US-023 files)
+  - Command: `pnpm build` -> FAIL (pre-existing pagination.tsx error, unrelated to US-023)
+  - Command: `npx tsc --noEmit | grep notification` -> PASS (0 errors)
+- Files changed:
+  - `src/actions/notifications.ts`
+  - `src/components/notifications/notification-preferences.tsx`
+- Implemented:
+  - Exported shared Zod schema to eliminate ~20 lines of client-side duplication
+  - Extracted `PREFS_SELECT` constant to DRY duplicate column lists
+  - Derived `NotificationPreferences` interface via `extends NotificationPreferencesInput` (tightened `digest_frequency` from `string` to union type)
+  - Extracted `ChannelToggle` component + `CHANNEL_TOGGLES` data array to replace 3 repetitive JSX blocks (~60 lines → ~17 lines)
+  - Simplified `useEffect` form reset: destructured spread instead of field-by-field mapping
+  - Removed unnecessary `as NotificationPreferencesInput` type assertion in onSubmit
+  - Polished user-facing text: "IANA timezone" → "timezone from the list", "Save notification preferences" → "Save preferences", "Control coaching nudges and digest emails" → "Manage coaching tips and activity digests"
+- **Acceptance criteria final verification:**
+  - [x] Users can toggle email, push, and in-app notification channels
+  - [x] Quiet hours configurable with start/end time and timezone
+  - [x] Coach nudges toggleable
+  - [x] Digest frequency selectable (daily/weekly/never)
+  - [x] Preferences persist via Supabase upsert on notification_preferences table
+  - [x] Form uses Zod validation
+  - [x] Matches existing settings page style
+  - [x] pnpm typecheck passes (0 errors in US-023 files)
+  - [x] Toggling 'Email notifications' off and saving persists the preference
+  - [x] Invalid timezone value rejected by Zod with clear error message
+- **Learnings for future iterations:**
+  - Sharing Zod schemas between server actions and client components eliminates drift risk; export from the server action file
+  - `extends` on interfaces derived from Zod inferred types tightens types automatically (e.g., enum union instead of loose `string`)
+  - Data-driven rendering (array of config objects + small component) is cleaner than repeating near-identical JSX blocks
+---
