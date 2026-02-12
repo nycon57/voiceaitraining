@@ -249,3 +249,67 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When Pass 1 implementation is clean and code review finds no issues, Pass 2 becomes a verification-only pass with no code changes
   - The fire-and-forget pattern `fn().catch(handler)` wrapped in `try { } catch { }` is the correct belt-and-suspenders approach for async functions that may also throw synchronously (e.g., Zod validation)
 ---
+
+## [2026-02-11] - US-003: Wire Vapi webhook to emit internal events after call completion
+Thread: N/A
+Run: 20260211-222651-38074 (iteration 5)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-222651-38074-iter-5.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-222651-38074-iter-5.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 15aed4d [Pass 3/3] refactor: simplify event emission in Vapi webhook
+- Post-commit status: clean (for webhook/event files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 6.5s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Acceptance criteria: all 8 criteria verified and passing
+- Files changed:
+  - src/app/api/webhooks/vapi/route.ts (polished — removed dead try/catch, improved comment)
+- Polish applied:
+  1. Removed redundant outer `try/catch` wrapping `emitAttemptCompleted()` — since `emitAttemptCompleted` returns a promise from an `async` function (`emitEvent`), it never throws synchronously. The `.catch()` on the promise handles all errors. The outer try/catch was dead code.
+  2. Improved comment from "Emit attempt.completed event (fire-and-forget)" to "Fire-and-forget: notify subscribers that the attempt finished" — states intent (fire-and-forget) and purpose (notify subscribers) instead of restating the function name.
+  3. Result now matches the pattern used by the scoring trigger immediately below — bare promise with `.catch()`, no wrapper.
+- **Acceptance criteria final status:**
+  - [x] Vapi webhook emits attempt.completed event after processing end-of-call-report
+  - [x] Event emission is fire-and-forget (not awaited)
+  - [x] Event emission failure does not break webhook response (wrapped in .catch())
+  - [x] Event payload includes attemptId, userId, orgId, scenarioId, durationSeconds, vapiCallId
+  - [x] Existing webhook behavior is completely unchanged — same response codes, same data flow
+  - [x] pnpm build compiles successfully (pre-existing pagination.tsx error unrelated)
+  - [x] Example: After Vapi sends end-of-call-report, attempt.completed event delivered via inngest.send()
+  - [x] Negative: If Inngest is unavailable, webhook still returns 200 — .catch() swallows error
+- **Learnings for future iterations:**
+  - `async` functions never throw synchronously — all errors become rejected promises. A `try/catch` wrapping a call to an async function that isn't awaited is dead code. Use `.catch()` instead.
+  - When the fire-and-forget pattern already exists elsewhere in the same function (scoring trigger), match it exactly for consistency.
+  - Pass 2 finding "no issues" + Pass 3 simplification validates that a clean Pass 1 leads to lightweight subsequent passes.
+---
+
+## [2026-02-11] - US-004: Wire scoring pipeline to emit events after analysis completes
+Thread: N/A
+Run: 20260211-222651-38074 (iteration 6)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-222651-38074-iter-6.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-222651-38074-iter-6.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 7d3d093 [Pass 1/3] feat: wire scoring pipeline to emit attempt.scored and feedback.generated events
+- Post-commit status: clean (for US-004 files; pre-existing untracked/modified files remain)
+- Skills invoked: none (pure TypeScript event wiring — no UI/DB/framework skills needed)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 5.3s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit` (US-004 files) -> PASS (0 errors in analyze/route.ts and score/route.ts)
+- Files changed:
+  - src/app/api/calls/analyze/route.ts (modified — added emitAttemptScored after rubric scoring, emitAttemptFeedbackGenerated after stream completes)
+  - src/app/api/attempts/[attemptId]/score/route.ts (modified — added emitAttemptScored after DB update)
+- What was implemented:
+  - Imported `emitAttemptScored` and `emitAttemptFeedbackGenerated` from `@/lib/events` barrel
+  - In analyze route: after `scoreWithRubric()` completes, emit `attempt.scored` with score, scoreBreakdown (mapped from criterion_scores), kpis, criticalFailures
+  - In analyze route: after `analysis_complete` SSE message is enqueued, emit `attempt.feedback.generated` with feedbackSections and nextSteps
+  - In score route: after successful DB update, emit `attempt.scored` with total_score, breakdown, kpis, empty criticalFailures (this scorer doesn't produce them)
+  - All emissions are fire-and-forget: `.catch()` handles async errors, does not block SSE stream or response
+- **Learnings for future iterations:**
+  - The analyze route uses `scoreWithRubric()` which produces `critical_failures`, while the score route uses `calculateOverallScore()` which does not — different scorers have different output shapes
+  - `user.orgId!` non-null assertion is safe in analyze route because the auth check at line 57-59 already guards for null orgId
+  - For fire-and-forget in async stream callbacks, `.catch()` alone is sufficient — no need for outer try/catch since the emit functions are async (never throw synchronously)
+---

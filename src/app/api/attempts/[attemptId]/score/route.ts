@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireHuman } from '@/lib/botid'
 import { createAdminClient } from '@/lib/supabase/server'
 import { calculateGlobalKPIs, calculateScenarioKPIs, calculateOverallScore } from '@/lib/ai/scoring'
+import { emitAttemptScored } from '@/lib/events'
 
 export async function POST(
   req: NextRequest,
@@ -85,6 +86,19 @@ export async function POST(
     }
 
     console.log(`Scored attempt ${attemptId}: ${total_score}/100`)
+
+    // Fire-and-forget: notify subscribers that scoring finished
+    emitAttemptScored({
+      attemptId,
+      userId: attempt.clerk_user_id,
+      orgId: attempt.org_id,
+      scenarioId: attempt.scenario_id,
+      score: total_score,
+      scoreBreakdown: breakdown,
+      kpis,
+      criticalFailures: [],
+    }).catch((err: unknown) => console.error('[score] Failed to emit attempt.scored:', err))
+
     return NextResponse.json({
       success: true,
       attemptId,
