@@ -4,21 +4,14 @@ import { z } from 'zod'
 
 import { createServiceClient } from '@/lib/memory/supabase'
 
-import { emailTemplates, type NotificationType } from './email-templates'
+import { emailTemplates, NOTIFICATION_TYPES } from './email-templates'
 
 // Validation
 
 const sendNotificationSchema = z.object({
   userId: z.string().min(1),
   orgId: z.string().uuid(),
-  type: z.enum([
-    'coach_recommendation',
-    'daily_digest',
-    'practice_reminder',
-    'weakness_update',
-    'assignment_created',
-    'assignment_overdue',
-  ]),
+  type: z.enum(NOTIFICATION_TYPES),
   title: z.string().min(1),
   body: z.string().min(1),
   actionUrl: z.string().url().optional(),
@@ -91,9 +84,10 @@ async function getUserPreferences(
 
 // Quiet hours
 
+/** Parse "HH:MM" or "HH:MM:SS" (PostgreSQL time format) to total minutes. */
 function parseTimeToMinutes(time: string): number | null {
   const parts = time.split(':')
-  if (parts.length !== 2) return null
+  if (parts.length < 2) return null
   const hour = parseInt(parts[0], 10)
   const minute = parseInt(parts[1], 10)
   if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
@@ -194,7 +188,7 @@ async function sendEmail(params: SendNotificationParams): Promise<boolean> {
     return false
   }
 
-  const Template = emailTemplates[params.type as NotificationType]
+  const Template = emailTemplates[params.type]
   if (!Template) return false
 
   const element = createElement(Template, {

@@ -3,4 +3,8 @@ export {
   type SendNotificationParams,
   type SendNotificationResult,
 } from './dispatcher'
-export { emailTemplates, type NotificationType } from './email-templates'
+export {
+  emailTemplates,
+  NOTIFICATION_TYPES,
+  type NotificationType,
+} from './email-templates'

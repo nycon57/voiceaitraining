@@ -69,13 +69,16 @@ const footer: React.CSSProperties = {
 
 // Notification types
 
-export type NotificationType =
-  | 'coach_recommendation'
-  | 'daily_digest'
-  | 'practice_reminder'
-  | 'weakness_update'
-  | 'assignment_created'
-  | 'assignment_overdue'
+export const NOTIFICATION_TYPES = [
+  'coach_recommendation',
+  'daily_digest',
+  'practice_reminder',
+  'weakness_update',
+  'assignment_created',
+  'assignment_overdue',
+] as const
+
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 
 // Template props
 
