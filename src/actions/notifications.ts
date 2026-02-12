@@ -169,6 +169,7 @@ const markAsReadSchema = z.object({
 })
 
 export async function markAsRead(id: string): Promise<void> {
+  await assertHuman()
   const { id: validId } = markAsReadSchema.parse({ id })
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -186,6 +187,8 @@ export async function markAsRead(id: string): Promise<void> {
 }
 
 export async function markAllAsRead(): Promise<void> {
+  await assertHuman()
+
   return withOrgGuard(async (user, orgId, supabase) => {
     const { error } = await supabase
       .from('notifications')
