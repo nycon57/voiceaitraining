@@ -8,7 +8,7 @@ import { logAgentActivity } from '@/lib/agents/activity-log'
 import { generateWeaknessProfile, type DimensionResult } from '@/lib/memory/weakness-profiler'
 import { getAgentContext } from '@/lib/memory/query'
 import { analyzeSkillGaps } from './skill-gap-analyzer'
-import { recommendNextScenario } from './scenario-recommender'
+import { recommendNextScenario, type RecommendationResult } from './scenario-recommender'
 
 const AGENT_ID = 'coach-agent'
 
@@ -73,19 +73,21 @@ export const onAttemptScored = inngest.createFunction(
       return analyzeSkillGaps(context)
     })
 
-    const recommendation = await step.run('recommend-next-scenario', async () => {
-      if (gapAnalysis.topGaps.length === 0) return null
+    const result: RecommendationResult = await step.run('recommend-next-scenario', async () => {
+      if (gapAnalysis.topGaps.length === 0) {
+        return { recommendation: null, reason: 'No skill gaps identified yet.' }
+      }
       return recommendNextScenario(orgId, userId, gapAnalysis.topGaps)
     })
 
-    if (recommendation) {
+    if (result.recommendation) {
       await step.run('emit-recommendation', async () => {
         const payload: CoachRecommendationReadyPayload = {
           userId,
           orgId,
           recommendationType: 'next_scenario',
-          scenarioId: recommendation.scenarioId,
-          message: recommendation.reason,
+          scenarioId: result.recommendation!.scenarioId,
+          message: result.recommendation!.reason,
         }
 
         await inngest.send({
@@ -95,7 +97,11 @@ export const onAttemptScored = inngest.createFunction(
       })
     }
 
-    return { updated: profile.length, recommendation: recommendation?.scenarioId ?? null }
+    return {
+      updated: profile.length,
+      recommendation: result.recommendation?.scenarioId ?? null,
+      reason: result.reason,
+    }
   },
 )
 
