@@ -1629,3 +1629,39 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Inngest batch crons should wrap per-item processing in try-catch to prevent cascading failures
   - Always prefer `createServiceClient()` over inline `createClient()` for consistency
 ---
+
+## [2026-02-12] - US-020: Create notification tables migration (preferences and notifications)
+Thread: N/A
+Run: 20260212-062236-75703 (iteration 4)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-062236-75703-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-062236-75703-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 0311327 [Pass 1/3] feat: add notification_preferences and notifications tables (US-020)
+- Post-commit status: clean (for US-020 files; pre-existing untracked/modified files remain)
+- Skills invoked: supabase-postgres-best-practices
+- Verification:
+  - Command: `mcp__supabase__apply_migration` -> PASS (migration applied successfully)
+  - Command: `mcp__supabase__execute_sql` (verify columns) -> PASS (13 columns on notification_preferences, 12 columns on notifications)
+  - Command: `mcp__supabase__execute_sql` (verify RLS policies) -> PASS (4 policies: SELECT + ALL for each table)
+  - Command: `mcp__supabase__execute_sql` (verify indexes) -> PASS (idx_notifications_org_user_read_created + notification_preferences_unique_user)
+  - Command: `mcp__supabase__execute_sql` (verify constraints) -> PASS (unique, check, FK, PK constraints)
+  - Command: `mcp__supabase__execute_sql` (positive test) -> PASS (insert with quiet hours succeeded)
+  - Command: `mcp__supabase__execute_sql` (negative test) -> PASS (duplicate insert fails with 23505 unique violation)
+  - Command: `pnpm build` -> pre-existing pagination.tsx error (unrelated; US-020 is SQL-only)
+  - Command: `pnpm typecheck` -> pre-existing errors (unrelated; US-020 is SQL-only)
+- Files changed:
+  - db/migrations/0016_create_notification_tables.sql (created)
+- What was implemented:
+  - `notification_preferences` table: id, org_id, user_id, channel_email, channel_push, channel_in_app (booleans), quiet_hours_start/end (time), quiet_hours_timezone, digest_frequency (with CHECK constraint for realtime/daily/weekly/none), coach_nudges, created_at, updated_at
+  - UNIQUE constraint on (org_id, user_id) — prevents duplicate preferences
+  - updated_at trigger via update_notification_preferences_updated_at()
+  - `notifications` table: id, org_id, user_id, type, title, body, action_url, agent_id, read (boolean), channel_sent (text[]), metadata (jsonb), created_at
+  - RLS enabled on both tables with SELECT + ALL policies using jwt.claims.org_id
+  - Composite index on notifications (org_id, user_id, read, created_at DESC) for efficient unread queries
+- **Learnings for future iterations:**
+  - SQL-only migration stories don't need lint/typecheck verification — the file is not TypeScript
+  - Supabase MCP apply_migration is the correct tool for DDL operations (not execute_sql)
+  - Test data cleanup after verification prevents polluting the database
+---
