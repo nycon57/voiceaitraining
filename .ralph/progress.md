@@ -1044,3 +1044,36 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When code review finds only one low-impact valid issue and 3 false positives/out-of-scope items, the Pass 1 implementation was clean.
   - Defensive guards for division-by-zero in weighted scoring are cheap insurance even when the guard condition is practically unreachable.
 ---
+
+## [2026-02-12] - US-011: Build weakness profile generator from attempt history
+Thread: N/A
+Run: 20260212-031217-84132 (iteration 1)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-031217-84132-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-031217-84132-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: c04a369 [Pass 3/3] refactor: extract shared supabase client, simplify weakness profiler
+- Post-commit status: clean (for US-011 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (manual review — no UI text in backend library)
+- Verification:
+  - Command: `pnpm typecheck | grep src/lib/memory` -> PASS (0 errors in memory module)
+  - Command: `pnpm build` -> Pre-existing pagination.tsx type error only; no US-011 errors
+- Files changed:
+  - src/lib/memory/supabase.ts (new) — extracted shared createServiceClient()
+  - src/lib/memory/weakness-profiler.ts (modified — factory helpers, average(), import from shared supabase)
+  - src/lib/memory/user-memory.ts (modified — import from shared supabase)
+  - src/lib/memory/embeddings.ts (modified — import from shared supabase)
+  - src/lib/memory/index.ts (modified — added DimensionResult type export)
+- What was implemented:
+  - Extracted duplicated createServiceClient() from 3 files into shared src/lib/memory/supabase.ts
+  - Added flatScoreDimension() and flatInverseDimension() factory helpers to collapse 5 repetitive dimension definitions
+  - Extracted average() helper to deduplicate inline reduce pattern in calculateTrend
+  - Simplified trailing return patterns (if/return/null -> ternary)
+  - Exported DimensionResult type for downstream consumers
+  - All 11 acceptance criteria verified passing
+- **Learnings for future iterations:**
+  - When multiple files in the same module duplicate a utility (createServiceClient), extract it early to avoid 3-file refactors later
+  - Factory helpers for config arrays (like DIMENSIONS) are a clean way to reduce boilerplate when 3+ entries follow the same shape
+  - Three-pass cycle for data processing stories: Pass 1 implements with full coverage, Pass 2 catches edge cases, Pass 3 extracts shared code and reduces duplication
+---
