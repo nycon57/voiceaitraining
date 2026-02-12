@@ -2121,3 +2121,24 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - PopoverContent size prop handles width — don't duplicate in className
   - Zod schemas can be simplified when wrapping a single field (z.string().uuid() vs z.object({id: ...}))
 ---
+
+## [2026-02-12 09:15:00] - US-022: In-app notification bell and notification center UI
+Thread: run-20260212-084248-20942-iter-2
+Run: 20260212-084248-20942 (iteration 2)
+Pass: 3/3 - Polish & Finalize (duplicate — parallel run completed this pass)
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084248-20942-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-084248-20942-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: none — parallel run (20260212-084249-21034-iter-1) already committed identical Pass 3/3 changes (80e0803, 47ebfec)
+- Post-commit status: clean (US-022 files)
+- Skills invoked: code-simplifier:code-simplifier, writing (manual review), agent-browser (auth blocked)
+- Verification:
+  - Command: npx tsc --noEmit (US-022 files) -> PASS (0 errors)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx type error — unrelated to US-022)
+  - Browser verification: auth required, could not sign in
+- Files changed: none (parallel run committed same changes)
+- All acceptance criteria verified (see parallel run entry above)
+- **Learnings for future iterations:**
+  - Parallel Ralph runs can produce identical changes — check git log before committing
+---
