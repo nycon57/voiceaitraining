@@ -11,7 +11,6 @@ CREATE TABLE agent_activity_log (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Enable RLS
 ALTER TABLE agent_activity_log ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy: org members can read their org's activity

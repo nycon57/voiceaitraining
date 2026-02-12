@@ -612,3 +612,46 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Always check the existing migration directory (`db/migrations/`) and naming convention (sequential 0NNN_) before creating new migrations. The PRD suggested `supabase/migrations/` but the actual convention is different.
   - When code review suggests ON DELETE CASCADE, verify against existing project patterns first — not every FK needs CASCADE.
 ---
+
+## [2026-02-12] - US-007: Create agent activity logging table and API
+Thread: N/A
+Run: 20260212-002201-62073 (iteration 4)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-4.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-4.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 418bea0 [Pass 3/3] refactor: polish agent activity logging for clarity and maintainability
+- Post-commit status: clean (for US-007 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit` (US-007 files) -> PASS (0 errors in agent-activity and activity-log files)
+  - Acceptance criteria: all 9 criteria verified and passing
+- Files changed:
+  - src/lib/agents/activity-log.ts (polished — exported interface, expanded JSDoc with architectural rationale, explicit Promise<void> return type)
+  - src/actions/agent-activity.ts (polished — removed redundant .default() from Zod schema, improved error message consistency)
+  - db/migrations/0013_create_agent_activity_log.sql (polished — removed redundant "Enable RLS" comment)
+  - src/lib/agents/index.ts (polished — added LogAgentActivityParams type re-export)
+- Polish applied:
+  1. Exported `LogAgentActivityParams` interface and added it to barrel — allows consumers to reference the type
+  2. Expanded JSDoc on `logAgentActivity()` to explain why it uses bare `@supabase/supabase-js` client instead of `createAdminClient()` — prevents future developers from "fixing" it back to the cookie-dependent server client
+  3. Added explicit `Promise<void>` return type annotation
+  4. Removed `.default(50)` and `.default(0)` from Zod pagination schema — function parameter defaults are the single source of truth, dual defaults create a maintenance risk
+  5. Improved error message consistency: "for user" / "for org" parallel structure
+  6. Removed self-explanatory "Enable RLS" SQL comment
+- **Acceptance criteria final status:**
+  - [x] agent_activity_log table migration exists with all specified columns
+  - [x] RLS policy restricts reads to matching org_id
+  - [x] Indexes on (org_id, created_at DESC) and (org_id, user_id, created_at DESC)
+  - [x] logAgentActivity() inserts rows using service-role client (admin-equivalent, cookie-free for background jobs)
+  - [x] getAgentActivityForUser() uses withOrgGuard and scopes to org
+  - [x] getAgentActivityForOrg() requires manager or admin role via withRoleGuard
+  - [x] Typecheck passes (0 errors in US-007 files)
+  - [x] Example: logAgentActivity({ agentId: 'coach-agent', action: 'updated_weakness_profile', orgId, userId, details: { skills: 5 } }) creates a row
+  - [x] Negative: A trainee calling getAgentActivityForOrg() is rejected with an authorization error (role guard)
+- **Learnings for future iterations:**
+  - When function parameter defaults and Zod `.default()` both provide the same value, remove the Zod default to avoid dual-source-of-truth maintenance risk
+  - Exporting internal interfaces from barrel files enables better type reuse by consumers
+  - Architectural JSDoc (explaining "why" not "what") is especially valuable when an unconventional pattern is used intentionally
+---

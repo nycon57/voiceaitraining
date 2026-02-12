@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-interface LogAgentActivityParams {
+export interface LogAgentActivityParams {
   orgId: string
   userId?: string
   agentId: string
@@ -10,8 +10,14 @@ interface LogAgentActivityParams {
   metadata?: Record<string, unknown>
 }
 
-/** Insert an agent activity log row using a service-role client (no cookie context needed). */
-export async function logAgentActivity(params: LogAgentActivityParams) {
+/**
+ * Insert an agent activity log row.
+ *
+ * Uses the bare supabase-js client with the service-role key so it can be
+ * called from background jobs (Inngest) where Next.js cookie context is
+ * unavailable.
+ */
+export async function logAgentActivity(params: LogAgentActivityParams): Promise<void> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
