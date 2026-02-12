@@ -3,7 +3,7 @@ import { upsertMemory, type MemoryType, type Trend } from './user-memory'
 
 // Types
 
-interface AttemptRow {
+export interface AttemptRow {
   id: string
   kpis: Record<string, unknown> | null
   score: number | null
@@ -313,4 +313,20 @@ export async function generateWeaknessProfile(
   }
 
   return results
+}
+
+/** Compute the simple average score per dimension for a set of attempts. */
+export function extractDimensionAverages(attempts: AttemptRow[]): Map<string, number> {
+  const result = new Map<string, number>()
+  for (const dim of DIMENSIONS) {
+    const scores: number[] = []
+    for (const attempt of attempts) {
+      const score = dim.extract(attempt)
+      if (score != null) scores.push(score)
+    }
+    if (scores.length > 0) {
+      result.set(dim.key, Math.round(scores.reduce((s, v) => s + v, 0) / scores.length))
+    }
+  }
+  return result
 }
