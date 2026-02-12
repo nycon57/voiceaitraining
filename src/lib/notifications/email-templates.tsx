@@ -12,8 +12,6 @@ import {
 } from '@react-email/components'
 import * as React from 'react'
 
-// Shared styles
-
 const main: React.CSSProperties = {
   backgroundColor: '#f6f9fc',
   fontFamily:
@@ -67,8 +65,6 @@ const footer: React.CSSProperties = {
   lineHeight: '16px',
 }
 
-// Notification types
-
 export const NOTIFICATION_TYPES = [
   'coach_recommendation',
   'daily_digest',
@@ -80,8 +76,6 @@ export const NOTIFICATION_TYPES = [
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 
-// Template props
-
 interface BaseEmailProps {
   title: string
   body: string
@@ -89,7 +83,10 @@ interface BaseEmailProps {
   recipientName?: string
 }
 
-// Shared layout
+interface TemplateConfig {
+  headingText: (name?: string) => string
+  ctaLabel: string
+}
 
 function NotificationEmailLayout({
   title,
@@ -98,7 +95,7 @@ function NotificationEmailLayout({
   recipientName,
   headingText,
   ctaLabel,
-}: BaseEmailProps & { headingText: (name?: string) => string; ctaLabel: string }) {
+}: BaseEmailProps & TemplateConfig) {
   return (
     <Html>
       <Head />
@@ -130,12 +127,7 @@ function NotificationEmailLayout({
   )
 }
 
-// Template configuration
-
-const TEMPLATE_CONFIG: Record<
-  NotificationType,
-  { headingText: (name?: string) => string; ctaLabel: string }
-> = {
+const TEMPLATE_CONFIG: Record<NotificationType, TemplateConfig> = {
   coach_recommendation: {
     headingText: (name) => (name ? `Hey ${name},` : 'Hey there,'),
     ctaLabel: 'Start practicing',

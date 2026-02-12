@@ -6,8 +6,6 @@ import { createServiceClient } from '@/lib/memory/supabase'
 
 import { emailTemplates, NOTIFICATION_TYPES } from './email-templates'
 
-// Validation
-
 const sendNotificationSchema = z.object({
   userId: z.string().min(1),
   orgId: z.string().uuid(),
@@ -29,8 +27,6 @@ export interface SendNotificationResult {
   emailSuppressedReason?: 'quiet_hours' | 'channel_disabled' | 'no_email'
   notificationId: string
 }
-
-// Preferences
 
 interface NotificationPreferences {
   channel_email: boolean
@@ -75,8 +71,6 @@ async function getUserPreferences(
 
   return { ...DEFAULT_PREFERENCES, ...data }
 }
-
-// Quiet hours
 
 /** Parse "HH:MM" or "HH:MM:SS" (PostgreSQL time format) to total minutes. */
 function parseTimeToMinutes(time: string): number | null {
@@ -131,8 +125,6 @@ function isQuietHours(prefs: NotificationPreferences): boolean {
   }
 }
 
-// In-app notification
-
 async function createInAppNotification(
   params: SendNotificationParams,
 ): Promise<string> {
@@ -159,17 +151,15 @@ async function createInAppNotification(
     throw new Error(`Failed to create in-app notification: ${error.message}`)
   }
 
-  return data.id as string
+  return data.id
 }
 
-// Email sending
-
-let _resend: Resend | null = null
+let resendClient: Resend | null = null
 function getResend(): Resend {
-  if (!_resend) {
-    _resend = new Resend(process.env.RESEND_API_KEY)
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY)
   }
-  return _resend
+  return resendClient
 }
 
 async function sendEmail(params: SendNotificationParams): Promise<boolean> {
@@ -208,8 +198,6 @@ async function sendEmail(params: SendNotificationParams): Promise<boolean> {
 
   return true
 }
-
-// Main dispatcher
 
 /**
  * Send a notification to a user, respecting their channel preferences and quiet hours.
