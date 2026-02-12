@@ -1,5 +1,4 @@
--- Structured memory for trainee weakness profiles, skill levels, and learning trajectories.
--- Used by the Coach Agent to persist per-user coaching intelligence.
+-- Per-user coaching intelligence: weakness profiles, skill levels, and learning trajectories.
 
 CREATE TABLE user_memory (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -28,15 +27,12 @@ CREATE POLICY "org_members_read_user_memory"
   FOR SELECT
   USING (org_id = current_setting('jwt.claims.org_id', true)::uuid);
 
--- Composite index for querying a user's memories by type
 CREATE INDEX idx_user_memory_org_user_type
   ON user_memory (org_id, user_id, memory_type);
 
--- Composite index for sorting/filtering by score within a user
 CREATE INDEX idx_user_memory_org_user_score
   ON user_memory (org_id, user_id, score);
 
--- Auto-update updated_at on row modification
 CREATE OR REPLACE FUNCTION update_user_memory_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN

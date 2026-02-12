@@ -939,3 +939,47 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Code review produced 0 actionable fixes — a clean Pass 1 for a well-understood pattern (matching embeddings.ts) results in a verification-only Pass 2
   - SELECT-only RLS is the established convention for tables written exclusively by service-role clients (background jobs)
 ---
+
+## [2026-02-12] - US-010: Create user_memory table for structured weakness profiles
+Thread: N/A
+Run: 20260212-023714-54409 (iteration 1)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-023714-54409-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-023714-54409-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: e48e19e [Pass 3/3] refactor: polish user_memory for clarity and deduplication
+- Post-commit status: clean (for US-010 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep memory/user-memory` -> PASS (0 errors in US-010 files)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Acceptance criteria: all 11 criteria verified and passing
+- Files changed:
+  - src/lib/memory/user-memory.ts (polished — collapsed 3 identical interfaces into MemoryEntry + aliases, extracted queryMemories helper, tightened JSDoc)
+  - src/lib/memory/index.ts (added MemoryEntry to barrel re-exports)
+  - db/migrations/0015_create_user_memory.sql (polished — condensed header comment, removed redundant index and trigger comments)
+- Polish applied:
+  1. Collapsed `WeaknessEntry`, `SkillLevel`, `TrajectoryPoint` into single `MemoryEntry` interface with type aliases — eliminates 20 duplicate lines while preserving all named exports
+  2. Fixed `toEntry()` return type from `WeaknessEntry` to `MemoryEntry` — honest about what the function maps
+  3. Extracted `queryMemories()` private helper — deduplicates 4 near-identical query functions into one-liner delegations
+  4. Tightened JSDoc: removed implementation details from upsertMemory, removed "sorted by score ascending" restating code, simplified getTopWeaknesses/getTopStrengths
+  5. SQL: condensed 2-line header to 1 line, removed comments that restate index/trigger names
+  6. Added `MemoryEntry` to barrel re-exports for consumer type reuse
+- **Acceptance criteria final status:**
+  - [x] user_memory table exists with all columns and constraints
+  - [x] Unique constraint on (org_id, user_id, memory_type, key) prevents duplicates
+  - [x] RLS policy restricts access by org_id
+  - [x] upsertMemory() performs INSERT ON CONFLICT UPDATE correctly
+  - [x] getWeaknessProfile() returns weaknesses sorted by score ascending (worst first)
+  - [x] getTopWeaknesses() returns limited results sorted by severity
+  - [x] All functions use createServiceClient() for writes (background job compatible)
+  - [x] TypeScript interfaces defined with no any types
+  - [x] pnpm build and pnpm typecheck pass (pre-existing pagination.tsx error unrelated)
+  - [x] Example: upsertMemory({ userId, memoryType: 'weakness_profile', key: 'objection_handling', score: 45, trend: 'declining' }) creates or updates the entry
+  - [x] Negative: Inserting a duplicate (same org_id, user_id, memory_type, key) updates the existing row instead of creating a second one
+- **Learnings for future iterations:**
+  - When multiple interfaces are field-for-field identical, define one base interface and export type aliases — preserves the public API while eliminating duplication
+  - When 4+ functions follow the same query pattern with minor variations (type, sort direction, limit), extract a private helper — reduces ~60 lines of near-identical code to one-liner delegations
+  - Three-pass cycle for infrastructure stories: Pass 1 implements, Pass 2 verifies (no changes), Pass 3 deduplicates types and extracts helpers
+---
