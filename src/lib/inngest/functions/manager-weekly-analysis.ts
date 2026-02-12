@@ -21,7 +21,10 @@ export const managerWeeklyAnalysis = inngest.createFunction(
   async ({ step }) => {
     const orgIds = await step.run('list-active-orgs', async () => {
       const supabase = createServiceClient()
-      const { data, error } = await supabase.from('orgs').select('id')
+      const { data, error } = await supabase
+        .from('orgs')
+        .select('id')
+        .or('status.is.null,status.neq.inactive')
 
       if (error) throw new Error(`Failed to fetch orgs: ${error.message}`)
       return (data ?? []).map((o: { id: string }) => o.id)
@@ -71,9 +74,9 @@ export const managerWeeklyAnalysis = inngest.createFunction(
                   recipientEmail: manager.email,
                   recipientName: manager.name,
                   metadata: {
+                    ...insight.metadata,
                     insightType: insight.type,
                     priority: insight.priority,
-                    ...insight.metadata,
                   },
                 })
                 notified++
