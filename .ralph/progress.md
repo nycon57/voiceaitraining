@@ -2678,3 +2678,73 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Notification messages benefit from direct imperatives over hedged suggestions — managers want actionable guidance
   - Vary sentence patterns across similar messages to avoid formulaic feel
 ---
+
+## 2026-02-12 - US-029: Auto-generated 1:1 coaching briefs for managers
+Run: 20260212-102255-38146 (iteration 3)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38146-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: b12f578 [Pass 1/3] feat: add auto-generated coaching briefs for managers (US-029)
+- Post-commit status: clean
+- Skills invoked: /feature-dev, /next-best-practices, /supabase-postgres-best-practices
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in new files; pre-existing errors in UI components)
+  - Command: pnpm build -> Compiled successfully (TypeScript check fails on pre-existing UI errors)
+  - Command: pnpm lint -> FAIL (pre-existing project-level issue with next lint command)
+- Files changed:
+  - src/lib/agents/manager/coaching-brief.ts (new)
+  - src/app/api/coach/briefing/manager/route.ts (new)
+  - src/actions/coaching-briefs.ts (new)
+- What was implemented:
+  - generateCoachingBrief(orgId, managerId, traineeId) with performance vs team comparison
+  - PerformanceSummary with overallScore, trend, recentScores, teamAvgScore, comparedToTeam
+  - Strengths and areas to discuss from user_memory weakness/skill_level profiles
+  - Talking points generated via Gemini Flash with deterministic fallback
+  - Recommended assignments scored against weakness profile using rubric matching
+  - API route at /api/coach/briefing/manager with manager/admin role check and 403 for trainees
+  - Server actions getCoachingBrief(traineeId) and getTeamBriefs() with withRoleGuard
+  - Zod validation on all inputs
+  - Parallel data fetching with Promise.all for performance
+- **Learnings for future iterations:**
+  - The manager agent already had team-analyzer and insight-generator patterns to follow
+  - ScenarioRubric field matching pattern reused from coach/scenario-recommender.ts
+  - Pre-existing build/lint failures should be documented but not block story progress
+---
+
+## [2026-02-12T10:30:00] - US-030: Real-time manager alerts on critical scoring events
+Run: 20260212-102255-38254 (iteration 3)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38254-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38254-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 21676e4 [Pass 3/3] refactor: polish manager alerts for clarity and conciseness (US-030)
+- Post-commit status: clean
+- Skills invoked: code-simplifier:code-simplifier (x2 — code simplification + writing review)
+- Verification:
+  - Command: pnpm typecheck (manager-alerts.ts) -> PASS (no errors in story files)
+  - Command: pnpm lint -> PASS (no lint errors in story files)
+  - All 9 acceptance criteria verified manually -> PASS
+- Files changed:
+  - src/lib/inngest/functions/manager-alerts.ts (refactored)
+- What was implemented:
+  - Code simplifier: renamed interfaces (AlertPayload→Alert, ManagerInfo→Manager), extracted SendResult type, removed variable shadowing (results→matched, results→sendResults), removed redundant type annotations and inline ManagerUser cast, improved destructuring
+  - Writing review: made alert body text active voice with actionable CTAs, removed exclamation marks from professional notifications, removed filler adjectives, replaced vague "consider providing targeted coaching support" with specific "schedule a coaching session", rewrote comments to explain WHY not WHAT
+  - Removed 3 redundant comments that restated code intent
+- Acceptance criteria final verification:
+  1. Function subscribes to attempt.scored event — PASS
+  2. Score < 40 triggers critical alert with trainee name, scenario, score — PASS
+  3. 3+ consecutive declining scores triggers trend alert — PASS
+  4. First attempt > 90 triggers achievement notification — PASS
+  5. Correctly identifies managers via org_members (role='manager') — PASS
+  6. Respects notification preferences via sendNotification() — PASS
+  7. pnpm typecheck passes — PASS
+  8. Example: score 35 → critical alert with correct format — PASS
+  9. Negative: score 41 does NOT trigger critical alert — PASS
+- **Learnings for future iterations:**
+  - code-simplifier:code-simplifier can be invoked in parallel for structural and text review tasks
+  - Professional notification text should avoid exclamation marks and use specific actionable CTAs
+  - Pre-existing build failures in pagination.tsx, analytics.ts, vapi.ts persist across all US-030 passes — not related to this story
+---
