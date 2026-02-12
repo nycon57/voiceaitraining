@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { generateText } from 'ai'
 import { google } from '@ai-sdk/google'
 import { createServiceClient } from '@/lib/memory/supabase'
@@ -103,7 +104,7 @@ export async function generateCoachingBrief(
   // Fetch all data in parallel
   const [trainee, weaknesses, strengths, traineeAttempts, teamAttempts, scenarios] =
     await Promise.all([
-      fetchTrainee(supabase, traineeId),
+      fetchTrainee(supabase, orgId, traineeId),
       getWeaknessProfile(orgId, traineeId),
       getTopStrengths(orgId, traineeId, MAX_STRENGTHS),
       fetchTraineeAttempts(supabase, orgId, traineeId),
@@ -144,9 +145,22 @@ export async function generateCoachingBrief(
 // ── Data fetching ──────────────────────────────────────────────────
 
 async function fetchTrainee(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: SupabaseClient,
+  orgId: string,
   traineeId: string,
 ): Promise<TraineeRow> {
+  // Verify trainee belongs to the requesting org before returning user data
+  const { data: member, error: memberError } = await supabase
+    .from('org_members')
+    .select('user_id')
+    .eq('org_id', orgId)
+    .eq('user_id', traineeId)
+    .single()
+
+  if (memberError || !member) {
+    throw new Error(`Failed to fetch trainee: user not found in organization`)
+  }
+
   const { data, error } = await supabase
     .from('users')
     .select('first_name, last_name, email')
@@ -161,7 +175,7 @@ async function fetchTrainee(
 }
 
 async function fetchTraineeAttempts(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: SupabaseClient,
   orgId: string,
   traineeId: string,
 ): Promise<AttemptRow[]> {
@@ -181,7 +195,7 @@ async function fetchTraineeAttempts(
 }
 
 async function fetchTeamAttempts(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: SupabaseClient,
   orgId: string,
 ): Promise<AttemptRow[]> {
   const { data, error } = await supabase
@@ -199,7 +213,7 @@ async function fetchTeamAttempts(
 }
 
 async function fetchActiveScenarios(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: SupabaseClient,
   orgId: string,
 ): Promise<ScenarioRow[]> {
   const { data, error } = await supabase
@@ -319,7 +333,7 @@ function buildAreasToDiscuss(weaknesses: WeaknessEntry[]): string[] {
 // ── Recommended assignments ────────────────────────────────────────
 
 async function buildRecommendedAssignments(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: SupabaseClient,
   orgId: string,
   traineeId: string,
   weaknesses: WeaknessEntry[],
@@ -407,7 +421,7 @@ interface RecentCountRow {
 }
 
 async function getRecentAttemptCounts(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: SupabaseClient,
   orgId: string,
   traineeId: string,
   cutoff: string,
