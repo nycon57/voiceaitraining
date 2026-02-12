@@ -2651,3 +2651,30 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Pure builder functions (returning arrays) are cleaner than mutating a shared accumulator — easier to test and reason about
   - Named row-type interfaces for Supabase query results prevent repetitive inline type casts and centralize the shape definition
 ---
+
+## 2026-02-12 11:15 UTC - US-028: Build insight generator and weekly manager analysis cron
+Thread: N/A
+Run: 20260212-102255-38254 (iteration 2)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38254-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-102255-38254-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 5d2440a [Pass 3/3] refactor: improve notification message clarity in insight generator (US-028)
+- Post-commit status: clean (US-028 files only; other untracked/modified files are pre-existing)
+- Skills invoked: code-simplifier:code-simplifier, writing-clearly-and-concisely
+- Verification:
+  - Command: pnpm typecheck -> PASS (no errors in US-028 files; pre-existing errors in pagination.tsx, webhook-form.tsx, analytics.ts, etc.)
+  - Command: pnpm build -> FAIL (pre-existing: type error in pagination.tsx, unrelated to US-028)
+- Files changed:
+  - src/lib/agents/manager/insight-generator.ts
+- What was implemented:
+  - Applied writing-clearly-and-concisely review to all notification messages
+  - Replaced passive voice ("Rep flagged as at risk") with active ("A rep shows risk signs")
+  - Replaced repetitive "Consider" hedging with direct imperatives ("Reach out", "Send reminders", "Recognize")
+  - Changed "in the last 7 days" to "this week" for concision
+  - Changed "is averaging" to "averaged" for past tense consistency
+- **Learnings for future iterations:**
+  - Notification messages benefit from direct imperatives over hedged suggestions — managers want actionable guidance
+  - Vary sentence patterns across similar messages to avoid formulaic feel
+---
