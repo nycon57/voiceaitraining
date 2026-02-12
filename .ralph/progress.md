@@ -1852,3 +1852,120 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When a prior Pass 3/3 crashes after commit but before completion signal, re-run should still look for genuine polish opportunities rather than just re-signaling
   - Trigger function names that follow the pattern `update_{table}_updated_at()` are self-documenting and don't need comments
 ---
+
+## [2026-02-12 07:37] - US-021: Build notification dispatcher with email templates
+Run: 20260212-073743-58254 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073743-58254-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073743-58254-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 039e22a [Pass 1/3] feat: add notification dispatcher with email templates (US-021)
+- Post-commit status: clean (for US-021 files; pre-existing untracked/modified files remain)
+- Skills invoked: feature-dev
+- Verification:
+  - Command: `npx tsc --noEmit | grep src/lib/notifications` -> PASS (0 errors in US-021 files)
+  - Command: `pnpm build` -> Pre-existing type error in src/actions/notifications.ts blocks full build (not our file)
+- Files changed:
+  - src/lib/notifications/dispatcher.ts (new) — sendNotification() with preference checking, quiet hours, Resend email, in-app insert
+  - src/lib/notifications/email-templates.tsx (new) — 6 React Email templates for all notification types
+  - src/lib/notifications/index.ts (new) — barrel export
+  - package.json — added @react-email/components dependency
+  - pnpm-lock.yaml — lockfile update
+- What was implemented:
+  - Centralized notification dispatcher that checks user preferences before sending to each channel
+  - Quiet hours detection using Intl.DateTimeFormat for timezone-aware time comparison, supports overnight ranges
+  - In-app notification always created (inserted into notifications table) regardless of preferences
+  - Email sent via Resend with React Email templates when channel_email is enabled and outside quiet hours
+  - 6 notification types: coach_recommendation, daily_digest, practice_reminder, weakness_update, assignment_created, assignment_overdue
+  - Lazy Resend client initialization to avoid build-time env var reads
+  - Zod validation on all sendNotification() inputs
+- **Learnings for future iterations:**
+  - Email template files need .tsx extension (not .ts) for JSX support
+  - Resend client should be lazy-initialized, not module-level, to avoid build-time failures when env vars are absent
+  - @react-email/components exports a `render` function but Resend's `react` prop accepts JSX directly — simpler to use createElement
+---
+
+## [2026-02-12 08:07] - US-021: Build notification dispatcher with email templates
+Run: 20260212-080745-74639 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080745-74639-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080745-74639-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: a0ea354 [Pass 2/3] fix: harden notification dispatcher error handling (US-021)
+- Post-commit status: clean (for US-021 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep src/lib/notifications` -> PASS (0 errors in US-021 files)
+  - Command: `pnpm build` -> Pre-existing type error in pagination.tsx blocks full build (not our file)
+- Files changed:
+  - src/lib/notifications/dispatcher.ts — 4 fixes applied
+- What was implemented:
+  - Code review found 4 issues (confidence 80+), all fixed:
+    1. Invalid timezone in isQuietHours() caused uncaught RangeError — wrapped in try-catch, fails open
+    2. Malformed time format in quiet hours could produce NaN — added parseTimeToMinutes() with validation
+    3. EMAIL_FROM env var used without null check — added guard in sendEmail()
+    4. In-app notification created after email send — reordered to create in-app first, guaranteeing record exists even if email throws
+- **Learnings for future iterations:**
+  - isQuietHours reads directly from DB via service client, bypassing server action validation — always add defensive checks in lib functions
+  - Reorder side effects so the most critical (in-app record) happens first
+---
+
+## [2026-02-12 07:50] - US-023: Notification preferences settings page
+Thread: N/A
+Run: 20260212-073742-58060 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073742-58060-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-073742-58060-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 0936432 [Pass 1/3] feat: add notification preferences settings page (US-023)
+- Post-commit status: clean (for US-023 files; pre-existing untracked/modified files remain)
+- Skills invoked: none (standard react-hook-form + server actions pattern)
+- Verification:
+  - Command: `pnpm typecheck | grep notifications` -> PASS (0 errors in US-023 files)
+  - Command: `pnpm build` -> Compiled successfully in 3.8s; pre-existing pagination.tsx type error blocks full build TypeScript step
+- Files changed:
+  - src/actions/notifications.ts (new) — getNotificationPreferences(), updateNotificationPreferences() with Zod validation
+  - src/components/notifications/notification-preferences.tsx (new) — react-hook-form + Zod component with channel toggles, quiet hours, timezone, coach nudges, digest frequency
+  - src/app/(authenticated)/settings/preferences/preferences-client.tsx (modified — replaced local-only Notifications tab with Supabase-backed component, removed unused notification preference fields from local Preferences type)
+- What was implemented:
+  - Server actions: getNotificationPreferences() uses withOrgGuard to fetch from notification_preferences table (PGRST116 handled for first-time users returning defaults). updateNotificationPreferences() uses assertHuman() + Zod validation + upsert with onConflict on (org_id, user_id).
+  - Timezone validation via Intl.DateTimeFormat try-catch (compatible with es6 lib target — Intl.supportedValuesOf requires ES2022).
+  - UI component: 3 cards (Notification Channels, Quiet Hours, Coaching & Digest) matching existing settings page style. Uses react-hook-form with zodResolver. Form dirty state tracked for save button enable/disable. useTransition for non-blocking save.
+  - Integrated into existing preferences page by replacing the Notifications tab content and removing now-unused local preference fields.
+- **Learnings for future iterations:**
+  - tsconfig lib is es6 — Intl.supportedValuesOf('timeZone') not available. Use Intl.DateTimeFormat try-catch for timezone validation instead.
+  - pnpm lint is broken in this project (Next.js + ESLint config mismatch). ESLint direct invocation also fails (circular structure).
+  - Pre-existing pagination.tsx type error continues to block full pnpm build TypeScript step.
+  - The Supabase upsert onConflict parameter takes the constraint column names, matching the UNIQUE constraint on (org_id, user_id).
+---
+
+## [2026-02-12 08:20] - US-021: Build notification dispatcher with email templates
+Run: 20260212-080746-74816 (iteration 1)
+Pass: 2/3 - Quality Review (continued)
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080746-74816-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-080746-74816-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 1f5b9e0 [Pass 2/3] refactor: deduplicate NotificationType and harden time parsing (US-021)
+- Post-commit status: clean (for US-021 files)
+- Skills invoked: code-review (feature-dev:code-reviewer agent, CodeRabbit attempted but non-TTY)
+- Verification:
+  - Command: `npx tsc --noEmit | grep src/lib/notifications` -> PASS (0 errors)
+  - Command: `pnpm build` -> Compiled successfully; pre-existing pagination.tsx type error blocks full build
+- Files changed:
+  - src/lib/notifications/dispatcher.ts — 3 improvements
+  - src/lib/notifications/email-templates.tsx — extract NOTIFICATION_TYPES const
+  - src/lib/notifications/index.ts — export NOTIFICATION_TYPES
+- What was implemented (on top of prior Pass 2 commit a0ea354):
+  - Extracted NOTIFICATION_TYPES as const array in email-templates.tsx as single source of truth
+  - Dispatcher's Zod schema now uses z.enum(NOTIFICATION_TYPES) instead of duplicating the list
+  - Removed redundant `as NotificationType` type assertion in sendEmail() — now type-safe without cast
+  - Fixed parseTimeToMinutes() to accept "HH:MM:SS" format from PostgreSQL time columns (was rejecting 3-part strings)
+- **Learnings for future iterations:**
+  - PostgreSQL `time` columns return "HH:MM:SS" format via Supabase — time parsing functions must handle 3-part strings
+  - When Zod enum and TypeScript union share values, extract a const array and derive both from it
+  - CodeRabbit CLI requires TTY (raw mode) — cannot run in non-interactive shell
+---
