@@ -113,18 +113,21 @@ export async function POST(req: NextRequest) {
     })
 
     // Fire-and-forget: notify subscribers that scoring finished
+    const scoreBreakdown = Object.fromEntries(
+      rubricScore.criterion_scores.map(
+        (c: { criterion_name: string; score: number; max_score: number; percentage: number }) => [
+          c.criterion_name,
+          { score: c.score, maxScore: c.max_score, percentage: c.percentage },
+        ]
+      )
+    )
     emitAttemptScored({
       attemptId,
       userId: user.id,
       orgId: user.orgId!,
       scenarioId: attempt.scenario_id,
       score: rubricScore.overall_score,
-      scoreBreakdown: Object.fromEntries(
-        rubricScore.criterion_scores.map((c: { criterion_name: string; score: number; max_score: number; percentage: number }) => [
-          c.criterion_name,
-          { score: c.score, maxScore: c.max_score, percentage: c.percentage },
-        ])
-      ),
+      scoreBreakdown,
       kpis,
       criticalFailures: rubricScore.critical_failures,
     }).catch((err: unknown) => console.error('[analyze] Failed to emit attempt.scored:', err))
