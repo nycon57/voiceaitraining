@@ -439,7 +439,7 @@ Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-
 Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-1.md
 - Guardrails reviewed: yes
 - No-commit run: false
-- Commit: see below
+- Commit: cd3bb9f [Pass 3/3] docs: update progress log for US-005 polish — no code changes needed
 - Post-commit status: clean (for US-005 files; pre-existing untracked/modified files remain)
 - Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (general-purpose agent)
 - Verification:
@@ -463,4 +463,34 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When Passes 1 and 2 produce clean, minimal code (simple fire-and-forget wiring), Pass 3 converges immediately with no changes
   - The three-pass cycle for event-wiring stories is lightweight: Pass 1 implements, Pass 2 catches edge cases (empty name fallback), Pass 3 verifies polish
   - Consistent fire-and-forget pattern across US-003/US-004/US-005 makes code review and simplification trivial — each new story follows the same template
+---
+
+## [2026-02-12] - US-006: Create agent runtime base definition and registry
+Thread: N/A
+Run: 20260211-235158-44184 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: (pending — will update after commit)
+- Post-commit status: (pending)
+- Skills invoked: none (pure TypeScript interface + registry — no UI/DB/framework skills needed)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 3.6s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit --project tsconfig.json | grep agents` -> PASS (0 errors in agent files)
+- Files changed:
+  - src/lib/agents/base.ts (new) — AgentDefinition interface with id, name, description, subscribesTo, inngestFunctions
+  - src/lib/agents/registry.ts (new) — registerAgent, getAgent, getAllAgentFunctions, getAgentsByEvent using Map
+  - src/lib/agents/index.ts (new) — barrel export for type and functions
+  - src/app/api/inngest/route.ts (modified) — combines standaloneFunctions + getAllAgentFunctions() for serve()
+  - src/lib/inngest/functions/index.ts (modified) — updated JSDoc to clarify standalone vs agent-owned functions
+- What was implemented:
+  - AgentDefinition interface: plain object (no classes) with id, name, description, subscribesTo, inngestFunctions
+  - Registry using module-level Map: registerAgent (set), getAgent (get, returns undefined for missing), getAllAgentFunctions (flatMap), getAgentsByEvent (filter)
+  - Route now serves combined standalone + agent functions
+  - Empty registry returns empty arrays — valid per acceptance criteria
+- **Learnings for future iterations:**
+  - `Map.values()` returns a MapIterator which cannot be iterated with `for...of` without `--downlevelIteration` flag. Use `Array.from(map.values())` instead.
+  - Pre-existing `pagination.tsx` motion.nav type error continues to block full `pnpm build` TypeScript step.
 ---
