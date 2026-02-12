@@ -556,3 +556,32 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - The three-pass cycle for pure-TypeScript definition stories is lightweight: Pass 1 implements, Pass 2 documents a timing constraint, Pass 3 verifies polish
   - Consistent pattern: code-simplifier and writing-clarity agents both finding no issues in Pass 3 validates the quality of Passes 1 and 2
 ---
+
+## [2026-02-12] - US-007: Create agent activity logging table and API
+Thread: N/A
+Run: 20260212-002201-62073 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-002201-62073-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: bc56583 [Pass 1/3] feat: create agent activity logging table and API
+- Post-commit status: clean (for US-007 files; pre-existing untracked/modified files remain)
+- Skills invoked: supabase-postgres-best-practices (via MCP migration tools)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 3.9s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit` (US-007 files) -> PASS (0 errors in agent-activity and activity-log files)
+- Files changed:
+  - supabase/migrations/20260212_create_agent_activity_log.sql (new) — table, RLS, indexes
+  - src/lib/agents/activity-log.ts (new) — logAgentActivity() using @supabase/supabase-js directly
+  - src/actions/agent-activity.ts (new) — getAgentActivityForUser (withOrgGuard), getAgentActivityForOrg (withRoleGuard)
+  - src/lib/agents/index.ts (modified — added logAgentActivity re-export)
+- What was implemented:
+  - Migration: agent_activity_log table with all specified columns (id, org_id, user_id, agent_id, event_type, action, details, metadata, created_at), RLS policy on org_id, indexes on (org_id, created_at DESC) and (org_id, user_id, created_at DESC)
+  - logAgentActivity() uses @supabase/supabase-js createClient directly instead of the SSR createAdminClient — this avoids the cookies() dependency so it works from Inngest background jobs
+  - Server actions with Zod validation on pagination (limit 1-100, offset >= 0)
+  - withOrgGuard scopes getAgentActivityForUser to org, withRoleGuard(['manager', 'admin']) gates getAgentActivityForOrg
+- **Learnings for future iterations:**
+  - The existing createAdminClient() depends on cookies() from next/headers, which is unavailable in Inngest background jobs. Use @supabase/supabase-js createClient() directly for background/system operations that don't have request context.
+  - Pre-existing pagination.tsx motion.nav type error continues to block full pnpm build TypeScript step.
+---
