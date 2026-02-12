@@ -1295,3 +1295,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - Service-role supabase client is the pattern for Inngest background jobs (no cookies())
   - Each step.run() is independently retryable — errors in one step don't prevent others from executing on retry
 ---
+
+## [2026-02-12] - US-014: Build Coach Agent core: event subscriptions and weakness profile updates
+Run: 20260212-045726-67336 (iteration 1)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-045726-67336-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-045726-67336-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 6613544 [Pass 2/3] fix: add error resilience and remove dead code in Coach Agent (US-014)
+- Post-commit status: clean (US-014 files only)
+- Skills invoked: /code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: npx tsc --noEmit → PASS (0 errors in US-014 files; pre-existing errors in pagination.tsx, progress.tsx, etc.)
+  - Command: pnpm build → pre-existing pagination.tsx compile error (unrelated to US-014)
+  - Command: eslint on US-014 files → PASS (0 errors)
+- Files changed:
+  - src/lib/agents/coach/on-attempt-scored.ts (fix: wrap generateWeaknessProfile in try-catch)
+  - src/lib/agents/coach/on-user-inactive.ts (fix: remove dead code, move buildReminderMessage inside step)
+- Issues found and fixed:
+  - **Critical**: generateWeaknessProfile() failure would block subsequent steps — added try-catch returning [] on error
+  - **Critical**: Dead code in on-user-inactive.ts (`scenarioId = context.weaknesses[0] ? undefined : undefined`) — replaced with direct `undefined`
+  - **Important**: buildReminderMessage() called between steps was a replay concern — moved inside emit-recommendation step
+  - **Out of scope**: coachWeaknessUpdatedSchema uses loose z.record() — schema was created in US-002, not modified here
+- **Learnings for future iterations:**
+  - CodeRabbit CLI doesn't work in non-interactive mode (raw mode error) — use agent-based code review instead
+  - When acceptance criteria says "error should not prevent other steps", that means try-catch inside the step, not Inngest's built-in retry
+  - Pure functions between Inngest steps are technically safe but better to move inside step.run() for clarity
+---
