@@ -1,8 +1,6 @@
 import { createServiceClient } from './supabase'
 import { getWeaknessProfile, getSkillLevels, type WeaknessEntry, type SkillLevel, type Trend } from './user-memory'
 
-// Types
-
 export interface AttemptSummary {
   id: string
   scenarioId: string | null
@@ -29,8 +27,7 @@ export interface AgentContext {
   relevantInsights: string[]
 }
 
-// Row shapes from Supabase joins
-
+/** Row shapes from Supabase joins */
 interface AttemptWithScenarioRow {
   id: string
   scenario_id: string | null
@@ -46,12 +43,12 @@ interface AttemptTimestampRow {
   score: number | null
 }
 
-// Constants
-
 const MS_PER_DAY = 1000 * 60 * 60 * 24
 const TREND_RECENT_COUNT = 5
 
-// Helpers
+function average(arr: number[]): number {
+  return arr.reduce((sum, v) => sum + v, 0) / arr.length
+}
 
 function extractScenarioTitle(
   scenarios: { title: string }[] | { title: string } | null,
@@ -61,11 +58,9 @@ function extractScenarioTitle(
   return s?.title ?? 'Untitled Scenario'
 }
 
-// Functions
-
 /**
  * Fetch recent attempts joined with scenario titles.
- * Uses a single query with an inner join — no N+1.
+ * Uses a single query with an inner join -- no N+1.
  */
 export async function getRecentAttemptSummaries(
   orgId: string,
@@ -84,7 +79,9 @@ export async function getRecentAttemptSummaries(
     throw new Error(`Failed to fetch recent attempt summaries: ${error.message}`)
   }
 
-  return ((data ?? []) as AttemptWithScenarioRow[]).map((row) => ({
+  const rows = (data ?? []) as AttemptWithScenarioRow[]
+
+  return rows.map((row) => ({
     id: row.id,
     scenarioId: row.scenario_id,
     scenarioTitle: extractScenarioTitle(row.scenarios),
@@ -191,7 +188,6 @@ function computeTrajectory(attempts: AttemptTimestampRow[]): Trend {
     .filter((a) => a.score != null)
     .map((a) => a.score!)
 
-  if (scores.length === 0) return 'new'
   if (scores.length < TREND_RECENT_COUNT) return 'new'
 
   // scores are newest-first from DB; reverse for chronological order
@@ -204,8 +200,7 @@ function computeTrajectory(attempts: AttemptTimestampRow[]): Trend {
 
   if (previous.length === 0) return 'new'
 
-  const avg = (arr: number[]) => arr.reduce((s, v) => s + v, 0) / arr.length
-  const diff = avg(recent) - avg(previous)
+  const diff = average(recent) - average(previous)
 
   if (diff > 5) return 'improving'
   if (diff < -5) return 'declining'
@@ -264,7 +259,7 @@ function buildInsights(
 
   if (strengths.length > 0) {
     const best = strengths[strengths.length - 1]
-    if (best?.score != null) {
+    if (best.score != null) {
       insights.push(`Strongest area: ${best.key} (score: ${best.score})`)
     }
   }
