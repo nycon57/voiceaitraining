@@ -15,6 +15,12 @@ interface SignificantSegment {
   metadata: Record<string, unknown>
 }
 
+interface EmbedItem {
+  contentType: ContentType
+  content: string
+  metadata: Record<string, unknown>
+}
+
 /**
  * After an attempt is scored, embed significant transcript moments
  * into the vector store for semantic memory retrieval by agents.
@@ -25,7 +31,6 @@ export const embedAttemptMemory = inngest.createFunction(
   async ({ event, step }) => {
     const { attemptId, userId, orgId } = event.data
 
-    // Step 0: Idempotency — skip if this attempt was already embedded
     const alreadyEmbedded = await step.run('check-existing', async () => {
       const { data } = await createServiceClient()
         .from('memory_embeddings')
@@ -38,11 +43,9 @@ export const embedAttemptMemory = inngest.createFunction(
     })
 
     if (alreadyEmbedded) {
-      console.log(`[embed-attempt-memory] Skipping attempt ${attemptId}: already embedded`)
       return { embedded: 0, skipped: true, reason: 'already_embedded' }
     }
 
-    // Step 1: Fetch attempt with transcript and feedback
     const attempt = await step.run('fetch-attempt', async () => {
       const { data, error } = await createServiceClient()
         .from('scenario_attempts')
@@ -60,38 +63,30 @@ export const embedAttemptMemory = inngest.createFunction(
       }
     })
 
-    // Skip gracefully if no transcript
     if (!attempt.transcript_json || attempt.transcript_json.length === 0) {
-      console.log(`[embed-attempt-memory] Skipping attempt ${attemptId}: no transcript_json`)
-      return { embedded: 0, skipped: true }
+      return { embedded: 0, skipped: true, reason: 'no_transcript' }
     }
 
-    // Step 2: Extract significant segments
     const segments = await step.run('extract-segments', () => {
       return extractSignificantSegments(attempt.transcript_json!)
     })
 
-    // Build the embedding queue: transcript segments + optional coaching insight
-    const queue: { contentType: ContentType; content: string; metadata: Record<string, unknown> }[] =
-      segments.map((seg) => ({
-        contentType: 'transcript_segment' as ContentType,
-        content: seg.content,
-        metadata: { ...seg.metadata, segmentType: seg.type },
-      }))
+    const items: EmbedItem[] = segments.map((seg) => ({
+      contentType: 'transcript_segment',
+      content: seg.content,
+      metadata: { ...seg.metadata, segmentType: seg.type },
+    }))
 
-    // If feedback text exists, add a coaching insight embedding
     if (attempt.feedback_text) {
-      queue.push({
+      items.push({
         contentType: 'coaching_insight',
         content: attempt.feedback_text,
         metadata: { source: 'post_scoring_feedback' },
       })
     }
 
-    // Enforce cost-control limit
-    const toEmbed = queue.slice(0, MAX_EMBEDDINGS)
+    const toEmbed = items.slice(0, MAX_EMBEDDINGS)
 
-    // Step 3: Embed each item with retryability
     for (let i = 0; i < toEmbed.length; i++) {
       const item = toEmbed[i]
       await step.run(`embed-${i}`, async () => {
@@ -110,44 +105,35 @@ export const embedAttemptMemory = inngest.createFunction(
   },
 )
 
-/** Count words in a string. */
 function wordCount(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
 
-/** Count filler word occurrences. */
 function fillerCount(text: string): number {
-  return (text.match(FILLER_PATTERN) || []).length
+  return (text.match(FILLER_PATTERN) ?? []).length
 }
 
-/**
- * Extract significant transcript segments using heuristics:
- * - Fumbles: short trainee responses heavy with filler words
- * - Unanswered questions: agent questions followed by inadequate trainee responses
- * - Strong responses: substantive, confident trainee answers
- */
 function extractSignificantSegments(segments: TranscriptSegment[]): SignificantSegment[] {
-  const found: SignificantSegment[] = []
+  const results: SignificantSegment[] = []
   const consumed = new Set<number>()
 
   for (let i = 0; i < segments.length; i++) {
     if (consumed.has(i)) continue
 
     const seg = segments[i]
-    const nextSeg = i + 1 < segments.length ? segments[i + 1] : undefined
+    const next = segments[i + 1] as TranscriptSegment | undefined
 
-    // Detect unanswered questions: agent asks a question, trainee response is weak
     if (seg.speaker === 'agent' && seg.text.includes('?')) {
-      if (!nextSeg || nextSeg.speaker !== 'trainee') {
-        found.push({
+      if (!next || next.speaker !== 'trainee') {
+        results.push({
           type: 'unanswered_question',
           content: `Agent asked: "${seg.text}" — No trainee response followed.`,
           metadata: { startTimeMs: seg.start_time_ms },
         })
-      } else if (wordCount(nextSeg.text) < SHORT_RESPONSE_WORDS) {
-        found.push({
+      } else if (wordCount(next.text) < SHORT_RESPONSE_WORDS) {
+        results.push({
           type: 'unanswered_question',
-          content: `Agent asked: "${seg.text}" — Trainee responded inadequately: "${nextSeg.text}"`,
+          content: `Agent asked: "${seg.text}" — Trainee responded inadequately: "${next.text}"`,
           metadata: { startTimeMs: seg.start_time_ms },
         })
         consumed.add(i + 1)
@@ -155,15 +141,13 @@ function extractSignificantSegments(segments: TranscriptSegment[]): SignificantS
       continue
     }
 
-    // Trainee-specific analysis
     if (seg.speaker !== 'trainee') continue
 
     const words = wordCount(seg.text)
     const fillers = fillerCount(seg.text)
 
-    // Fumble: short response with high filler ratio
     if (words < SHORT_RESPONSE_WORDS && fillers >= 2) {
-      found.push({
+      results.push({
         type: 'fumble',
         content: `Trainee fumbled: "${seg.text}"`,
         metadata: { startTimeMs: seg.start_time_ms, fillerCount: fillers },
@@ -171,9 +155,8 @@ function extractSignificantSegments(segments: TranscriptSegment[]): SignificantS
       continue
     }
 
-    // Strong response: substantive and low filler ratio
     if (words >= STRONG_RESPONSE_WORDS && fillers / words < 0.1) {
-      found.push({
+      results.push({
         type: 'strong_response',
         content: `Strong trainee response: "${seg.text}"`,
         metadata: { startTimeMs: seg.start_time_ms, wordCount: words },
@@ -181,5 +164,5 @@ function extractSignificantSegments(segments: TranscriptSegment[]): SignificantS
     }
   }
 
-  return found
+  return results
 }
