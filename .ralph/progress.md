@@ -2307,3 +2307,29 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
 - **Learnings for future iterations:**
   - Pre-existing build failures should not block story completion when story-specific code is clean
 ---
+
+## [2026-02-12 09:30] - US-024: Wire Coach Agent recommendations to notification dispatcher
+Run: 20260212-092752-41851 (iteration 2)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-092752-41851-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 29c5640 [Pass 2/3] fix: add error logging and URL normalization in coach notification dispatcher (US-024)
+- Post-commit status: clean (only pre-existing unrelated unstaged changes)
+- Skills invoked: code-review (via feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `npx tsc --noEmit | grep dispatch-coach-notification` -> PASS (0 errors in story files)
+  - Command: `pnpm build` -> FAIL (pre-existing pagination.tsx error, unrelated to US-024)
+- Files changed:
+  - `src/lib/inngest/functions/dispatch-coach-notification.ts`
+- What was implemented:
+  - Code review identified 4 issues; fixed the 2 most impactful:
+    1. `resolveScenarioPath` now destructures and logs Supabase query errors instead of silently swallowing them
+    2. `appUrl` strips trailing slashes from `NEXT_PUBLIC_APP_URL` to prevent double-slash URLs
+  - Verified all action URLs point to existing routes: `/training`, `/training/scenarios/[scenarioId]`, `/dashboard`
+  - Skipped over-engineering suggestions (redundant event payload validation, try-catch that only re-throws)
+- **Learnings for future iterations:**
+  - Always destructure `error` from Supabase queries even in fallback paths — silent failures mask real issues
+  - Env var URLs may have trailing slashes; normalize before concatenating paths
+---
