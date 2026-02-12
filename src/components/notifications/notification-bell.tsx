@@ -51,7 +51,7 @@ export function NotificationBell() {
       <PopoverContent
         align="end"
         size="xl"
-        className="w-96 p-0"
+        className="p-0"
         animated={false}
         glassMorphism={false}
       >
