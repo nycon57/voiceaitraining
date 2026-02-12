@@ -46,6 +46,7 @@ import {
   Lightbulb,
   Users
 } from 'lucide-react'
+import { NotificationPreferences } from '@/components/notifications/notification-preferences'
 import type { AuthUser } from '@/lib/auth'
 import { toast } from 'sonner'
 
@@ -72,15 +73,6 @@ interface Preferences {
   detailedFeedback: boolean
   showTranscript: boolean
 
-  // Notifications
-  dailyDigestTime: string
-  emailAssignmentReminders: boolean
-  emailPerformanceAlerts: boolean
-  emailTeamUpdates: boolean
-  desktopNotifications: boolean
-  soundEffects: boolean
-  badgeNotifications: boolean
-
   // Privacy
   leaderboardVisible: boolean
   profileVisibleToTeam: boolean
@@ -104,13 +96,6 @@ const defaultPreferences: Preferences = {
   speakerDevice: 'default',
   detailedFeedback: true,
   showTranscript: true,
-  dailyDigestTime: '09:00',
-  emailAssignmentReminders: true,
-  emailPerformanceAlerts: true,
-  emailTeamUpdates: false,
-  desktopNotifications: true,
-  soundEffects: true,
-  badgeNotifications: true,
   leaderboardVisible: true,
   profileVisibleToTeam: true,
   shareProgressWithManagers: true,
@@ -613,162 +598,7 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
 
           {/* Notifications Tab */}
           <TabsContent value="notifications" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Email Notifications
-                </CardTitle>
-                <CardDescription>
-                  Manage email notification preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="dailyDigestTime">Daily Digest Time</Label>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <Select
-                      value={preferences.dailyDigestTime}
-                      onValueChange={(value) => updatePreference('dailyDigestTime', value)}
-                    >
-                      <SelectTrigger id="dailyDigestTime" className="w-[180px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="06:00">6:00 AM</SelectItem>
-                        <SelectItem value="09:00">9:00 AM</SelectItem>
-                        <SelectItem value="12:00">12:00 PM</SelectItem>
-                        <SelectItem value="15:00">3:00 PM</SelectItem>
-                        <SelectItem value="18:00">6:00 PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Receive a daily summary at your preferred time
-                  </p>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="emailAssignmentReminders" className="text-base cursor-pointer">
-                      Assignment Reminders
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get notified about upcoming assignments
-                    </p>
-                  </div>
-                  <Switch
-                    id="emailAssignmentReminders"
-                    checked={preferences.emailAssignmentReminders}
-                    onCheckedChange={(checked) => updatePreference('emailAssignmentReminders', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="emailPerformanceAlerts" className="text-base cursor-pointer">
-                      Performance Alerts
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive alerts when your scores change
-                    </p>
-                  </div>
-                  <Switch
-                    id="emailPerformanceAlerts"
-                    checked={preferences.emailPerformanceAlerts}
-                    onCheckedChange={(checked) => updatePreference('emailPerformanceAlerts', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="emailTeamUpdates" className="text-base cursor-pointer">
-                      Team Updates
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get updates about your team's activities
-                    </p>
-                  </div>
-                  <Switch
-                    id="emailTeamUpdates"
-                    checked={preferences.emailTeamUpdates}
-                    onCheckedChange={(checked) => updatePreference('emailTeamUpdates', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  In-App Notifications
-                </CardTitle>
-                <CardDescription>
-                  Configure notifications within the application
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="desktopNotifications" className="text-base cursor-pointer">
-                      Desktop Notifications
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Show system notifications on your desktop
-                    </p>
-                  </div>
-                  <Switch
-                    id="desktopNotifications"
-                    checked={preferences.desktopNotifications}
-                    onCheckedChange={(checked) => updatePreference('desktopNotifications', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="soundEffects" className="text-base cursor-pointer">
-                      Sound Effects
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Play sounds for notifications and events
-                    </p>
-                  </div>
-                  <Switch
-                    id="soundEffects"
-                    checked={preferences.soundEffects}
-                    onCheckedChange={(checked) => updatePreference('soundEffects', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="badgeNotifications" className="text-base cursor-pointer">
-                      Badge Notifications
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Show notification badges in the interface
-                    </p>
-                  </div>
-                  <Switch
-                    id="badgeNotifications"
-                    checked={preferences.badgeNotifications}
-                    onCheckedChange={(checked) => updatePreference('badgeNotifications', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <NotificationPreferences />
           </TabsContent>
 
           {/* Privacy Tab */}
