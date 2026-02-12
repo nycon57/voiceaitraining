@@ -324,7 +324,7 @@ function computeTrend(scores: number[]): PerformanceSummary['trend'] {
 // ── Strengths ──────────────────────────────────────────────────────
 
 function buildStrengths(strengths: SkillLevel[]): string[] {
-  if (strengths.length === 0) return ['No strengths identified yet — needs more practice']
+  if (strengths.length === 0) return ['Not enough data yet — assign more practice scenarios']
 
   return strengths.map((s) => {
     const label = skillLabel(s.key)
@@ -336,7 +336,7 @@ function buildStrengths(strengths: SkillLevel[]): string[] {
 
 function buildAreasToDiscuss(weaknesses: WeaknessEntry[]): string[] {
   if (weaknesses.length === 0) {
-    return ['No weaknesses identified yet — encourage more practice']
+    return ['Not enough data yet — assign more practice scenarios']
   }
 
   return weaknesses.slice(0, MAX_AREAS_TO_DISCUSS).map((w) => {
@@ -420,7 +420,7 @@ function buildAssignmentReason(
   if (matched.length > 0) {
     return `Targets weak areas: ${matched.join(', ')}.`
   }
-  return 'Recommended based on skill gaps.'
+  return 'Addresses current skill gaps.'
 }
 
 async function getRecentAttemptCounts(
@@ -514,7 +514,7 @@ function buildFallbackTalkingPoints(
     }
   }
 
-  if (strengths.length > 0 && !strengths[0].includes('No strengths')) {
+  if (strengths.length > 0 && !strengths[0].includes('Not enough data')) {
     points.push(`Reinforce strong performance in ${strengths[0].toLowerCase()}.`)
   }
 
