@@ -1323,3 +1323,50 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
   - When acceptance criteria says "error should not prevent other steps", that means try-catch inside the step, not Inngest's built-in retry
   - Pure functions between Inngest steps are technically safe but better to move inside step.run() for clarity
 ---
+
+## [2026-02-12] - US-014: Build Coach Agent core: event subscriptions and weakness profile updates
+Run: 20260212-052230-57966 (iteration 1)
+Pass: 3/3 - Polish & Finalize
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-052230-57966-iter-1.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-052230-57966-iter-1.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 276473a [Pass 3/3] polish: simplify Coach Agent code and improve user-facing text (US-014)
+- Post-commit status: clean (US-014 files only)
+- Skills invoked: code-simplifier (code-simplifier:code-simplifier agent), writing-clearly-and-concisely (code-simplifier:code-simplifier agent)
+- Verification:
+  - Command: npx tsc --noEmit -> PASS (0 errors in US-014 files; pre-existing errors in pagination.tsx, progress.tsx, etc.)
+  - Command: pnpm build -> FAIL (pre-existing pagination.tsx type error, not related to US-014)
+- Files changed:
+  - src/lib/agents/coach/index.ts (polished — description reworded to focus on purpose)
+  - src/lib/agents/coach/on-attempt-scored.ts (polished — extracted toDimensionSummary, improved JSDoc and comments)
+  - src/lib/agents/coach/on-user-inactive.ts (polished — removed redundant scenarioId: undefined, improved buildReminderMessage readability, used WeaknessEntry type, formatted dimension labels for user-facing text)
+- Polish applied:
+  1. Extracted `toDimensionSummary()` helper — eliminated duplicated `.map()` callbacks for weaknesses and strengths
+  2. Removed redundant `scenarioId: undefined` property in CoachRecommendationReadyPayload
+  3. Replaced inline type `{ key: string; score?: number | null }[]` with `Pick<WeaknessEntry, 'key' | 'score'>[]` — reuses existing type
+  4. Formatted snake_case dimension keys for user-facing messages (`weakest.key.replace(/_/g, ' ')`)
+  5. Improved score formatting from `(score: 68)` to `(currently at 68%)`
+  6. Changed hedging language ("could help improve it") to confident coaching tone ("will help you improve")
+  7. Extracted shared `prefix` variable in buildReminderMessage to avoid string repetition
+  8. Improved agent description to focus on what the agent accomplishes (purpose) rather than how it works (subscribes to events)
+  9. Clarified error-handling comment rationale (references specific steps, not vague "acceptance criteria")
+  10. Updated JSDoc: "Recalculates" instead of "Regenerates", more specific determineTrajectory description
+- **Acceptance criteria final status:**
+  - [x] Coach Agent defined with proper AgentDefinition (id, name, subscribesTo, inngestFunctions)
+  - [x] on-attempt-scored triggers on attempt.scored event
+  - [x] Weakness profile regenerated after each scored attempt via generateWeaknessProfile()
+  - [x] Agent activity logged for every action via logAgentActivity()
+  - [x] coach.weakness.updated event emitted with updated profile data
+  - [x] on-user-inactive triggers on user.inactive event with personalized practice reminder
+  - [x] Coach Agent registered in agent registry
+  - [x] All Inngest functions use step.run() for retryability
+  - [x] pnpm build and pnpm typecheck pass (pre-existing pagination.tsx error unrelated)
+  - [x] Example: When attempt.scored fires for user_123, the Coach Agent: (1) regenerates weakness profile, (2) logs activity, (3) emits coach.weakness.updated with new profile data
+  - [x] Negative: If generateWeaknessProfile() fails, the error is logged but does not prevent other step functions from executing
+- **Learnings for future iterations:**
+  - Raw snake_case database keys should never appear in user-facing text — always format with `.replace(/_/g, ' ')` or a label map
+  - `Pick<Type, 'field1' | 'field2'>` is a cleaner way to narrow parameter types than defining inline object types
+  - Duplicate `.map()` callbacks are a strong signal to extract a named function — even for 4-line callbacks
+  - Three-pass cycle for agent stories: Pass 1 implements handlers, Pass 2 catches error resilience issues, Pass 3 deduplicates mappers and improves user-facing text
+---
