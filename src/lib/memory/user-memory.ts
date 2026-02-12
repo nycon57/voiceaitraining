@@ -11,7 +11,7 @@ export type MemoryType =
 
 export type Trend = 'improving' | 'declining' | 'stable' | 'new'
 
-export interface WeaknessEntry {
+export interface MemoryEntry {
   id: string
   key: string
   value: Record<string, unknown>
@@ -22,27 +22,9 @@ export interface WeaknessEntry {
   updatedAt: string
 }
 
-export interface SkillLevel {
-  id: string
-  key: string
-  value: Record<string, unknown>
-  score: number | null
-  trend: Trend | null
-  lastEvidenceAt: string | null
-  evidenceCount: number
-  updatedAt: string
-}
-
-export interface TrajectoryPoint {
-  id: string
-  key: string
-  value: Record<string, unknown>
-  score: number | null
-  trend: Trend | null
-  lastEvidenceAt: string | null
-  evidenceCount: number
-  updatedAt: string
-}
+export type WeaknessEntry = MemoryEntry
+export type SkillLevel = MemoryEntry
+export type TrajectoryPoint = MemoryEntry
 
 export interface UpsertMemoryParams {
   orgId: string
@@ -56,7 +38,6 @@ export interface UpsertMemoryParams {
   evidenceCount?: number
 }
 
-/** Row shape returned by Supabase for the user_memory table. */
 interface UserMemoryRow {
   id: string
   org_id: string
@@ -85,7 +66,7 @@ function createServiceClient() {
 
 // Functions
 
-function toEntry(row: UserMemoryRow): WeaknessEntry {
+function toEntry(row: UserMemoryRow): MemoryEntry {
   return {
     id: row.id,
     key: row.key,
@@ -98,10 +79,7 @@ function toEntry(row: UserMemoryRow): WeaknessEntry {
   }
 }
 
-/**
- * Insert or update a user memory entry. On conflict (same org, user, type, key),
- * updates value, score, trend, last_evidence_at, and evidence_count.
- */
+/** Insert or update a user memory entry. */
 export async function upsertMemory(params: UpsertMemoryParams): Promise<string> {
   const { data, error } = await createServiceClient()
     .from('user_memory')
@@ -129,80 +107,57 @@ export async function upsertMemory(params: UpsertMemoryParams): Promise<string> 
   return data.id
 }
 
-/** Returns all weakness_profile entries for a user, sorted by score ascending (worst first). */
+async function queryMemories(
+  orgId: string,
+  userId: string,
+  memoryType: MemoryType,
+  options?: { ascending?: boolean; limit?: number },
+): Promise<MemoryEntry[]> {
+  let query = createServiceClient()
+    .from('user_memory')
+    .select('*')
+    .eq('org_id', orgId)
+    .eq('user_id', userId)
+    .eq('memory_type', memoryType)
+    .order('score', { ascending: options?.ascending ?? true, nullsFirst: false })
+
+  if (options?.limit) {
+    query = query.limit(options.limit)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw new Error(`Failed to fetch ${memoryType} memories: ${error.message}`)
+  }
+
+  return (data as UserMemoryRow[]).map(toEntry)
+}
+
+/** Returns all weakness_profile entries for a user (worst first). */
 export async function getWeaknessProfile(orgId: string, userId: string): Promise<WeaknessEntry[]> {
-  const { data, error } = await createServiceClient()
-    .from('user_memory')
-    .select('*')
-    .eq('org_id', orgId)
-    .eq('user_id', userId)
-    .eq('memory_type', 'weakness_profile')
-    .order('score', { ascending: true, nullsFirst: false })
-
-  if (error) {
-    throw new Error(`Failed to fetch weakness profile: ${error.message}`)
-  }
-
-  return (data as UserMemoryRow[]).map(toEntry)
+  return queryMemories(orgId, userId, 'weakness_profile')
 }
 
-/** Returns all skill_level entries for a user. */
+/** Returns all skill_level entries for a user (worst first). */
 export async function getSkillLevels(orgId: string, userId: string): Promise<SkillLevel[]> {
-  const { data, error } = await createServiceClient()
-    .from('user_memory')
-    .select('*')
-    .eq('org_id', orgId)
-    .eq('user_id', userId)
-    .eq('memory_type', 'skill_level')
-    .order('score', { ascending: true, nullsFirst: false })
-
-  if (error) {
-    throw new Error(`Failed to fetch skill levels: ${error.message}`)
-  }
-
-  return (data as UserMemoryRow[]).map(toEntry)
+  return queryMemories(orgId, userId, 'skill_level')
 }
 
-/** Returns the N weaknesses with the lowest scores (worst first). */
+/** Returns the N weakest skills (worst first). */
 export async function getTopWeaknesses(
   orgId: string,
   userId: string,
   limit = 5,
 ): Promise<WeaknessEntry[]> {
-  const { data, error } = await createServiceClient()
-    .from('user_memory')
-    .select('*')
-    .eq('org_id', orgId)
-    .eq('user_id', userId)
-    .eq('memory_type', 'weakness_profile')
-    .order('score', { ascending: true, nullsFirst: false })
-    .limit(limit)
-
-  if (error) {
-    throw new Error(`Failed to fetch top weaknesses: ${error.message}`)
-  }
-
-  return (data as UserMemoryRow[]).map(toEntry)
+  return queryMemories(orgId, userId, 'weakness_profile', { limit })
 }
 
-/** Returns the N skills with the highest scores (best first). */
+/** Returns the N strongest skills (best first). */
 export async function getTopStrengths(
   orgId: string,
   userId: string,
   limit = 5,
 ): Promise<SkillLevel[]> {
-  const { data, error } = await createServiceClient()
-    .from('user_memory')
-    .select('*')
-    .eq('org_id', orgId)
-    .eq('user_id', userId)
-    .eq('memory_type', 'skill_level')
-    .order('score', { ascending: false, nullsFirst: false })
-    .limit(limit)
-
-  if (error) {
-    throw new Error(`Failed to fetch top strengths: ${error.message}`)
-  }
-
-  return (data as UserMemoryRow[]).map(toEntry)
+  return queryMemories(orgId, userId, 'skill_level', { ascending: false, limit })
 }
