@@ -473,8 +473,8 @@ Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-
 Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-2.md
 - Guardrails reviewed: yes
 - No-commit run: false
-- Commit: (pending — will update after commit)
-- Post-commit status: (pending)
+- Commit: ca3a93e [Pass 1/3] feat: create agent runtime base definition and registry
+- Post-commit status: clean (for US-006 files; pre-existing untracked/modified files remain)
 - Skills invoked: none (pure TypeScript interface + registry — no UI/DB/framework skills needed)
 - Verification:
   - Command: `pnpm build` -> Compiled successfully in 3.6s; pre-existing pagination.tsx type error blocks full build TypeScript step
@@ -493,4 +493,31 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
 - **Learnings for future iterations:**
   - `Map.values()` returns a MapIterator which cannot be iterated with `for...of` without `--downlevelIteration` flag. Use `Array.from(map.values())` instead.
   - Pre-existing `pagination.tsx` motion.nav type error continues to block full `pnpm build` TypeScript step.
+---
+
+## [2026-02-12] - US-006: Create agent runtime base definition and registry
+Thread: N/A
+Run: 20260211-235158-44184 (iteration 3)
+Pass: 2/3 - Quality Review
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-3.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260211-235158-44184-iter-3.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: c1209e2 [Pass 2/3] review: document module-load timing constraint in Inngest route
+- Post-commit status: clean (for US-006 files; pre-existing untracked/modified files remain)
+- Skills invoked: code-review (feature-dev:code-reviewer agent)
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 3.8s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit` (agent/inngest files) -> PASS (0 errors in US-006 files)
+- Files changed:
+  - src/app/api/inngest/route.ts (modified — added comment documenting module-load timing constraint)
+- Code review findings:
+  1. **VALID (85%)**: `getAllAgentFunctions()` evaluated at module load time in route.ts. Future agent registrations must import before this module loads. Fixed by adding documentation comment explaining the constraint and the import pattern.
+  2. **Verified safe (100%)**: `InngestFunction.Any` type import matches Inngest v3.52.0 SDK.
+  3. **Verified safe (100%)**: Map-based registry is correct for Node.js module singleton pattern.
+  4. **Verified safe (100%)**: No circular dependencies in barrel exports.
+  5. **Verified safe (100%)**: TypeScript strict mode compliance — no `any` types except in accepted `InngestFunction.Any` namespace type.
+- **Learnings for future iterations:**
+  - `serve()` from inngest/next evaluates its `functions` array at module load time, not per request. All agent registrations must happen via imports above the serve() call.
+  - The Map-based module-scoped singleton pattern is idiomatic for Node.js registries — no need for class-based or DI patterns.
 ---
