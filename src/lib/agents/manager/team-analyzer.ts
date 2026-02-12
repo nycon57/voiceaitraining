@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
+
 import { createServiceClient } from '@/lib/memory/supabase'
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -102,8 +104,8 @@ export async function analyzeTeamPerformance(orgId: string): Promise<TeamAnalysi
 
   // 2. Fetch weakness profiles and completed attempts in parallel
   const [weaknessProfiles, attempts] = await Promise.all([
-    fetchWeaknessProfiles(orgId, traineeIds),
-    fetchCompletedAttempts(orgId, traineeIds),
+    fetchWeaknessProfiles(supabase, orgId, traineeIds),
+    fetchCompletedAttempts(supabase, orgId, traineeIds),
   ])
 
   // 3. Compute analysis
@@ -119,10 +121,11 @@ export async function analyzeTeamPerformance(orgId: string): Promise<TeamAnalysi
 // ── Data fetching ──────────────────────────────────────────────────
 
 async function fetchWeaknessProfiles(
+  supabase: SupabaseClient,
   orgId: string,
   traineeIds: string[],
 ): Promise<WeaknessProfileRow[]> {
-  const { data, error } = await createServiceClient()
+  const { data, error } = await supabase
     .from('user_memory')
     .select('user_id, key, score, trend')
     .eq('org_id', orgId)
@@ -137,10 +140,11 @@ async function fetchWeaknessProfiles(
 }
 
 async function fetchCompletedAttempts(
+  supabase: SupabaseClient,
   orgId: string,
   traineeIds: string[],
 ): Promise<AttemptRow[]> {
-  const { data, error } = await createServiceClient()
+  const { data, error } = await supabase
     .from('scenario_attempts')
     .select('clerk_user_id, score, started_at')
     .eq('org_id', orgId)
@@ -225,13 +229,14 @@ function findAtRiskReps(
   for (const userId of traineeIds) {
     const reasons: string[] = []
 
-    // Declining scores: majority of weakness dimensions trending down
+    // Declining scores: majority of weakness dimensions trending down.
+    // Require at least 2 profiles to avoid false positives from limited data.
     const userProfiles = profilesByUser.get(userId) ?? []
-    if (userProfiles.length > 0) {
+    if (userProfiles.length >= 2) {
       const decliningCount = userProfiles.filter(
         (p) => p.trend === 'declining',
       ).length
-      if (decliningCount > 0 && decliningCount >= userProfiles.length / 2) {
+      if (decliningCount >= Math.ceil(userProfiles.length / 2)) {
         reasons.push('declining scores')
       }
     }
