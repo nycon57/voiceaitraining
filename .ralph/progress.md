@@ -774,3 +774,38 @@ Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/
 - **Learnings for future iterations:**
   - When a prior run completes all 3 passes and outputs COMPLETE but stalls, simply verify code integrity and re-signal — no need to re-run passes
 ---
+
+## [2026-02-12] - US-009: Enable pgvector and create embeddings infrastructure
+Thread: N/A
+Run: 20260212-013208-22035 (iteration 2)
+Pass: 1/3 - Implementation
+Run log: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-013208-22035-iter-2.log
+Run summary: /Users/jarrettstanley/Desktop/websites/voiceaitraining/.ralph/runs/run-20260212-013208-22035-iter-2.md
+- Guardrails reviewed: yes
+- No-commit run: false
+- Commit: 047bd07 [Pass 1/3] feat: enable pgvector and create embeddings infrastructure
+- Post-commit status: clean (for US-009 files; pre-existing untracked/modified files remain)
+- Skills invoked: supabase-postgres-best-practices
+- Verification:
+  - Command: `pnpm build` -> Compiled successfully in 3.9s; pre-existing pagination.tsx type error blocks full build TypeScript step
+  - Command: `npx tsc --noEmit | grep memory/embeddings` -> PASS (0 errors in US-009 files)
+- Files changed:
+  - db/migrations/0014_enable_pgvector_and_embeddings.sql (new) — pgvector extension, memory_embeddings table, RLS, IVFFlat index, composite index, match_memory_embeddings RPC function
+  - src/lib/memory/embeddings.ts (new) — generateEmbedding(), storeEmbedding(), searchSimilar()
+  - src/lib/memory/index.ts (new) — barrel export for types and functions
+- What was implemented:
+  - Migration: CREATE EXTENSION vector, memory_embeddings table with all specified columns (id, org_id, user_id, content_type, content, embedding vector(1536), source_id, metadata, created_at)
+  - RLS policy restricting SELECT to org_id matching JWT claim
+  - IVFFlat index with vector_cosine_ops for cosine similarity search (lists=100)
+  - Composite B-tree index on (org_id, user_id, content_type) for filtered queries
+  - Postgres function match_memory_embeddings for vector similarity search via supabase.rpc()
+  - generateEmbedding() uses Vercel AI SDK embed() with @ai-sdk/openai text-embedding-3-small (1536 dimensions)
+  - storeEmbedding() generates embedding + inserts in one call, using bare @supabase/supabase-js client with service-role key (background job compatible)
+  - searchSimilar() generates query embedding + calls match_memory_embeddings RPC, scoped by org_id with optional user_id and content_type filters
+- **Learnings for future iterations:**
+  - Supabase JS client has no native vector search operator — use a Postgres function (RPC) for cosine similarity queries with `<=>` operator
+  - IVFFlat index lists parameter should be sqrt(row count); 100 is a reasonable initial value for tuning later
+  - The match_memory_embeddings function provides defense-in-depth org_id filtering alongside RLS
+  - Embedding vectors must be passed to Supabase as JSON.stringify(array) — the JS client serializes them for the vector column
+  - Pre-existing pagination.tsx motion.nav type error continues to block full pnpm build TypeScript step
+---
