@@ -2,8 +2,7 @@ import { logAgentActivity } from '@/lib/agents/activity-log'
 import { EVENT_NAMES, type CoachRecommendationReadyPayload } from '@/lib/events/types'
 import { inngest } from '@/lib/inngest/client'
 import { createServiceClient } from '@/lib/memory/supabase'
-import { sendNotification, type SendNotificationParams } from '@/lib/notifications'
-import type { NotificationType } from '@/lib/notifications'
+import { sendNotification, type NotificationType } from '@/lib/notifications'
 
 const AGENT_ID = 'coach-agent'
 
@@ -119,17 +118,12 @@ export const dispatchCoachNotification = inngest.createFunction(
     }
 
     const result = await step.run('send-notification', async () => {
-      const params: SendNotificationParams = {
+      return sendNotification({
         userId: data.userId,
         orgId: data.orgId,
-        type: content.type,
-        title: content.title,
-        body: content.body,
-        actionUrl: content.actionUrl,
         agentId: AGENT_ID,
-      }
-
-      return sendNotification(params)
+        ...content,
+      })
     })
 
     await step.run('log-activity', async () => {
