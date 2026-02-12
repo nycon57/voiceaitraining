@@ -59,6 +59,17 @@ const SYSTEMIC_THRESHOLD = 3
 const WEAKNESS_SCORE_THRESHOLD = 60
 const TOP_PERFORMER_LIMIT = 5
 
+// ── Helpers ─────────────────────────────────────────────────────────
+
+/** Compute the mean of a non-empty number array, rounded to the nearest integer. */
+function roundedMean(values: number[]): number {
+  return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length)
+}
+
+function pluralize(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural
+}
+
 // ── Empty analysis (no trainees) ───────────────────────────────────
 
 function emptyAnalysis(): TeamAnalysis {
@@ -85,7 +96,6 @@ function emptyAnalysis(): TeamAnalysis {
 export async function analyzeTeamPerformance(orgId: string): Promise<TeamAnalysis> {
   const supabase = createServiceClient()
 
-  // 1. Get trainee members
   const { data: membersData, error: membersError } = await supabase
     .from('org_members')
     .select('user_id, role')
@@ -102,13 +112,11 @@ export async function analyzeTeamPerformance(orgId: string): Promise<TeamAnalysi
 
   if (traineeIds.length === 0) return emptyAnalysis()
 
-  // 2. Fetch weakness profiles and completed attempts in parallel
   const [weaknessProfiles, attempts] = await Promise.all([
     fetchWeaknessProfiles(supabase, orgId, traineeIds),
     fetchCompletedAttempts(supabase, orgId, traineeIds),
   ])
 
-  // 3. Compute analysis
   const systemicGaps = findSystemicGaps(weaknessProfiles)
   const atRiskReps = findAtRiskReps(traineeIds, weaknessProfiles, attempts)
   const topPerformers = findTopPerformers(attempts)
@@ -186,10 +194,7 @@ function findSystemicGaps(profiles: WeaknessProfileRow[]): SystemicGap[] {
   for (const [skill, users] of weakUsersBySkill) {
     if (users.size >= SYSTEMIC_THRESHOLD) {
       const scores = scoresBySkill.get(skill)!
-      const avgScore = Math.round(
-        scores.reduce((sum, s) => sum + s, 0) / scores.length,
-      )
-      gaps.push({ skill, affectedCount: users.size, avgScore })
+      gaps.push({ skill, affectedCount: users.size, avgScore: roundedMean(scores) })
     }
   }
 
@@ -277,10 +282,7 @@ function findTopPerformers(attempts: AttemptRow[]): TopPerformer[] {
   const performers: TopPerformer[] = []
 
   for (const [userId, scores] of scoresByUser) {
-    const avgScore = Math.round(
-      scores.reduce((sum, s) => sum + s, 0) / scores.length,
-    )
-    performers.push({ userId, avgScore, attemptCount: scores.length })
+    performers.push({ userId, avgScore: roundedMean(scores), attemptCount: scores.length })
   }
 
   return performers
@@ -311,10 +313,7 @@ function computeTeamStats(
   return {
     totalTrainees: traineeIds.length,
     activeTrainees: activeUsers.size,
-    avgScore:
-      allScores.length > 0
-        ? Math.round(allScores.reduce((sum, s) => sum + s, 0) / allScores.length)
-        : null,
+    avgScore: allScores.length > 0 ? roundedMean(allScores) : null,
     totalCompletedAttempts: attempts.length,
   }
 }
@@ -326,11 +325,11 @@ function generateRecommendations(
   atRisk: AtRiskRep[],
   stats: TeamStats,
 ): string[] {
-  const recs: string[] = []
+  const recommendations: string[] = []
 
   for (const gap of gaps) {
     const label = gap.skill.replace(/_/g, ' ')
-    recs.push(
+    recommendations.push(
       `Team-wide training needed for ${label} — ${gap.affectedCount} reps averaging ${gap.avgScore}%.`,
     )
   }
@@ -339,8 +338,9 @@ function generateRecommendations(
     r.reasons.some((reason) => reason.includes('inactive') || reason.includes('no completed')),
   ).length
   if (inactiveCount > 0) {
-    recs.push(
-      `${inactiveCount} rep${inactiveCount > 1 ? 's' : ''} inactive for 7+ days — consider outreach or reassignment.`,
+    const noun = pluralize(inactiveCount, 'rep', 'reps')
+    recommendations.push(
+      `${inactiveCount} ${noun} inactive for 7+ days — consider outreach or reassignment.`,
     )
   }
 
@@ -348,16 +348,17 @@ function generateRecommendations(
     r.reasons.includes('declining scores'),
   ).length
   if (decliningCount > 0) {
-    recs.push(
-      `${decliningCount} rep${decliningCount > 1 ? 's have' : ' has'} declining scores — review coaching plans.`,
+    const verb = pluralize(decliningCount, 'has', 'have')
+    recommendations.push(
+      `${decliningCount} ${pluralize(decliningCount, 'rep', 'reps')} ${verb} declining scores — review coaching plans.`,
     )
   }
 
   if (stats.totalTrainees > 0 && stats.activeTrainees / stats.totalTrainees < 0.5) {
-    recs.push(
+    recommendations.push(
       `Low engagement: only ${stats.activeTrainees} of ${stats.totalTrainees} trainees active in the last 7 days.`,
     )
   }
 
-  return recs
+  return recommendations
 }
