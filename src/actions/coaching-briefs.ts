@@ -40,10 +40,16 @@ export async function getTeamBriefs(): Promise<CoachingBrief[]> {
 
     if (traineeIds.length === 0) return []
 
-    // Generate briefs in parallel (capped to avoid overload)
-    const briefs = await Promise.all(
-      traineeIds.map((id) => generateCoachingBrief(orgId, user.id, id)),
-    )
+    // Generate briefs in batches to avoid overwhelming DB + LLM rate limits
+    const BATCH_SIZE = 5
+    const briefs: CoachingBrief[] = []
+    for (let i = 0; i < traineeIds.length; i += BATCH_SIZE) {
+      const batch = traineeIds.slice(i, i + BATCH_SIZE)
+      const results = await Promise.all(
+        batch.map((id) => generateCoachingBrief(orgId, user.id, id)),
+      )
+      briefs.push(...results)
+    }
 
     return briefs
   })
