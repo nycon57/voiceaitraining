@@ -1,9 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
-
 import { EVENT_NAMES, type CoachRecommendationReadyPayload } from '@/lib/events/types'
 import { inngest } from '@/lib/inngest/client'
 import { logAgentActivity } from '@/lib/agents/activity-log'
 import { generateTraineeDigest, type TraineeDigest } from '@/lib/agents/coach/daily-digest'
+import { createServiceClient } from '@/lib/memory/supabase'
 
 const AGENT_ID = 'coach-agent'
 const ACTIVE_WINDOW_DAYS = 14
@@ -27,10 +26,7 @@ export const sendDailyDigest = inngest.createFunction(
   { cron: '0 8 * * *' },
   async ({ step }) => {
     const activeTrainees = await step.run('find-active-trainees', async () => {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      )
+      const supabase = createServiceClient()
 
       const cutoff = new Date(Date.now() - ACTIVE_WINDOW_DAYS * MS_PER_DAY).toISOString()
       const seen = new Map<string, ActiveTrainee>()
@@ -66,53 +62,67 @@ export const sendDailyDigest = inngest.createFunction(
     })
 
     let digestCount = 0
+    let failures = 0
 
     for (const trainee of activeTrainees) {
-      const digest: TraineeDigest = await step.run(
-        `generate-digest-${trainee.orgId}-${trainee.userId}`,
-        async () => {
-          return generateTraineeDigest(trainee.orgId, trainee.userId)
-        },
-      )
+      try {
+        const digest: TraineeDigest = await step.run(
+          `generate-digest-${trainee.orgId}-${trainee.userId}`,
+          async () => {
+            return generateTraineeDigest(trainee.orgId, trainee.userId)
+          },
+        )
 
-      await step.run(
-        `log-and-emit-${trainee.orgId}-${trainee.userId}`,
-        async () => {
-          await logAgentActivity({
-            orgId: trainee.orgId,
-            userId: trainee.userId,
-            agentId: AGENT_ID,
-            eventType: 'daily_digest',
-            action: 'generate_daily_digest',
-            details: {
-              attempts: digest.summary.attempts,
-              avgScore: digest.summary.avgScore,
-              trend: digest.summary.trend,
-              noRecentActivity: digest.noRecentActivity,
-              streak: digest.streak,
-            },
-          })
+        await step.run(
+          `log-digest-${trainee.orgId}-${trainee.userId}`,
+          async () => {
+            await logAgentActivity({
+              orgId: trainee.orgId,
+              userId: trainee.userId,
+              agentId: AGENT_ID,
+              eventType: 'daily_digest',
+              action: 'generate_daily_digest',
+              details: {
+                attempts: digest.summary.attempts,
+                avgScore: digest.summary.avgScore,
+                trend: digest.summary.trend,
+                noRecentActivity: digest.noRecentActivity,
+                streak: digest.streak,
+              },
+            })
+          },
+        )
 
-          const message = formatDigestMessage(digest)
+        await step.run(
+          `emit-digest-${trainee.orgId}-${trainee.userId}`,
+          async () => {
+            const message = formatDigestMessage(digest)
 
-          const payload: CoachRecommendationReadyPayload = {
-            userId: trainee.userId,
-            orgId: trainee.orgId,
-            recommendationType: 'daily_digest',
-            message,
-          }
+            const payload: CoachRecommendationReadyPayload = {
+              userId: trainee.userId,
+              orgId: trainee.orgId,
+              recommendationType: 'daily_digest',
+              message,
+            }
 
-          await inngest.send({
-            name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
-            data: payload,
-          })
-        },
-      )
+            await inngest.send({
+              name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
+              data: payload,
+            })
+          },
+        )
 
-      digestCount++
+        digestCount++
+      } catch (error) {
+        console.error(
+          `[coach-agent] Failed to process digest for ${trainee.userId}:`,
+          error instanceof Error ? error.message : error,
+        )
+        failures++
+      }
     }
 
-    return { activeTrainees: activeTrainees.length, digestsSent: digestCount }
+    return { activeTrainees: activeTrainees.length, digestsSent: digestCount, failures }
   },
 )
 
