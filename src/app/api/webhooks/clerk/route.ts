@@ -171,12 +171,13 @@ export async function POST(req: Request) {
         const email = clerkUser?.email || public_user_data.identifier || ''
         const firstName = clerkUser?.first_name || public_user_data.first_name || ''
         const lastName = clerkUser?.last_name || public_user_data.last_name || ''
+        const fullName = `${firstName} ${lastName}`.trim()
         emitUserJoinedOrg({
           userId: public_user_data.user_id,
           orgId: organization.id,
           role: userRole,
           email,
-          name: `${firstName} ${lastName}`.trim(),
+          name: fullName || email,
         }).catch((err) => console.error('Failed to emit user.joined.org:', err))
 
         break
