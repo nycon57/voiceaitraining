@@ -26,12 +26,18 @@ export const notificationPreferencesSchema = z.object({
     }),
   digest_frequency: z.enum(['daily', 'weekly', 'none']),
   coach_nudges: z.boolean(),
-})
+}).refine(
+  (data) => (data.quiet_hours_start === null) === (data.quiet_hours_end === null),
+  {
+    message: 'Both quiet_hours_start and quiet_hours_end must be both set or both null',
+    path: ['quiet_hours_end'],
+  },
+)
 
 export type NotificationPreferencesInput = z.infer<typeof notificationPreferencesSchema>
 
 export interface NotificationPreferences extends NotificationPreferencesInput {
-  id: string
+  id: string | null
 }
 
 const PREFS_SELECT = 'id, channel_email, channel_push, channel_in_app, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, digest_frequency, coach_nudges' as const
@@ -61,7 +67,7 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
     }
 
     if (!data) {
-      return { id: '', ...DEFAULT_PREFERENCES }
+      return { id: null, ...DEFAULT_PREFERENCES }
     }
 
     return data

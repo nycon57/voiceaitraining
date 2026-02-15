@@ -167,18 +167,20 @@ export async function POST(req: Request) {
             onConflict: 'clerk_user_id,org_id'
           })
 
-        // Fire-and-forget: notify subscribers that a user joined the org
-        const email = clerkUser?.email || public_user_data.identifier || ''
+        // Ensure event emission completes before the serverless function exits
         const firstName = clerkUser?.first_name || public_user_data.first_name || ''
         const lastName = clerkUser?.last_name || public_user_data.last_name || ''
         const fullName = `${firstName} ${lastName}`.trim()
-        emitUserJoinedOrg({
-          userId: public_user_data.user_id,
-          orgId: organization.id,
-          role: userRole,
-          email,
-          name: fullName || email,
-        }).catch((err) => console.error('Failed to emit user.joined.org:', err))
+        try {
+          await emitUserJoinedOrg({
+            userId: public_user_data.user_id,
+            orgId: organization.id,
+            role: userRole,
+            name: fullName || 'Unknown',
+          })
+        } catch (err) {
+          console.error('Failed to emit user.joined.org:', err)
+        }
 
         break
       }

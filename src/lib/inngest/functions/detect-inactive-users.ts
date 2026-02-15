@@ -19,9 +19,18 @@ export const detectInactiveUsers = inngest.createFunction(
   { cron: '0 9 * * *' },
   async ({ step }) => {
     const inactiveUsers = await step.run('query-inactive-users', async () => {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+      if (!supabaseUrl) {
+        throw new Error('Missing SUPABASE env var: NEXT_PUBLIC_SUPABASE_URL')
+      }
+      if (!serviceRoleKey) {
+        throw new Error('Missing SUPABASE env var: SUPABASE_SERVICE_ROLE_KEY')
+      }
+
       const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        supabaseUrl,
+        serviceRoleKey,
       )
 
       // PostgREST caps responses at 1000 rows and lacks GROUP BY,

@@ -72,7 +72,7 @@ export async function storeEmbedding(params: StoreEmbeddingParams): Promise<stri
       user_id: params.userId,
       content_type: params.contentType,
       content: params.content,
-      embedding: JSON.stringify(embedding),
+      embedding,
       source_id: params.sourceId ?? null,
       metadata: params.metadata ?? null,
     })

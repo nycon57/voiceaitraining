@@ -110,7 +110,7 @@ async function queryMemories(
     .eq('memory_type', memoryType)
     .order('score', { ascending: options?.ascending ?? true, nullsFirst: false })
 
-  if (options?.limit) {
+  if (typeof options?.limit === 'number') {
     query = query.limit(options.limit)
   }
 

@@ -47,6 +47,7 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24
 const TREND_RECENT_COUNT = 5
 
 function average(arr: number[]): number {
+  if (arr.length === 0) return 0
   return arr.reduce((sum, v) => sum + v, 0) / arr.length
 }
 

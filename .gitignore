@@ -47,3 +47,18 @@ next-env.d.ts
 .mcp.json 
 
 ######
+*.md
+!CLAUDE.md
+!README.md
+!CONTRIBUTING.md
+!CHANGELOG.md
+!docs/**/*.md
+!.claude/**/*.md
+story-*
+run-*
+*.sql
+!db/migrations/*.sql
+!db/migrations/**/*.sql
+
+# Ralph temp files
+.ralph/

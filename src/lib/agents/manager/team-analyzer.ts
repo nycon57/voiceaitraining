@@ -61,8 +61,9 @@ const TOP_PERFORMER_LIMIT = 5
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
-/** Compute the mean of a non-empty number array, rounded to the nearest integer. */
+/** Compute the mean of a number array, rounded to the nearest integer. Returns 0 for empty input. */
 function roundedMean(values: number[]): number {
+  if (values.length === 0) return 0
   return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length)
 }
 

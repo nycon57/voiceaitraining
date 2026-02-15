@@ -100,16 +100,20 @@ export async function createAssignment(data: z.infer<typeof createAssignmentSche
       throw new Error(`Failed to create assignment: ${error.message}`)
     }
 
-    // Fire-and-forget: notify subscribers that an assignment was created
-    emitAssignmentCreated({
-      assignmentId: assignment.id,
-      userId: validatedData.assignee_user_id,
-      orgId,
-      scenarioId: validatedData.scenario_id,
-      trackId: validatedData.track_id,
-      dueAt: validatedData.due_at,
-      assignedBy: user.id,
-    }).catch((err) => console.error('Failed to emit assignment.created:', err))
+    // Ensure event emission completes before the serverless function exits
+    try {
+      await emitAssignmentCreated({
+        assignmentId: assignment.id,
+        userId: validatedData.assignee_user_id,
+        orgId,
+        scenarioId: validatedData.scenario_id,
+        trackId: validatedData.track_id,
+        dueAt: validatedData.due_at,
+        assignedBy: user.id,
+      })
+    } catch (err) {
+      console.error('Failed to emit assignment.created:', err)
+    }
 
     revalidatePath('/assignments', 'page')
     revalidatePath('/dashboard', 'page')

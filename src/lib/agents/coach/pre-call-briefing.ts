@@ -39,6 +39,7 @@ const MAX_FOCUS_AREAS = 3
 const MAX_TIPS = 3
 const MAX_PREVIOUS_ATTEMPTS = 3
 const VALID_DIFFICULTIES = new Set<ScenarioDifficulty>(['easy', 'medium', 'hard'])
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const DEFAULT_FOCUS_AREAS = [
   'Focus on clear communication',
@@ -58,6 +59,10 @@ export async function generatePreCallBriefing(
   userId: string,
   scenarioId: string,
 ): Promise<PreCallBriefing> {
+  if (!UUID_RE.test(orgId)) {
+    throw new Error(`Invalid orgId format: ${orgId}`)
+  }
+
   const supabase = createServiceClient()
 
   // Fetch scenario, weaknesses, and previous attempts in parallel
@@ -225,7 +230,7 @@ async function generateMotivationalNote(
 
   try {
     const { text } = await generateText({
-      model: google('gemini-2.0-flash-exp'),
+      model: google('gemini-2.5-flash'),
       maxOutputTokens: 150,
       prompt: `You are a supportive sales coach. Write a brief (1-2 sentence) motivational note for a trainee about to practice "${scenarioTitle}". ${attemptContext} Their focus areas are: ${focusAreas.join(', ')}. Be encouraging but specific. Do not use emojis.`,
     })

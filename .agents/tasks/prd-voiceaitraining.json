@@ -1,0 +1,1488 @@
+{
+  "project": {
+    "name": "VoiceAI Training \u2014 Agent-First Transformation",
+    "description": "Transform from a traditional SaaS training tool into an autonomous AI sales coach that lives alongside every rep, learns their weaknesses, drills them relentlessly, coaches them on live calls, and reports results to managers without anyone logging into a dashboard.",
+    "tech_stack": [
+      "Next.js 15 (App Router)",
+      "React 19",
+      "TypeScript (strict)",
+      "Supabase (PostgreSQL, RLS, pgvector, Storage, Realtime)",
+      "Clerk (auth, orgs, roles)",
+      "Vapi (telephony, STT, TTS, call control)",
+      "Stripe (billing)",
+      "Vercel AI SDK + Google Gemini",
+      "Inngest (background jobs, event-driven agents)",
+      "Resend (email)",
+      "Tailwind CSS + ShadCN/UI"
+    ],
+    "domain": "voiceaitraining.com",
+    "branch_name": "ralph/agent-first-transformation",
+    "qualityGates": [
+      "pnpm build",
+      "pnpm lint",
+      "pnpm typecheck"
+    ]
+  },
+  "epics": [
+    {
+      "id": "E01",
+      "name": "Agent Infrastructure",
+      "description": "Install Inngest for background job processing, create a typed internal event bus, wire existing webhooks and scoring pipelines to emit internal events, and establish the agent runtime foundation that all subsequent agent features depend on."
+    },
+    {
+      "id": "E02",
+      "name": "Agent Memory",
+      "description": "Enable pgvector in Supabase and build persistent per-user memory infrastructure including weakness profiles, learning trajectories, and semantic search over transcripts. This is the perception layer that makes agents intelligent."
+    },
+    {
+      "id": "E03",
+      "name": "Coach Agent",
+      "description": "Build the autonomous coaching agent that subscribes to attempt events, updates weakness profiles, performs skill gap analysis, recommends scenarios, adapts difficulty, and implements spaced repetition. This is the core product differentiator."
+    },
+    {
+      "id": "E04",
+      "name": "Proactive Communication",
+      "description": "Build the notification dispatch system (web push, email, in-app) that agents use to proactively reach trainees and managers. Includes preference management and quiet hours."
+    },
+    {
+      "id": "E05",
+      "name": "Adaptive Scenarios",
+      "description": "AI-powered scenario generation from weakness profiles. The Coach Agent generates targeted practice scenarios, calibrates difficulty dynamically, and tracks whether generated scenarios actually improve the targeted weakness."
+    },
+    {
+      "id": "E06",
+      "name": "Live Call Copilot",
+      "description": "Real-time audio stream processing for whisper coaching during actual sales calls. Includes live STT pipeline, real-time KPI overlay, objection detection, and contextual coaching suggestions."
+    },
+    {
+      "id": "E07",
+      "name": "Manager Intelligence Agent",
+      "description": "Background analytics agent that continuously monitors team performance, detects patterns (systemic vs individual gaps), sends proactive alerts to managers, and auto-generates 1:1 coaching briefs."
+    },
+    {
+      "id": "E08",
+      "name": "Scenario Generation Agent",
+      "description": "Autonomous agent that ingests real call recordings, extracts customer personas, builds objection libraries from actual conversations, and continuously updates the scenario library based on what reps encounter in the field."
+    },
+    {
+      "id": "E09",
+      "name": "Outcome Tracking",
+      "description": "CRM integration framework (starting with HubSpot), deal outcome sync, attribution model correlating training activity with sales results, and auto-generated ROI reports for renewal justification."
+    },
+    {
+      "id": "E10",
+      "name": "Agent Dashboard",
+      "description": "Agent-first UI replacing traditional dashboards: coach chat interface for trainees, agent activity feed, agent settings/controls, manager agent control panel, and org-wide agent health dashboard."
+    }
+  ],
+  "stories": [
+    {
+      "id": "US-001",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Install and configure Inngest for background job processing",
+      "description": "As a developer, I want Inngest installed and configured as the background job runtime so that all agent processing has a reliable, event-driven execution environment.\n\n## Technical Requirements\n\n1. Install `inngest` package via pnpm\n2. Create `src/lib/inngest/client.ts` \u2014 instantiate the Inngest client with id `voiceai-training`\n3. Create `src/app/api/inngest/route.ts` \u2014 Next.js route handler using `serve()` from `inngest/next` that registers all Inngest functions. Import functions from a central registry.\n4. Create `src/lib/inngest/functions/index.ts` \u2014 barrel export for all Inngest functions (empty array initially, populated by subsequent stories)\n5. Add `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY` to env setup (document in code comments)\n6. Verify the Inngest dev server runs alongside `pnpm dev`\n\n## Files to Create\n- `src/lib/inngest/client.ts`\n- `src/lib/inngest/functions/index.ts`\n- `src/app/api/inngest/route.ts`",
+      "acceptanceCriteria": [
+        "inngest package is installed in package.json dependencies",
+        "Inngest client is created at src/lib/inngest/client.ts with proper typing",
+        "API route at /api/inngest serves the Inngest handler using serve() from inngest/next",
+        "Functions registry exists at src/lib/inngest/functions/index.ts (empty array export initially)",
+        "pnpm build passes with no errors",
+        "pnpm typecheck passes with no errors",
+        "Example: Running `pnpm dev` starts both the Next.js dev server and Inngest dev server without errors",
+        "Negative: If INNGEST_EVENT_KEY is missing, the client creation fails with a clear error message, not a silent failure"
+      ],
+      "status": "done",
+      "notes": "System context: This is the foundation for ALL autonomous agent behavior. Every agent (Coach, Manager Intelligence, Scenario Generation) runs as an Inngest function triggered by events. All subsequent stories in E01-E10 depend on this runtime being in place.\n\nFollow existing API route patterns (see src/app/api/webhooks/vapi/route.ts for structure). Use TypeScript strict mode. Export typed client for use across the codebase.",
+      "size": "S",
+      "startedAt": "2026-02-12T02:54:34.479923+00:00",
+      "completedAt": "2026-02-12T03:01:18.824799+00:00",
+      "updatedAt": "2026-02-12T03:01:18.824656+00:00",
+      "dependsOn": []
+    },
+    {
+      "id": "US-002",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Create typed internal event bus with domain events",
+      "description": "As a developer, I want a typed internal event system so that event producers (webhooks, server actions, scoring) are decoupled from event consumers (agents) with full type safety.\n\n## Technical Requirements\n\n1. Create `src/lib/events/types.ts` \u2014 define all domain event types as a discriminated union:\n   - `attempt.completed` \u2014 Payload: `{ attemptId: string, userId: string, orgId: string, scenarioId: string, durationSeconds: number, vapiCallId: string }`\n   - `attempt.scored` \u2014 Payload: `{ attemptId: string, userId: string, orgId: string, scenarioId: string, score: number, scoreBreakdown: object, kpis: object, criticalFailures: string[] }`\n   - `attempt.feedback.generated` \u2014 Payload: `{ attemptId: string, userId: string, orgId: string, feedbackSections: object[], nextSteps: string[] }`\n   - `assignment.created` \u2014 Payload: `{ assignmentId: string, userId: string, orgId: string, scenarioId?: string, trackId?: string, dueAt?: string, assignedBy: string }`\n   - `assignment.overdue` \u2014 Payload: `{ assignmentId: string, userId: string, orgId: string, scenarioId?: string, trackId?: string, dueAt: string }`\n   - `user.joined.org` \u2014 Payload: `{ userId: string, orgId: string, role: string, email: string, name: string }`\n   - `user.inactive` \u2014 Payload: `{ userId: string, orgId: string, lastAttemptAt: string, daysSinceLastAttempt: number }`\n   - `coach.recommendation.ready` \u2014 Payload: `{ userId: string, orgId: string, recommendationType: string, scenarioId?: string, message: string }`\n   - `coach.weakness.updated` \u2014 Payload: `{ userId: string, orgId: string, weaknesses: object[], strengths: object[], trajectory: string }`\n   - `recording.uploaded` \u2014 Payload: `{ orgId: string, fileUrl: string, uploadedBy: string, metadata?: object }`\n\n2. Create `src/lib/events/emit.ts` \u2014 helper `emitEvent(eventName, payload)` that sends typed events through Inngest client with compile-time type checking.\n\n3. Create `src/lib/events/index.ts` \u2014 barrel export.\n\n4. Register event types with Inngest client in `src/lib/inngest/client.ts` using Inngest's generic type parameter.\n\n## Files to Create\n- `src/lib/events/types.ts`\n- `src/lib/events/emit.ts`\n- `src/lib/events/index.ts`\n\n## Files to Modify\n- `src/lib/inngest/client.ts` \u2014 register event types with Inngest generic",
+      "acceptanceCriteria": [
+        "All domain events defined as TypeScript types with strict payloads in src/lib/events/types.ts",
+        "Zod schemas validate event payloads at runtime",
+        "emitEvent() sends events through Inngest client with full type safety",
+        "Convenience emit functions exist for each event type (emitAttemptCompleted, emitAttemptScored, etc.)",
+        "Inngest client is typed with all event definitions via generic parameter",
+        "No any types in event definitions",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Calling emitAttemptScored({ attemptId: 'att_123', score: 85, ... }) sends a typed event through Inngest with no type errors",
+        "Negative: Calling emitEvent with a mismatched payload type (e.g. missing required field) produces a compile-time TypeScript error"
+      ],
+      "status": "done",
+      "notes": "System context: This event bus is consumed by US-003 (Vapi webhook emission), US-004 (scoring pipeline emission), US-005 (server action emission), US-008 (inactivity cron), and all agent stories (E03/E07). Mirror the typed webhook events pattern from src/lib/webhooks-types.ts (WEBHOOK_EVENTS const + WebhookEvent type) but for internal agent use. Export convenience functions like emitAttemptCompleted() matching how src/lib/webhooks.ts exports triggerScenarioCompleted().",
+      "size": "M",
+      "updatedAt": "2026-02-12T03:39:19.632313+00:00",
+      "dependsOn": [
+        "US-001"
+      ],
+      "startedAt": "2026-02-12T03:34:18.741627+00:00",
+      "completedAt": "2026-02-12T03:39:19.632482+00:00"
+    },
+    {
+      "id": "US-003",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Wire Vapi webhook to emit internal events after call completion",
+      "description": "As a developer, I want the Vapi webhook to emit an `attempt.completed` internal event so that agents can react to call completions autonomously.\n\n## Technical Requirements\n\n1. Modify `src/app/api/webhooks/vapi/route.ts`:\n   - After the successful attempt update (around line 166), call `emitEvent('attempt.completed', { ... })`\n   - Import emitEvent from `@/lib/events`\n   - Do NOT await the event emission \u2014 fire and forget to avoid blocking the webhook response\n   - Wrap in try/catch so event emission failure doesn't break the webhook\n\n2. Event payload: attemptId, userId (clerk_user_id from attempt), orgId, scenarioId, durationSeconds, vapiCallId\n\n## Files to Modify\n- `src/app/api/webhooks/vapi/route.ts`",
+      "acceptanceCriteria": [
+        "Vapi webhook emits attempt.completed event after processing end-of-call-report",
+        "Event emission is fire-and-forget (not awaited)",
+        "Event emission failure does not break webhook response (wrapped in try/catch)",
+        "Event payload includes attemptId, userId, orgId, scenarioId, durationSeconds, vapiCallId",
+        "Existing webhook behavior is completely unchanged \u2014 same response codes, same data flow",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After Vapi sends an end-of-call-report webhook, the attempt.completed event appears in Inngest dev dashboard within 1 second",
+        "Negative: If Inngest is unavailable, the webhook still returns 200 and attempt data is saved normally"
+      ],
+      "status": "done",
+      "notes": "System context: This connects the existing voice pipeline to the new agent system. The Vapi webhook at src/app/api/webhooks/vapi/route.ts currently processes end-of-call-reports, downloads recordings, stores transcripts, and triggers scoring. Follow the existing fire-and-forget pattern on line 170-176 where scoring is triggered without awaiting. The emitted event will be consumed by the Coach Agent (US-013) to update weakness profiles.",
+      "size": "S",
+      "startedAt": "2026-02-12T03:47:28.498642+00:00",
+      "completedAt": "2026-02-12T03:52:40.080761+00:00",
+      "updatedAt": "2026-02-12T03:52:40.080597+00:00",
+      "dependsOn": [
+        "US-002"
+      ]
+    },
+    {
+      "id": "US-004",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Wire scoring pipeline to emit events after analysis completes",
+      "description": "As a developer, I want the scoring pipeline to emit `attempt.scored` and `attempt.feedback.generated` events so that agents can react to scoring results.\n\n## Technical Requirements\n\n1. Modify `src/app/api/calls/analyze/route.ts`:\n   - After rubricScore is calculated (~line 107), emit `attempt.scored` event with score, scoreBreakdown, kpis, criticalFailures\n   - After the stream completes (after analysis_complete is sent), emit `attempt.feedback.generated` with feedback sections and next steps\n   - Import emitEvent from `@/lib/events`\n   - Extract userId and orgId from authenticated user context (already available via getCurrentUser())\n\n2. Also check `src/app/api/attempts/[attemptId]/score/route.ts` \u2014 if it scores independently, add attempt.scored emission there too.\n\n## Files to Modify\n- `src/app/api/calls/analyze/route.ts`\n- `src/app/api/attempts/[attemptId]/score/route.ts` (if it exists and scores independently)",
+      "acceptanceCriteria": [
+        "attempt.scored event emitted after rubric scoring completes in analyze route",
+        "attempt.feedback.generated event emitted after AI feedback stream completes",
+        "Events include all required payload fields (score, breakdown, kpis, criticalFailures)",
+        "Event emission does not block the SSE stream response",
+        "Existing scoring and feedback behavior unchanged",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After scoring an attempt with score 72 and 2 critical failures, the attempt.scored event payload contains { score: 72, criticalFailures: ['missed_greeting', 'no_close'] }",
+        "Negative: If event emission throws, the SSE stream continues and the client receives the full analysis response"
+      ],
+      "status": "done",
+      "notes": "System context: The analyze route at src/app/api/calls/analyze/route.ts runs transcript analysis (src/lib/analysis/transcript-analyzer.ts), rubric scoring (src/lib/analysis/rubric-scorer.ts), then streams AI feedback via Gemini Flash. The attempt.scored event is the primary trigger for the Coach Agent (US-013) to update weakness profiles and generate recommendations. The attempt.feedback.generated event feeds into the embedding pipeline (US-012).",
+      "size": "S",
+      "updatedAt": "2026-02-12T04:27:41.396237+00:00",
+      "dependsOn": [
+        "US-002"
+      ],
+      "startedAt": "2026-02-12T04:23:02.597434+00:00",
+      "completedAt": "2026-02-12T04:27:41.396394+00:00"
+    },
+    {
+      "id": "US-005",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Wire server actions to emit events on key mutations",
+      "description": "As a developer, I want server actions to emit internal events so that agents react to user-triggered mutations like assignments and user onboarding.\n\n## Technical Requirements\n\n1. Modify `src/actions/assignments.ts`:\n   - After successful assignment creation, emit `assignment.created` event\n   - Payload: assignmentId, userId (assignee), orgId, scenarioId/trackId, dueAt, assignedBy\n\n2. Modify `src/actions/org.ts` (or wherever user join/invite is handled):\n   - After user joins org, emit `user.joined.org` event\n   - Payload: userId, orgId, role, email, name\n\n3. All event emissions fire-and-forget (don't await, wrap in try/catch)\n\n## Files to Modify\n- `src/actions/assignments.ts`\n- `src/actions/org.ts`",
+      "acceptanceCriteria": [
+        "assignment.created event emitted when assignments are created",
+        "user.joined.org event emitted when users join an org",
+        "Event payloads match typed definitions from US-002",
+        "Event failures don't break server action responses (try/catch, no await)",
+        "Existing server action behavior unchanged",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Creating an assignment with dueAt '2025-01-15' emits assignment.created with the correct dueAt and assignedBy fields",
+        "Negative: If event emission fails, the assignment is still created successfully in the database"
+      ],
+      "status": "done",
+      "notes": "System context: Server actions are the primary mutation surface (see src/actions/assignments.ts, src/actions/org.ts). The assignment.created event will eventually trigger the Coach Agent to incorporate the assigned scenario into its planning. The user.joined.org event will trigger welcome flows and initial weakness profile creation.",
+      "size": "S",
+      "updatedAt": "2026-02-12T04:55:56.886294+00:00",
+      "dependsOn": [
+        "US-002"
+      ],
+      "startedAt": "2026-02-12T04:51:58.895316+00:00",
+      "completedAt": "2026-02-12T04:55:56.886526+00:00"
+    },
+    {
+      "id": "US-006",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Create agent runtime base definition and registry",
+      "description": "As a developer, I want an agent registry so that all agents are discoverable, their Inngest functions are auto-registered, and agent metadata is accessible for monitoring.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/base.ts` \u2014 define AgentDefinition interface:\n   - `id: string` (e.g. 'coach-agent')\n   - `name: string` (e.g. 'Coach Agent')\n   - `description: string`\n   - `subscribesTo: string[]` (event names)\n   - `inngestFunctions: InngestFunction[]` (actual Inngest function implementations)\n\n2. Create `src/lib/agents/registry.ts`:\n   - `registerAgent(agent: AgentDefinition)` \u2014 adds to registry\n   - `getAgent(id: string)` \u2014 lookup by id\n   - `getAllAgentFunctions()` \u2014 collects all Inngest functions for the serve handler\n   - `getAgentsByEvent(eventName: string)` \u2014 for debugging/monitoring\n\n3. Create `src/lib/agents/index.ts` \u2014 barrel export\n\n4. Update `src/app/api/inngest/route.ts` to use `getAllAgentFunctions()` instead of static array\n\n## Design Decisions\n- Agents are plain objects conforming to AgentDefinition (NOT classes with inheritance)\n- Each agent lives in its own directory: `src/lib/agents/coach/`, `src/lib/agents/manager/`, etc.\n- Inngest handles lifecycle (retry, timeout, observability)\n\n## Files to Create\n- `src/lib/agents/base.ts`\n- `src/lib/agents/registry.ts`\n- `src/lib/agents/index.ts`\n\n## Files to Modify\n- `src/app/api/inngest/route.ts` \u2014 use getAllAgentFunctions()\n- `src/lib/inngest/functions/index.ts` \u2014 integrate with registry",
+      "acceptanceCriteria": [
+        "AgentDefinition interface defined with id, name, description, subscribesTo, inngestFunctions",
+        "Agent registry supports registerAgent, getAgent, getAllAgentFunctions, getAgentsByEvent",
+        "Inngest serve route uses getAllAgentFunctions() from registry",
+        "Empty registry is valid (no agents registered yet is fine)",
+        "No class inheritance \u2014 plain objects and functions only",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After registering a Coach Agent, getAllAgentFunctions() returns its Inngest functions and getAgent('coach-agent') returns its definition",
+        "Negative: Calling getAgent('nonexistent-agent') returns undefined, not an error"
+      ],
+      "status": "done",
+      "notes": "System context: This registry is used by US-013 (Coach Agent), US-025 (Manager Agent), US-030 (Scenario Gen Agent) to register themselves. The getAllAgentFunctions() output feeds into the Inngest serve() handler. Keep this intentionally simple \u2014 avoid over-abstracting before we know what agents need.",
+      "size": "M",
+      "updatedAt": "2026-02-12T05:25:09.256233+00:00",
+      "dependsOn": [
+        "US-001"
+      ],
+      "startedAt": "2026-02-12T05:22:01.960776+00:00",
+      "completedAt": "2026-02-12T05:25:09.256358+00:00"
+    },
+    {
+      "id": "US-007",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Create agent activity logging table and API",
+      "description": "As a developer, I want an agent activity log so that all autonomous agent actions are observable and auditable.\n\n## Technical Requirements\n\n1. Supabase migration for `agent_activity_log` table:\n   - `id` uuid primary key default gen_random_uuid()\n   - `org_id` uuid not null references orgs(id)\n   - `user_id` text (clerk_user_id, nullable for org-wide actions)\n   - `agent_id` text not null (e.g. 'coach-agent')\n   - `event_type` text not null (triggering event)\n   - `action` text not null (e.g. 'updated_weakness_profile', 'generated_recommendation')\n   - `details` jsonb\n   - `metadata` jsonb (timing, model used, tokens consumed)\n   - `created_at` timestamptz default now()\n   - RLS: org_id = current_setting('jwt.claims.org_id')::uuid\n   - Index on (org_id, created_at DESC) and (org_id, user_id, created_at DESC)\n\n2. Create `src/lib/agents/activity-log.ts`:\n   - `logAgentActivity(params)` \u2014 inserts row using admin client\n\n3. Create `src/actions/agent-activity.ts`:\n   - `getAgentActivityForUser(userId, limit?, offset?)` \u2014 uses withOrgGuard\n   - `getAgentActivityForOrg(limit?, offset?)` \u2014 uses withRoleGuard(['manager', 'admin'])\n\n## Files to Create\n- `supabase/migrations/YYYYMMDD_create_agent_activity_log.sql`\n- `src/lib/agents/activity-log.ts`\n- `src/actions/agent-activity.ts`",
+      "acceptanceCriteria": [
+        "agent_activity_log table migration exists with all specified columns",
+        "RLS policy restricts reads to matching org_id",
+        "Indexes on (org_id, created_at DESC) and (org_id, user_id, created_at DESC)",
+        "logAgentActivity() inserts rows using createAdminClient()",
+        "getAgentActivityForUser() uses withOrgGuard and scopes to org",
+        "getAgentActivityForOrg() requires manager or admin role via withRoleGuard",
+        "Typecheck passes",
+        "Example: logAgentActivity({ agentId: 'coach-agent', action: 'updated_weakness_profile', orgId, userId, details: { skills: 5 } }) creates a row in agent_activity_log",
+        "Negative: A trainee calling getAgentActivityForOrg() is rejected with an authorization error (role guard)"
+      ],
+      "status": "done",
+      "notes": "System context: Every agent calls logAgentActivity() after significant actions. This log feeds the Agent Activity Feed UI (US-032) and Manager Agent Control Panel (US-033). Uses createAdminClient() from src/lib/supabase/server.ts for writes (agents don't have user sessions). Server actions use withOrgGuard/withRoleGuard from src/lib/auth.ts.",
+      "size": "L",
+      "updatedAt": "2026-02-12T05:57:54.419248+00:00",
+      "dependsOn": [
+        "US-006"
+      ],
+      "startedAt": "2026-02-12T05:57:05.137518+00:00",
+      "completedAt": "2026-02-12T05:57:54.419369+00:00"
+    },
+    {
+      "id": "US-008",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Create Inngest cron for user inactivity detection",
+      "description": "As a developer, I want a daily cron that detects inactive trainees so that the Coach Agent can send practice reminders.\n\n## Technical Requirements\n\n1. Create `src/lib/inngest/functions/detect-inactive-users.ts`:\n   - Inngest cron function running daily at 9am UTC\n   - Queries scenario_attempts to find last attempt per user per org\n   - For users where last attempt > 3 days ago, emit `user.inactive` event\n   - Batch users by org to avoid N+1 queries\n   - Use admin Supabase client (no user session for cron)\n\n2. Register function in Inngest functions index\n\n## Files to Create\n- `src/lib/inngest/functions/detect-inactive-users.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`\n- `src/app/api/inngest/route.ts` (ensure function is registered)",
+      "acceptanceCriteria": [
+        "Inngest cron function runs on daily schedule at 9am UTC",
+        "Queries last attempt date per user efficiently (single query with GROUP BY, not N+1)",
+        "Emits user.inactive event for users with no attempts in 3+ days",
+        "Event payload includes userId, orgId, lastAttemptAt, daysSinceLastAttempt",
+        "Function registered and served by Inngest route",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A user whose last completed attempt was 5 days ago gets a user.inactive event emitted with daysSinceLastAttempt: 5",
+        "Negative: Users with attempts within the last 3 days are NOT flagged as inactive"
+      ],
+      "status": "done",
+      "notes": "System context: This cron is the trigger for the Coach Agent's inactivity handler (US-013). Uses createAdminClient() for database access. Query scenario_attempts table (see src/types/attempt.ts for AttemptStatus type \u2014 only count 'completed' status). The user.inactive event eventually triggers notifications via US-022.",
+      "size": "M",
+      "updatedAt": "2026-02-12T06:33:36.515787+00:00",
+      "dependsOn": [
+        "US-002",
+        "US-006"
+      ],
+      "startedAt": "2026-02-12T06:32:08.245886+00:00",
+      "completedAt": "2026-02-12T06:33:36.515958+00:00"
+    },
+    {
+      "id": "US-009",
+      "epic_id": "E02",
+      "phase": 1,
+      "title": "Enable pgvector and create embeddings infrastructure",
+      "description": "As a developer, I want pgvector enabled in Supabase with an embeddings table so that agents can store and search vector embeddings for semantic memory.\n\n## Technical Requirements\n\n1. Supabase migration:\n   - `CREATE EXTENSION IF NOT EXISTS vector;`\n   - Create `memory_embeddings` table:\n     - `id` uuid primary key default gen_random_uuid()\n     - `org_id` uuid not null references orgs(id)\n     - `user_id` text not null (clerk_user_id)\n     - `content_type` text not null ('transcript_segment' | 'feedback_summary' | 'weakness_note' | 'coaching_insight')\n     - `content` text not null\n     - `embedding` vector(1536) not null (OpenAI text-embedding-3-small)\n     - `source_id` text (reference to attempt_id, scenario_id, etc.)\n     - `metadata` jsonb\n     - `created_at` timestamptz default now()\n     - RLS: org_id = current_setting('jwt.claims.org_id')::uuid\n     - IVFFlat index for cosine similarity search\n     - Index on (org_id, user_id, content_type)\n\n2. Create `src/lib/memory/embeddings.ts`:\n   - `generateEmbedding(text: string): Promise<number[]>` \u2014 calls OpenAI text-embedding-3-small\n   - `storeEmbedding(params: { orgId, userId, contentType, content, sourceId?, metadata? }): Promise<string>`\n   - `searchSimilar(params: { orgId, userId, query: string, contentType?, limit? }): Promise<SimilarResult[]>` \u2014 vector similarity search\n\n3. Create `src/lib/memory/index.ts` (barrel export)\n\n## Files to Create\n- `supabase/migrations/YYYYMMDD_enable_pgvector_and_embeddings.sql`\n- `src/lib/memory/embeddings.ts`\n- `src/lib/memory/index.ts`",
+      "acceptanceCriteria": [
+        "pgvector extension enabled via migration",
+        "memory_embeddings table exists with vector(1536) column",
+        "IVFFlat index created for cosine similarity search",
+        "RLS policy restricts access by org_id",
+        "generateEmbedding() calls OpenAI text-embedding-3-small API",
+        "storeEmbedding() generates embedding and inserts in one call using createAdminClient()",
+        "searchSimilar() performs vector similarity search with org and optional user scoping",
+        "pnpm build and pnpm typecheck pass",
+        "Example: storeEmbedding({ content: 'The customer objected to pricing', contentType: 'transcript_segment' }) generates a 1536-dim vector and stores it",
+        "Negative: searchSimilar() with a userId from org A never returns embeddings from org B (RLS enforced)"
+      ],
+      "status": "done",
+      "notes": "System context: Embeddings power semantic search in the Coach Agent's memory query API (US-011). Used by US-012 (embed transcript segments after scoring). openai package may need to be installed for the embeddings API (separate from Vercel AI SDK which uses @ai-sdk/openai).",
+      "size": "L",
+      "updatedAt": "2026-02-12T07:08:52.471430+00:00",
+      "dependsOn": [
+        "US-001"
+      ],
+      "startedAt": "2026-02-12T07:03:16.411903+00:00",
+      "completedAt": "2026-02-12T07:08:52.471593+00:00"
+    },
+    {
+      "id": "US-010",
+      "epic_id": "E02",
+      "phase": 1,
+      "title": "Create user_memory table for structured weakness profiles",
+      "description": "As a developer, I want a user_memory table so that the Coach Agent can persist structured data about each trainee's weakness profile, skill levels, and learning trajectory.\n\n## Technical Requirements\n\n1. Supabase migration for `user_memory` table:\n   - `id` uuid primary key default gen_random_uuid()\n   - `org_id` uuid not null references orgs(id)\n   - `user_id` text not null (clerk_user_id)\n   - `memory_type` text not null ('weakness_profile' | 'skill_level' | 'learning_trajectory' | 'coaching_note' | 'practice_pattern')\n   - `key` text not null (e.g. 'objection_handling', 'talk_listen_ratio', 'confidence')\n   - `value` jsonb not null\n   - `score` numeric (0-100, for sorting/filtering)\n   - `trend` text ('improving' | 'declining' | 'stable' | 'new')\n   - `last_evidence_at` timestamptz\n   - `evidence_count` integer default 1\n   - `created_at` timestamptz default now()\n   - `updated_at` timestamptz default now()\n   - Unique constraint on (org_id, user_id, memory_type, key)\n   - RLS: org_id match\n   - Indexes: (org_id, user_id, memory_type), (org_id, user_id, score)\n\n2. Create `src/lib/memory/user-memory.ts`:\n   - `upsertMemory(params)` \u2014 insert or update on conflict\n   - `getWeaknessProfile(orgId, userId)` \u2014 returns weakness_profile entries sorted by score ASC (worst first)\n   - `getSkillLevels(orgId, userId)` \u2014 returns skill_level entries\n   - `getTopWeaknesses(orgId, userId, limit?)` \u2014 returns N worst weaknesses\n   - `getTopStrengths(orgId, userId, limit?)` \u2014 returns N best skills\n\n3. Define TypeScript interfaces: WeaknessEntry, SkillLevel, TrajectoryPoint\n\n## Files to Create\n- `supabase/migrations/YYYYMMDD_create_user_memory.sql`\n- `src/lib/memory/user-memory.ts`\n\n## Files to Modify\n- `src/lib/memory/index.ts` \u2014 add exports",
+      "acceptanceCriteria": [
+        "user_memory table exists with all columns and constraints",
+        "Unique constraint on (org_id, user_id, memory_type, key) prevents duplicates",
+        "RLS policy restricts access by org_id",
+        "upsertMemory() performs INSERT ON CONFLICT UPDATE correctly",
+        "getWeaknessProfile() returns weaknesses sorted by score ascending (worst first)",
+        "getTopWeaknesses() returns limited results sorted by severity",
+        "All functions use createAdminClient() for writes",
+        "TypeScript interfaces defined with no any types",
+        "pnpm build and pnpm typecheck pass",
+        "Example: upsertMemory({ userId, memoryType: 'weakness_profile', key: 'objection_handling', score: 45, trend: 'declining' }) creates or updates the entry",
+        "Negative: Inserting a duplicate (same org_id, user_id, memory_type, key) updates the existing row instead of creating a second one"
+      ],
+      "status": "done",
+      "notes": "System context: This table is the primary data store for the Coach Agent's decision-making. Read by US-011 (memory query API), written by US-010a (weakness profiler), US-017 (spaced repetition). The weakness_profile entries are the input to the skill gap analyzer (US-014) and scenario recommender (US-015).",
+      "size": "M",
+      "updatedAt": "2026-02-12T07:42:45.718542+00:00",
+      "dependsOn": [],
+      "startedAt": "2026-02-12T07:37:14.487854+00:00",
+      "completedAt": "2026-02-12T07:42:45.718854+00:00"
+    },
+    {
+      "id": "US-011",
+      "epic_id": "E02",
+      "phase": 1,
+      "title": "Build weakness profile generator from attempt history",
+      "description": "As a developer, I want a weakness profiler that analyzes a user's attempt history and generates/updates their weakness profile so that the Coach Agent can make intelligent recommendations.\n\n## Technical Requirements\n\n1. Create `src/lib/memory/weakness-profiler.ts`:\n\n   `generateWeaknessProfile(orgId, userId)` \u2014 main function:\n   a. Queries last 20 scenario_attempts (completed status only) from Supabase\n   b. Extracts KPIs from `kpis` jsonb column (see AttemptKPIs interface in src/types/attempt.ts)\n   c. Aggregates performance across 10+ dimensions:\n      - `question_handling` \u2014 from unanswered_questions_count\n      - `confidence` \u2014 from confidence_score\n      - `professionalism` \u2014 from professionalism_score\n      - `clarity` \u2014 from clarity_score\n      - `talk_listen_balance` \u2014 from talk_listen_ratio\n      - `filler_words` \u2014 from filler_words_count\n      - `response_time` \u2014 from avg_response_time_ms\n      - `empathy` \u2014 from empathy_signals_count\n      - `objection_handling` \u2014 from score_breakdown\n      - `dead_air` \u2014 from dead_air_instances\n   d. For each dimension: calculate weighted score (recent attempts weighted higher), determine trend (last 5 vs previous 5)\n   e. Calls upsertMemory() for each dimension\n   f. Stores weakness_profile (score < 70) and skill_level (score >= 70) entries\n\n## Files to Create\n- `src/lib/memory/weakness-profiler.ts`\n\n## Files to Modify\n- `src/lib/memory/index.ts` \u2014 add export",
+      "acceptanceCriteria": [
+        "generateWeaknessProfile() queries last 20 completed attempts for a user",
+        "Extracts and aggregates 10+ performance dimensions from AttemptKPIs",
+        "Weighted scoring: recent attempts count more than older ones",
+        "Trend calculated by comparing last 5 vs previous 5 attempts per dimension",
+        "Calls upsertMemory() to persist each dimension with correct memory_type",
+        "Stores weakness_profile (score < 70) and skill_level (score >= 70)",
+        "Handles edge case of user with 0 or 1 attempts gracefully (no crash, no bad data)",
+        "No any types",
+        "pnpm build and pnpm typecheck pass",
+        "Example: For a user with 15 completed attempts, the profiler aggregates scores across 10 dimensions and stores weakness_profile entries for dimensions scoring below 70",
+        "Negative: A user with 0 completed attempts gets an empty weakness profile (no crash, no NaN scores)"
+      ],
+      "status": "done",
+      "notes": "System context: This is called by the Coach Agent (US-013) after every scored attempt. Reference AttemptKPIs interface from src/types/attempt.ts for the KPI field names. The existing transcript-analyzer.ts (src/lib/analysis/transcript-analyzer.ts) shows how these KPIs are originally computed. Pure logic over data \u2014 no side effects beyond memory writes.",
+      "size": "L",
+      "updatedAt": "2026-02-12T08:39:10.926352+00:00",
+      "dependsOn": [
+        "US-010"
+      ],
+      "startedAt": "2026-02-12T08:37:20.494840+00:00",
+      "completedAt": "2026-02-12T08:39:10.926529+00:00"
+    },
+    {
+      "id": "US-012",
+      "epic_id": "E02",
+      "phase": 1,
+      "title": "Build memory query API for agent context retrieval",
+      "description": "As a developer, I want a unified query interface so that agents can retrieve all relevant context about a user in a single call.\n\n## Technical Requirements\n\n1. Create `src/lib/memory/query.ts`:\n\n   `getAgentContext(params: { orgId, userId }): Promise<AgentContext>` \u2014 returns:\n   ```\n   { weaknesses, strengths, recentAttempts, trajectory, practicePattern, relevantInsights }\n   ```\n\n   `getRecentAttemptSummaries(orgId, userId, limit?)` \u2014 joins attempts with scenarios for titles, returns simplified data\n\n   `getPracticePattern(orgId, userId)` \u2014 calculates attempt frequency, streak days, recency\n\n2. Each function uses admin client (agents don't have user sessions)\n3. Efficient queries: single queries with joins, no N+1\n\n## Files to Create\n- `src/lib/memory/query.ts`\n\n## Files to Modify\n- `src/lib/memory/index.ts` \u2014 add exports",
+      "acceptanceCriteria": [
+        "getAgentContext() returns comprehensive user context including weaknesses, strengths, attempts, trajectory, pattern",
+        "getRecentAttemptSummaries() joins scenario_attempts with scenarios for titles",
+        "getPracticePattern() calculates avgAttemptsPerWeek, lastAttemptDaysAgo, streakDays",
+        "All queries org-scoped using createAdminClient()",
+        "No N+1 queries \u2014 use JOINs and aggregates",
+        "Well-typed interfaces with no any",
+        "pnpm build and pnpm typecheck pass",
+        "Example: getAgentContext({ orgId, userId }) returns { weaknesses: [{key: 'objection_handling', score: 45}], strengths: [{key: 'clarity', score: 88}], recentAttempts: [...], trajectory: 'improving' }",
+        "Negative: A user with no attempts returns empty arrays for weaknesses, strengths, and recentAttempts with trajectory 'new'"
+      ],
+      "status": "done",
+      "notes": "System context: This is the primary input to all agent decision-making. Called by Coach Agent (US-013, US-014, US-015, US-018), Manager Agent (US-025, US-026), and Coach Chat API (US-031). Returns data from user_memory table + scenario_attempts + scenarios tables.",
+      "size": "M",
+      "updatedAt": "2026-02-12T09:18:26.400344+00:00",
+      "dependsOn": [
+        "US-010",
+        "US-011"
+      ],
+      "startedAt": "2026-02-12T09:17:23.796327+00:00",
+      "completedAt": "2026-02-12T09:18:26.400495+00:00"
+    },
+    {
+      "id": "US-013",
+      "epic_id": "E02",
+      "phase": 1,
+      "title": "Embed transcript segments after scoring for semantic memory",
+      "description": "As a developer, I want significant transcript segments embedded into the vector store after each scored attempt so that agents can semantically search past performance.\n\n## Technical Requirements\n\n1. Create `src/lib/inngest/functions/embed-attempt-memory.ts`:\n   - Inngest function subscribed to `attempt.scored` event\n   - Steps:\n     a. Fetch full attempt with transcript_json from Supabase\n     b. Extract significant segments: unanswered questions, fumbles, strong responses\n     c. For each, call storeEmbedding() with content_type 'transcript_segment', source_id attemptId\n     d. If feedback text exists, embed summary as 'coaching_insight'\n   - Limit to 10 embeddings per attempt (cost control)\n   - Use Inngest step functions for retryability\n\n2. Register in Inngest functions index\n\n## Files to Create\n- `src/lib/inngest/functions/embed-attempt-memory.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "Inngest function subscribes to attempt.scored event",
+        "Extracts significant transcript segments (fumbles, unanswered questions, strong moments)",
+        "Stores embeddings via storeEmbedding() with proper content_type and metadata",
+        "Limits to 10 embeddings per attempt",
+        "Uses Inngest step.run() for retryability",
+        "Function registered in Inngest serve route",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After attempt.scored fires, 3 transcript segments (fumble, unanswered question, strong close) are embedded with source_id referencing the attempt",
+        "Negative: Attempts with no transcript_json are skipped gracefully (no crash, activity logged as skipped)"
+      ],
+      "status": "done",
+      "notes": "System context: This builds the semantic memory layer that enables the Coach Agent to reference specific past moments (e.g. 'Last time you struggled with price objections at 2:30 into the call'). Consumes the attempt.scored event emitted by US-004. Uses storeEmbedding() from US-009.",
+      "size": "M",
+      "startedAt": "2026-02-12T09:29:51.557304+00:00",
+      "completedAt": "2026-02-12T09:35:26.580238+00:00",
+      "updatedAt": "2026-02-12T09:35:26.579921+00:00",
+      "dependsOn": [
+        "US-009",
+        "US-004"
+      ]
+    },
+    {
+      "id": "US-014",
+      "epic_id": "E03",
+      "phase": 2,
+      "title": "Build Coach Agent core: event subscriptions and weakness profile updates",
+      "description": "As a developer, I want the Coach Agent to subscribe to attempt events and automatically update weakness profiles so that every scored attempt improves the agent's understanding of the trainee.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/index.ts` \u2014 Agent definition:\n   - id: 'coach-agent', subscribesTo: ['attempt.scored', 'user.inactive']\n\n2. Create `src/lib/agents/coach/on-attempt-scored.ts`:\n   - Inngest function triggered by `attempt.scored`\n   - step.run('update-weakness-profile') \u2192 generateWeaknessProfile(orgId, userId)\n   - step.run('log-activity') \u2192 logAgentActivity()\n   - step.run('emit-weakness-updated') \u2192 emit coach.weakness.updated event\n\n3. Create `src/lib/agents/coach/on-user-inactive.ts`:\n   - Inngest function triggered by `user.inactive`\n   - Fetch weakness profile via getAgentContext()\n   - Emit coach.recommendation.ready with type 'practice_reminder'\n\n4. Register Coach Agent in registry\n\n## Files to Create\n- `src/lib/agents/coach/index.ts`\n- `src/lib/agents/coach/on-attempt-scored.ts`\n- `src/lib/agents/coach/on-user-inactive.ts`\n\n## Files to Modify\n- `src/lib/agents/registry.ts` \u2014 register coach agent\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "Coach Agent defined with proper AgentDefinition (id, name, subscribesTo, inngestFunctions)",
+        "on-attempt-scored triggers on attempt.scored event",
+        "Weakness profile regenerated after each scored attempt via generateWeaknessProfile()",
+        "Agent activity logged for every action via logAgentActivity()",
+        "coach.weakness.updated event emitted with updated profile data",
+        "on-user-inactive triggers on user.inactive event with personalized practice reminder",
+        "Coach Agent registered in agent registry",
+        "All Inngest functions use step.run() for retryability",
+        "pnpm build and pnpm typecheck pass",
+        "Example: When attempt.scored fires for user_123, the Coach Agent: (1) regenerates weakness profile, (2) logs activity, (3) emits coach.weakness.updated with new profile data",
+        "Negative: If generateWeaknessProfile() fails, the error is logged but does not prevent other step functions from executing"
+      ],
+      "status": "done",
+      "notes": "System context: This is the CORE agent that makes the product agent-first. It reacts autonomously to every scored attempt without any human trigger. Uses generateWeaknessProfile() from US-010a, logAgentActivity() from US-007, getAgentContext() from US-011. The emitted events feed US-014 (gap analysis), US-022 (notifications), and US-032 (activity feed).",
+      "size": "L",
+      "updatedAt": "2026-02-12T10:28:44.532504+00:00",
+      "dependsOn": [
+        "US-006",
+        "US-007",
+        "US-011",
+        "US-012"
+      ],
+      "startedAt": "2026-02-12T10:22:30.046797+00:00",
+      "completedAt": "2026-02-12T10:28:44.532617+00:00"
+    },
+    {
+      "id": "US-015",
+      "epic_id": "E03",
+      "phase": 2,
+      "title": "Coach Agent skill gap analysis and scenario recommendation engine",
+      "description": "As a developer, I want the Coach Agent to analyze skill gaps and recommend the best next scenario so that trainees always know what to practice next.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/skill-gap-analyzer.ts`:\n   - `analyzeSkillGaps(context: AgentContext): SkillGapAnalysis`\n   - Identifies top 3 gaps (lowest scoring weaknesses NOT improving)\n   - Priority: declining > stable > new > improving\n   - Returns: topGaps[], focusArea, reasoning\n\n2. Create `src/lib/agents/coach/scenario-recommender.ts`:\n   - `recommendNextScenario(orgId, gaps): Promise<ScenarioRecommendation>`\n   - Queries available scenarios, scores against gaps\n   - Matching: objection_handling gap \u2192 scenarios with rubric.objections_handled; question_handling \u2192 rubric.open_questions; confidence gap \u2192 easy difficulty; etc.\n   - Avoids scenarios done 3+ times in last 7 days\n   - Returns: scenarioId, scenarioTitle, reason, difficulty\n\n3. Wire into on-attempt-scored: after weakness update, run gap analysis \u2192 recommend \u2192 emit coach.recommendation.ready with type 'next_scenario'\n\n## Files to Create\n- `src/lib/agents/coach/skill-gap-analyzer.ts`\n- `src/lib/agents/coach/scenario-recommender.ts`\n\n## Files to Modify\n- `src/lib/agents/coach/on-attempt-scored.ts`",
+      "acceptanceCriteria": [
+        "analyzeSkillGaps() identifies top 3 gaps prioritized by trend (declining > stable > new > improving)",
+        "recommendNextScenario() queries org scenarios and matches to gaps using rubric configuration",
+        "Recommendation avoids recently-practiced scenarios (3+ times in 7 days)",
+        "Matching logic considers rubric fields (objections_handled, open_questions, etc.) from ScenarioRubric type",
+        "coach.recommendation.ready event emitted with recommendation data",
+        "All functions well-typed, no any",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A user with objection_handling at 35 (declining) and clarity at 42 (stable) gets objection_handling as gap #1 since declining > stable priority",
+        "Negative: If no scenarios match any gaps (empty org scenario library), the recommendation returns null with a reason explaining why"
+      ],
+      "status": "open",
+      "notes": "System context: This adds intelligence to the Coach Agent. The ScenarioRubric type (src/types/scenario.ts) has fields: goal_achievement, required_phrases, open_questions, objections_handled, conversation_quality \u2014 use these to match scenarios to skill gaps. Query the scenarios table filtered by org_id and status='active'. The recommendation event is consumed by US-022 (notification dispatcher).",
+      "size": "L",
+      "updatedAt": "2026-02-15T05:24:31.288193+00:00",
+      "dependsOn": [
+        "US-014"
+      ],
+      "startedAt": null,
+      "completedAt": null
+    },
+    {
+      "id": "US-016",
+      "epic_id": "E03",
+      "phase": 2,
+      "title": "Coach Agent adaptive difficulty calibration",
+      "description": "As a developer, I want the Coach Agent to adapt scenario difficulty based on the trainee's improvement curve so that practice is always at the optimal challenge level.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/difficulty-calibrator.ts`:\n   - `calibrateDifficulty(context, recommendation): DifficultyCalibration`\n   - Scores > 80 on last 2 similar attempts \u2192 increase difficulty\n   - Scores < 50 on last 2 \u2192 decrease difficulty\n   - Improving trend \u2192 maintain or slightly increase\n   - Declining trend \u2192 decrease to rebuild confidence\n   - Returns: suggestedDifficulty, temperatureAdjustment, reasoning, vapiOverrides\n\n2. Wire into recommendation flow in on-attempt-scored\n\n## Files to Create\n- `src/lib/agents/coach/difficulty-calibrator.ts`\n\n## Files to Modify\n- `src/lib/agents/coach/on-attempt-scored.ts`",
+      "acceptanceCriteria": [
+        "calibrateDifficulty() analyzes score trajectory for the scenario type",
+        "Difficulty increases when user consistently scores > 80 (last 2 similar attempts)",
+        "Difficulty decreases when user consistently scores < 50",
+        "Declining trends trigger difficulty reduction to rebuild confidence",
+        "Returns VapiOverrides-compatible temperature adjustments (ref src/lib/vapi-agents.ts DIFFICULTY_TEMPERATURES)",
+        "Calibration included in recommendation event payload",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A user scoring 85 and 88 on their last 2 objection_handling attempts triggers difficulty increase from 'medium' to 'hard' (temperature 0.7 \u2192 0.85)",
+        "Negative: A user with only 1 attempt for a scenario type gets no difficulty adjustment (insufficient data)"
+      ],
+      "status": "open",
+      "notes": "System context: Reference DIFFICULTY_TEMPERATURES in src/lib/vapi-agents.ts (easy: 0.6, medium: 0.7, hard: 0.85) and VapiOverrides type in src/types/scenario.ts. The calibration output can override temperature and difficulty when the user starts the recommended scenario.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-015"
+      ]
+    },
+    {
+      "id": "US-017",
+      "epic_id": "E03",
+      "phase": 2,
+      "title": "Coach Agent spaced repetition scheduler",
+      "description": "As a developer, I want spaced repetition logic so that mastered skills are periodically reviewed to prevent regression.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/spaced-repetition.ts`:\n   - `calculateReviewSchedule(context: AgentContext): ReviewSchedule[]`\n   - Intervals: 1 day, 3 days, 7 days, 14 days, 30 days\n   - Tracks review stage in user_memory (memory_type='practice_pattern', key='review_schedule_{skill}')\n   - `processReviewResults(orgId, userId, skill, passed: boolean)` \u2014 advance or reset interval\n\n2. Create Inngest cron `src/lib/inngest/functions/check-review-schedule.ts`:\n   - Daily at 10am UTC, emit coach.recommendation.ready with type 'review_drill' for due reviews\n\n## Files to Create\n- `src/lib/agents/coach/spaced-repetition.ts`\n- `src/lib/inngest/functions/check-review-schedule.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`\n- `src/lib/agents/coach/on-attempt-scored.ts` \u2014 call processReviewResults if this was a review drill",
+      "acceptanceCriteria": [
+        "Spaced repetition uses 1, 3, 7, 14, 30 day intervals",
+        "calculateReviewSchedule() identifies skills due for review",
+        "processReviewResults() advances interval on pass, resets to 1 day on fail",
+        "Review state persisted in user_memory table via upsertMemory()",
+        "Daily cron checks for due reviews and emits recommendations",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After passing a review drill for 'objection_handling' at the 3-day interval, the next review is scheduled for 7 days later",
+        "Negative: Failing a review drill resets the interval to 1 day, regardless of the previous interval stage"
+      ],
+      "status": "open",
+      "notes": "System context: Spaced repetition prevents skill regression after improvement. Stores state in user_memory with memory_type='practice_pattern'. The review recommendation is dispatched as a notification via US-022.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-015",
+        "US-010"
+      ]
+    },
+    {
+      "id": "US-018",
+      "epic_id": "E03",
+      "phase": 2,
+      "title": "Coach Agent pre-call briefing API",
+      "description": "As a trainee, I want a personalized pre-call briefing before starting a practice scenario so that I know exactly what to focus on.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/pre-call-briefing.ts`:\n   - `generatePreCallBriefing(orgId, userId, scenarioId): Promise<PreCallBriefing>`\n   - Returns: focusAreas[], scenarioTips[], previousAttempts[], motivationalNote, estimatedDifficulty\n   - Focus areas from weakness profile (deterministic)\n   - Scenario tips from rubric config (deterministic)\n   - Motivational note from Gemini Flash (only LLM call)\n   - Limit: 3 focus areas, 3 tips, 3 previous attempts\n\n2. Create `src/app/api/coach/briefing/route.ts`:\n   - GET handler, scenarioId from query param\n   - Requires auth via getCurrentUser()\n\n## Files to Create\n- `src/lib/agents/coach/pre-call-briefing.ts`\n- `src/app/api/coach/briefing/route.ts`",
+      "acceptanceCriteria": [
+        "generatePreCallBriefing() returns personalized briefing with focus areas from weakness profile",
+        "Previous attempt history for this specific scenario included if available",
+        "Scenario tips derived from rubric configuration (ScenarioRubric type)",
+        "Motivational note generated via Gemini Flash (google('gemini-2.0-flash-exp'))",
+        "API route requires authentication via getCurrentUser()",
+        "Well-typed response, no any",
+        "pnpm build and pnpm typecheck pass",
+        "Example: For a user weak in objection_handling, the pre-call briefing for a scenario with objections_handled rubric returns focusAreas: ['Listen for price objections', 'Use feel-felt-found technique']",
+        "Negative: If the user has never attempted this scenario, previousAttempts is an empty array (not null or undefined)"
+      ],
+      "status": "done",
+      "notes": "System context: Called by the call start page (src/app/(authenticated)/play/[scenarioId]/page.tsx) before the user initiates a Vapi call. Uses getAgentContext() from US-011 for weakness data. Uses google('gemini-2.0-flash-exp') model from @ai-sdk/google (already in dependencies) for motivational note.",
+      "size": "M",
+      "startedAt": "2026-02-12T11:33:40.946110+00:00",
+      "completedAt": "2026-02-12T11:40:18.039562+00:00",
+      "updatedAt": "2026-02-12T11:40:18.039415+00:00",
+      "dependsOn": [
+        "US-012",
+        "US-014"
+      ]
+    },
+    {
+      "id": "US-019",
+      "epic_id": "E03",
+      "phase": 2,
+      "title": "Coach Agent daily digest for trainees",
+      "description": "As a trainee, I want a daily progress digest so that I can see my performance summary and next recommended actions.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/daily-digest.ts`:\n   - `generateTraineeDigest(orgId, userId): Promise<TraineeDigest>`\n   - Returns: summary (attempts, avgScore, trend, best/worst), topImprovement, topDecline, nextActions, streak\n\n2. Create Inngest cron `src/lib/inngest/functions/send-daily-digest.ts`:\n   - Daily at 8am UTC\n   - For each org, find active trainees (attempted in last 14 days)\n   - Generate digest per trainee, emit coach.recommendation.ready with type 'daily_digest'\n\n## Files to Create\n- `src/lib/agents/coach/daily-digest.ts`\n- `src/lib/inngest/functions/send-daily-digest.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "generateTraineeDigest() produces accurate summary from last 24h of data",
+        "Handles users with 0 attempts in period gracefully",
+        "Score trend calculated correctly (comparing to previous period)",
+        "Daily cron runs at 8am UTC",
+        "Only processes active trainees (attempted in last 14 days)",
+        "Emits coach.recommendation.ready per trainee",
+        "Agent activity logged for each digest",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A trainee with 3 attempts yesterday (avg score 78, up from 72 prior period) gets digest: { trend: 'improving', avgScore: 78, topImprovement: 'objection_handling +6' }",
+        "Negative: Users with 0 attempts in the last 24 hours get a digest with a 'no recent activity' message, not an empty or error response"
+      ],
+      "status": "done",
+      "notes": "System context: The digest recommendation event is consumed by the notification dispatcher (US-022). Uses getAgentContext() and getRecentAttemptSummaries() from US-011.",
+      "size": "M",
+      "updatedAt": "2026-02-12T12:04:04.967822+00:00",
+      "dependsOn": [
+        "US-014",
+        "US-012"
+      ],
+      "startedAt": "2026-02-12T12:02:40.606817+00:00",
+      "completedAt": "2026-02-12T12:04:04.967969+00:00"
+    },
+    {
+      "id": "US-020",
+      "epic_id": "E04",
+      "phase": 2,
+      "title": "Create notification tables migration (preferences and notifications)",
+      "description": "As a developer, I want notification database tables so that agents can store and retrieve notifications and user preferences.\n\n## Technical Requirements\n\n1. Supabase migration for `notification_preferences` table:\n   - Columns: id, org_id, user_id, channel_email (bool), channel_push (bool), channel_in_app (bool), quiet_hours_start (time), quiet_hours_end (time), quiet_hours_timezone (text), digest_frequency (text), coach_nudges (bool)\n   - Unique on (org_id, user_id), RLS: org_id match\n\n2. Supabase migration for `notifications` table:\n   - Columns: id, org_id, user_id, type, title, body, action_url, agent_id, read (bool), channel_sent (text[]), metadata (jsonb), created_at\n   - RLS: org_id match\n   - Index: (org_id, user_id, read, created_at DESC)\n\n## Files to Create\n- `supabase/migrations/YYYYMMDD_create_notification_tables.sql`",
+      "acceptanceCriteria": [
+        "notification_preferences table exists with channel toggles and quiet hours columns",
+        "notifications table exists with type, read status, channel tracking",
+        "Unique constraint on (org_id, user_id) for notification_preferences",
+        "RLS policies on both tables restrict to org_id match",
+        "Indexes on notifications (org_id, user_id, read, created_at DESC)",
+        "Migration runs cleanly on empty database",
+        "Example: After migration, notification_preferences table allows inserting { channel_email: true, channel_push: false, channel_in_app: true, quiet_hours_start: '22:00', quiet_hours_end: '08:00' }",
+        "Negative: Attempting to insert a duplicate (org_id, user_id) in notification_preferences hits the unique constraint and fails cleanly"
+      ],
+      "status": "done",
+      "notes": "System context: These tables support the notification dispatcher (US-021), notification UI (US-022), and preferences (US-023). Separated from dispatcher logic to keep migration atomic.",
+      "size": "L",
+      "updatedAt": "2026-02-12T12:45:41.519997+00:00",
+      "dependsOn": [],
+      "startedAt": "2026-02-12T12:37:43.504262+00:00",
+      "completedAt": "2026-02-12T12:45:41.520268+00:00"
+    },
+    {
+      "id": "US-021",
+      "epic_id": "E04",
+      "phase": 2,
+      "title": "Build notification dispatcher with email templates",
+      "description": "As a developer, I want a centralized notification dispatcher so that agents can send notifications via email and in-app channels with preference awareness.\n\n## Technical Requirements\n\n1. Create `src/lib/notifications/dispatcher.ts`:\n   - `sendNotification(params)` \u2014 checks preferences (channels, quiet hours), inserts into notifications table, sends email via Resend if enabled\n\n2. Create `src/lib/notifications/email-templates.ts`:\n   - React Email templates for coach recommendations and daily digests\n   - Use Resend (already in dependencies)\n\n3. Create `src/lib/notifications/index.ts` \u2014 barrel export\n\n## Files to Create\n- `src/lib/notifications/dispatcher.ts`\n- `src/lib/notifications/email-templates.ts`\n- `src/lib/notifications/index.ts`",
+      "acceptanceCriteria": [
+        "sendNotification() checks user preferences before sending to each channel",
+        "Quiet hours respected (no email during quiet hours, in-app always recorded)",
+        "Email sends via Resend with React Email templates",
+        "In-app notification always created regardless of channel preferences",
+        "All notification types have corresponding email templates",
+        "pnpm build and pnpm typecheck pass",
+        "Example: sendNotification({ userId, type: 'coach_recommendation', title: 'Practice time!' }) checks preferences, creates in-app notification, and sends email via Resend if email channel is enabled",
+        "Negative: If quiet hours are active (e.g. 10pm-8am user timezone), email is suppressed but in-app notification is still created"
+      ],
+      "status": "done",
+      "notes": "System context: Depends on notification tables from US-020. Used by US-024 (coach dispatch), US-030 (manager alerts). Resend is already configured (see package.json).",
+      "size": "M",
+      "updatedAt": "2026-02-12T13:18:22.218728+00:00",
+      "dependsOn": [
+        "US-020"
+      ],
+      "startedAt": "2026-02-12T13:16:26.877798+00:00",
+      "completedAt": "2026-02-12T13:18:22.218853+00:00"
+    },
+    {
+      "id": "US-022",
+      "epic_id": "E04",
+      "phase": 2,
+      "title": "In-app notification bell and notification center UI",
+      "description": "As a user, I want a notification bell in the app header so that I can see and manage agent notifications without leaving the app.\n\n## Technical Requirements\n\n1. Create `src/actions/notifications.ts`:\n   - `getNotifications(limit?, offset?)`, `getUnreadCount()`, `markAsRead(id)`, `markAllAsRead()` \u2014 all use withOrgGuard\n\n2. Create `src/components/notifications/notification-bell.tsx`:\n   - Bell icon (lucide-react Bell) with red unread count badge\n   - Polls unread count every 30 seconds\n\n3. Create `src/components/notifications/notification-center.tsx`:\n   - ShadCN Popover dropdown listing notifications\n   - Each: icon by type, title, body preview, relative time, read/unread indicator\n   - Click: marks read + navigates to action_url\n   - \"Mark all as read\" button, empty state\n\n4. Add NotificationBell to `src/app/(authenticated)/layout.tsx` header\n\n## Files to Create\n- `src/actions/notifications.ts`\n- `src/components/notifications/notification-bell.tsx`\n- `src/components/notifications/notification-center.tsx`\n- `src/components/notifications/index.ts`\n\n## Files to Modify\n- `src/app/(authenticated)/layout.tsx` \u2014 add NotificationBell to header",
+      "acceptanceCriteria": [
+        "Server actions for notifications use withOrgGuard for proper auth",
+        "Bell icon appears in authenticated app header",
+        "Unread count badge shows correct count and updates every 30 seconds",
+        "Notification center dropdown lists notifications with proper formatting",
+        "Clicking notification marks as read and navigates to action_url",
+        "Mark all as read works",
+        "Empty state handled gracefully",
+        "Uses ShadCN Popover, lucide-react icons, matches existing app style",
+        "Verify in browser",
+        "pnpm build and pnpm typecheck pass",
+        "Example: With 3 unread notifications, the bell icon shows a red badge with '3'; clicking opens a popover listing all 3 with titles, timestamps, and read/unread indicators",
+        "Negative: With 0 notifications, the popover shows an empty state message like 'No notifications yet' instead of a blank dropdown"
+      ],
+      "status": "done",
+      "notes": "System context: Renders in the existing authenticated layout (src/app/(authenticated)/layout.tsx). Uses ShadCN Popover from @/components/ui/popover. The notification actions should follow patterns in existing actions like src/actions/scenarios.ts (withOrgGuard pattern).",
+      "size": "L",
+      "updatedAt": "2026-02-12T13:58:54.153549+00:00",
+      "dependsOn": [
+        "US-021"
+      ],
+      "startedAt": "2026-02-12T13:48:05.828995+00:00",
+      "completedAt": "2026-02-12T13:58:54.153673+00:00"
+    },
+    {
+      "id": "US-023",
+      "epic_id": "E04",
+      "phase": 2,
+      "title": "Notification preferences settings page",
+      "description": "As a user, I want to control my notification preferences so that I receive agent communications on my preferred channels and schedule.\n\n## Technical Requirements\n\n1. Add to `src/actions/notifications.ts`:\n   - `getNotificationPreferences()`, `updateNotificationPreferences(prefs)` with Zod validation\n\n2. Create `src/components/notifications/notification-preferences.tsx`:\n   - Toggle switches: Email, Push, In-app notifications\n   - Quiet hours: start time, end time, timezone\n   - Coach nudges: on/off\n   - Digest frequency: daily / weekly / never\n   - Uses react-hook-form + Zod\n\n3. Add to settings preferences page\n\n## Files to Create\n- `src/components/notifications/notification-preferences.tsx`\n\n## Files to Modify\n- `src/actions/notifications.ts`\n- `src/app/(authenticated)/settings/preferences/page.tsx`",
+      "acceptanceCriteria": [
+        "Users can toggle email, push, and in-app notification channels",
+        "Quiet hours configurable with start/end time and timezone",
+        "Coach nudges toggleable",
+        "Digest frequency selectable (daily/weekly/never)",
+        "Preferences persist via Supabase upsert on notification_preferences table",
+        "Form uses Zod validation",
+        "Matches existing settings page style (see src/app/(authenticated)/settings/preferences/)",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Toggling 'Email notifications' off and saving persists the preference; subsequent coach notifications skip email delivery for this user",
+        "Negative: Submitting the form with an invalid timezone value is rejected by Zod validation with a clear error message"
+      ],
+      "status": "done",
+      "notes": "System context: The existing preferences page is at src/app/(authenticated)/settings/preferences/page.tsx with a preferences-client.tsx component. Add notification preferences as a new section in this existing page rather than creating a separate page.",
+      "size": "M",
+      "updatedAt": "2026-02-12T14:30:49.516764+00:00",
+      "dependsOn": [
+        "US-020"
+      ],
+      "startedAt": "2026-02-12T14:27:52.374905+00:00",
+      "completedAt": "2026-02-12T14:30:49.516891+00:00"
+    },
+    {
+      "id": "US-024",
+      "epic_id": "E04",
+      "phase": 2,
+      "title": "Wire Coach Agent recommendations to notification dispatcher",
+      "description": "As a developer, I want coach recommendations to automatically dispatch notifications so that trainees receive proactive coaching nudges.\n\n## Technical Requirements\n\n1. Create `src/lib/inngest/functions/dispatch-coach-notification.ts`:\n   - Subscribes to `coach.recommendation.ready` event\n   - Maps recommendation types to notification content:\n     - next_scenario \u2192 title: 'Your coach recommends...', body: reason, actionUrl: /training/scenarios/{id}\n     - practice_reminder \u2192 title: 'Time to practice!', body: message, actionUrl: /training\n     - review_drill \u2192 title: 'Skill review due', body: skill details, actionUrl: /training/scenarios/{id}\n     - daily_digest \u2192 title: 'Your daily progress', body: summary, actionUrl: /coach\n   - Calls sendNotification() from dispatcher\n   - Logs agent activity\n\n## Files to Create\n- `src/lib/inngest/functions/dispatch-coach-notification.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "Inngest function subscribes to coach.recommendation.ready event",
+        "Maps all 4 recommendation types to proper notification title/body/actionUrl",
+        "Calls sendNotification() from dispatcher",
+        "Action URLs are valid existing app routes",
+        "Agent activity logged for each notification dispatched",
+        "pnpm build and pnpm typecheck pass",
+        "Example: When coach.recommendation.ready fires with type 'next_scenario' and scenarioId 'sc_123', a notification is created with actionUrl '/training/scenarios/sc_123'",
+        "Negative: If the referenced scenario no longer exists (deleted), the notification is still created but actionUrl points to /training with a fallback message"
+      ],
+      "status": "done",
+      "notes": "System context: This connects the Coach Agent's output (recommendations from US-013, US-014, US-016, US-018) to the notification system (US-019). Action URLs should point to existing routes: /training/scenarios/[id] (src/app/(authenticated)/training/scenarios/[scenarioId]/page.tsx), /training (src/app/(authenticated)/training/page.tsx).",
+      "size": "M",
+      "updatedAt": "2026-02-12T14:42:26.580569+00:00",
+      "dependsOn": [
+        "US-021",
+        "US-014"
+      ],
+      "startedAt": "2026-02-12T14:36:15.481426+00:00",
+      "completedAt": "2026-02-12T14:42:26.580695+00:00"
+    },
+    {
+      "id": "US-025",
+      "epic_id": "E05",
+      "phase": 2,
+      "title": "AI scenario generation from weakness profile",
+      "description": "As a developer, I want LLM-powered scenario generation so that the Coach Agent can create targeted practice drills based on a trainee's specific weaknesses.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/scenario-generator.ts`:\n   - `generateTargetedScenario(params: { orgId, userId, targetSkill, context }): Promise<GeneratedScenario>`\n   - Uses google('gemini-2.0-flash-exp') with generateObject() and Zod schema\n   - Prompt includes target skill, current score, recent attempt summaries\n   - Output conforms to existing ScenarioPersona and ScenarioRubric types (src/types/scenario.ts)\n   - Generated rubric specifically targets the weakness\n   - Returns: title, description, persona, ai_prompt, difficulty, rubric, vapi_base_agent, targetSkill, generated: true\n\n2. Create `src/actions/generated-scenarios.ts`:\n   - `createGeneratedScenario(scenario)` \u2014 inserts into scenarios table with status='active' and metadata flag\n   - Uses withOrgGuard\n\n## Files to Create\n- `src/lib/agents/coach/scenario-generator.ts`\n- `src/actions/generated-scenarios.ts`",
+      "acceptanceCriteria": [
+        "generateTargetedScenario() produces valid output matching existing Scenario/ScenarioPersona/ScenarioRubric types",
+        "Generated persona has realistic background, objectives, pain_points",
+        "Generated rubric targets the specific weakness (e.g. objection_handling gap \u2192 objections_handled rubric with relevant types)",
+        "Uses generateObject() from ai package with Zod schema for structured output",
+        "Generated ai_prompt creates a challenging but fair practice scenario",
+        "Server action inserts into scenarios table with generated=true metadata flag",
+        "No any types",
+        "pnpm build and pnpm typecheck pass",
+        "Example: For a user with objection_handling score 38, generateTargetedScenario produces a scenario with persona having pain_points about pricing and rubric with objections_handled targeting price/value objections",
+        "Negative: If Gemini Flash returns an invalid response that doesn't match the Zod schema, the function throws a typed validation error (not a generic error)"
+      ],
+      "status": "open",
+      "notes": "System context: Uses generateObject() pattern from ai package (already in dependencies). The generated output must match ScenarioPersona (role, name, background, personality, objectives, pain_points) and ScenarioRubric (goal_achievement, required_phrases, open_questions, objections_handled, conversation_quality) interfaces from src/types/scenario.ts exactly. Reference src/lib/ai/scoring.ts for how the existing codebase uses the Vercel AI SDK.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-012",
+        "US-015"
+      ]
+    },
+    {
+      "id": "US-026",
+      "epic_id": "E05",
+      "phase": 2,
+      "title": "Auto-assign generated scenarios and track effectiveness",
+      "description": "As a developer, I want generated scenarios auto-queued for trainees and their effectiveness tracked so that the system learns which generated scenarios actually work.\n\n## Technical Requirements\n\n1. Modify `src/lib/agents/coach/on-attempt-scored.ts`:\n   - After gap analysis: if top gap score < 50 AND no suitable existing scenario \u2192 generate targeted scenario, create in DB, include in recommendation\n\n2. Create `src/lib/agents/coach/effectiveness-tracker.ts`:\n   - `trackScenarioEffectiveness(orgId, userId, scenarioId, targetSkill)` \u2014 compares target skill pre/post practice\n   - Stores result in user_memory with memory_type='coaching_note'\n   - If improved 5+ points: log success. If not: flag for different approach\n\n3. In on-attempt-scored: if completed scenario was AI-generated, run effectiveness tracking\n\n## Files to Create\n- `src/lib/agents/coach/effectiveness-tracker.ts`\n\n## Files to Modify\n- `src/lib/agents/coach/on-attempt-scored.ts`",
+      "acceptanceCriteria": [
+        "Coach Agent generates scenarios when gap score < 50 and no suitable existing scenario found",
+        "Generated scenarios created in database and included in recommendations",
+        "Effectiveness tracker compares pre/post skill scores",
+        "Results stored in user_memory as coaching_note",
+        "Only triggers generation for severe gaps (< 50), not minor ones",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After a user completes a generated scenario targeting objection_handling (pre-score 38), and the next attempt scores 48, effectiveness tracker logs 'improvement: +10, target met'",
+        "Negative: If the user's skill score didn't improve (pre: 38, post: 36), the tracker flags 'no_improvement' and does NOT generate another scenario for the same skill immediately"
+      ],
+      "status": "open",
+      "notes": "System context: This closes the feedback loop \u2014 the system generates scenarios, delivers them, and measures whether they actually helped. The effectiveness data informs future generation decisions.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-025",
+        "US-015"
+      ]
+    },
+    {
+      "id": "US-027",
+      "epic_id": "E07",
+      "phase": 3,
+      "title": "Build Manager Intelligence Agent definition and team analyzer",
+      "description": "As a manager, I want an AI agent that continuously monitors team performance so that systemic gaps and at-risk reps are identified automatically.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/manager/index.ts` \u2014 id: 'manager-intelligence', subscribesTo events\n\n2. Create `src/lib/agents/manager/team-analyzer.ts`:\n   - `analyzeTeamPerformance(orgId): Promise<TeamAnalysis>` \u2014 returns teamStats, systemicGaps, atRiskReps, topPerformers, recommendations\n   - Systemic gap: 3+ reps weak in same skill (same weakness_profile key with score < 60)\n   - At-risk: declining scores OR no attempts in 7+ days\n\n3. Register Manager Agent in registry\n\n## Files to Create\n- `src/lib/agents/manager/index.ts`\n- `src/lib/agents/manager/team-analyzer.ts`\n\n## Files to Modify\n- `src/lib/agents/registry.ts` \u2014 register manager agent",
+      "acceptanceCriteria": [
+        "Manager Intelligence Agent defined with proper AgentDefinition (id, name, subscribesTo, inngestFunctions)",
+        "analyzeTeamPerformance() produces comprehensive team analysis from attempt data",
+        "Systemic gaps identified when 3+ reps share same weakness (score < 60)",
+        "At-risk reps identified by declining scores AND/OR low engagement (7+ days inactive)",
+        "Agent registered in registry",
+        "pnpm build and pnpm typecheck pass",
+        "Example: In an org with 5 trainees where 3 have objection_handling score < 60, analyzeTeamPerformance returns systemicGaps: [{ skill: 'objection_handling', affectedCount: 3, avgScore: 48 }]",
+        "Negative: An org with no trainees (only managers) returns empty arrays for all analysis fields, not an error"
+      ],
+      "status": "done",
+      "notes": "System context: Queries users table (role='manager'/'admin') for notification recipients. Uses user_memory weakness profiles. Split from original US-025 \u2014 insight generator and cron are in US-028.",
+      "size": "L",
+      "startedAt": "2026-02-12T14:49:02.189978+00:00",
+      "completedAt": "2026-02-12T14:55:46.952719+00:00",
+      "updatedAt": "2026-02-12T14:55:46.952442+00:00",
+      "dependsOn": [
+        "US-006",
+        "US-007",
+        "US-021"
+      ]
+    },
+    {
+      "id": "US-028",
+      "epic_id": "E07",
+      "phase": 3,
+      "title": "Build insight generator and weekly manager analysis cron",
+      "description": "As a manager, I want weekly proactive insights from the Manager Agent so that I receive team intelligence without checking dashboards.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/manager/insight-generator.ts`:\n   - `generateManagerInsights(analysis): ManagerInsight[]` \u2014 converts analysis to prioritized alerts\n   - Systemic gap (3+ reps) -> high priority\n   - At-risk rep (declining + inactive) -> high priority\n   - Engagement drop (< 50% active) -> medium\n   - Top performer milestone -> low\n\n2. Create Inngest cron `src/lib/inngest/functions/manager-weekly-analysis.ts`:\n   - Weekly Monday 9am UTC, runs analysis per org, sends notifications to managers\n\n## Files to Create\n- `src/lib/agents/manager/insight-generator.ts`\n- `src/lib/inngest/functions/manager-weekly-analysis.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "generateManagerInsights() converts team analysis to prioritized actionable insights",
+        "Insight priorities: systemic_gap=high, at_risk_rep=high, engagement_drop=medium, milestone=low",
+        "Weekly cron runs Monday 9am UTC",
+        "Cron sends notifications to users with role='manager' or 'admin' per org",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Team analysis with 3+ reps weak in same skill generates a high-priority insight: { type: 'systemic_gap', priority: 'high', skill: 'objection_handling', message: '3 reps struggling...' }",
+        "Negative: A top performer milestone (low priority) does not generate a notification if the manager has disabled low-priority alerts"
+      ],
+      "status": "done",
+      "notes": "System context: Depends on team analyzer from US-027. Sends notifications via dispatcher (US-021). Insights feed the Manager Dashboard UI (US-044).",
+      "size": "M",
+      "updatedAt": "2026-02-12T15:40:48.507529+00:00",
+      "dependsOn": [
+        "US-027"
+      ],
+      "startedAt": "2026-02-12T15:31:40.689402+00:00",
+      "completedAt": "2026-02-12T15:40:48.507647+00:00"
+    },
+    {
+      "id": "US-029",
+      "epic_id": "E07",
+      "phase": 3,
+      "title": "Auto-generated 1:1 coaching briefs for managers",
+      "description": "As a manager, I want auto-generated coaching briefs for each team member so that I can have more effective 1:1 meetings.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/manager/coaching-brief.ts`:\n   - `generateCoachingBrief(orgId, managerId, traineeId): Promise<CoachingBrief>`\n   - Returns: performanceSummary, strengthsToReinforce, areasToDiscuss, talkingPoints (LLM via Gemini Flash), recommendedAssignments\n\n2. Create `src/app/api/coach/briefing/manager/route.ts`:\n   - GET, traineeId query param, requires manager/admin role\n\n3. Create `src/actions/coaching-briefs.ts`:\n   - `getCoachingBrief(traineeId)` \u2014 withRoleGuard(['manager', 'admin'])\n   - `getTeamBriefs()` \u2014 briefs for all reports\n\n## Files to Create\n- `src/lib/agents/manager/coaching-brief.ts`\n- `src/app/api/coach/briefing/manager/route.ts`\n- `src/actions/coaching-briefs.ts`",
+      "acceptanceCriteria": [
+        "generateCoachingBrief() produces comprehensive brief with performance vs team comparison",
+        "Talking points generated via Gemini Flash",
+        "Recommended assignments based on weakness profile",
+        "API route and server action require manager or admin role",
+        "pnpm build and pnpm typecheck pass",
+        "Example: generateCoachingBrief for trainee with declining objection_handling returns talkingPoints: ['Ask about specific objections encountered', 'Review feel-felt-found technique'] and recommendedAssignments with objection scenarios",
+        "Negative: A trainee calling the coaching brief API (non-manager role) gets a 403 forbidden response"
+      ],
+      "status": "done",
+      "notes": "System context: Uses getAgentContext() from US-011 for trainee data. Uses withRoleGuard(['manager', 'admin']) from src/lib/auth.ts. Feeds into the Manager Dashboard UI (US-033).",
+      "size": "L",
+      "updatedAt": "2026-02-15T05:12:06.047Z",
+      "dependsOn": [
+        "US-027",
+        "US-012"
+      ],
+      "startedAt": "2026-02-15T05:04:38.272975+00:00",
+      "completedAt": "2026-02-15T05:12:06.047Z"
+    },
+    {
+      "id": "US-030",
+      "epic_id": "E07",
+      "phase": 3,
+      "title": "Real-time manager alerts on critical scoring events",
+      "description": "As a manager, I want immediate alerts when a rep scores critically low or achieves a milestone so that I can intervene or celebrate promptly.\n\n## Technical Requirements\n\n1. Create `src/lib/inngest/functions/manager-alerts.ts`:\n   - Subscribes to `attempt.scored` event\n   - Rules:\n     - Score < 40 \u2192 critical alert to managers\n     - 3+ consecutive declining scores \u2192 trend alert\n     - First attempt score > 90 \u2192 achievement notification\n   - Finds managers in same org, sends via sendNotification()\n   - Respects notification preferences\n\n## Files to Create\n- `src/lib/inngest/functions/manager-alerts.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "Function subscribes to attempt.scored event",
+        "Score < 40 triggers critical alert with trainee name, scenario, and score",
+        "3+ consecutive declining scores triggers trend alert",
+        "First attempt > 90 triggers achievement notification",
+        "Correctly identifies managers in the org by querying users table (role='manager')",
+        "Respects notification preferences",
+        "pnpm build and pnpm typecheck pass",
+        "Example: When attempt.scored fires with score 35, managers in the org receive a critical alert notification: { type: 'critical_score', title: 'Low score alert: John scored 35 on Cold Call Intro' }",
+        "Negative: A score of 41 does NOT trigger a critical alert (threshold is < 40)"
+      ],
+      "status": "done",
+      "notes": "System context: This provides real-time intelligence \u2014 managers know immediately when intervention is needed. Uses sendNotification() from US-019. Query users table for role='manager' in the same org. The attempt.scored event is emitted by US-004.",
+      "size": "M",
+      "updatedAt": "2026-02-15T05:12:06.047Z",
+      "dependsOn": [
+        "US-021",
+        "US-004"
+      ],
+      "startedAt": "2026-02-15T05:12:06.047Z",
+      "completedAt": "2026-02-15T05:12:06.047Z"
+    },
+    {
+      "id": "US-031",
+      "epic_id": "E06",
+      "phase": 3,
+      "title": "Real-time audio ingestion WebSocket endpoint for Live Copilot",
+      "description": "As a developer, I want a WebSocket endpoint that receives live audio streams so that the copilot can process real-time call audio.\n\n## Technical Requirements\n\n1. Create `src/app/api/copilot/stream/route.ts`:\n   - WebSocket upgrade handler for live audio (PCM 16kHz mono)\n   - Authenticates via token in query params\n   - Manages session state in memory\n\n2. Create `src/lib/copilot/types.ts` \u2014 CopilotSession, CopilotMessage types\n\n3. Create `src/lib/copilot/session-manager.ts` \u2014 in-memory session tracking\n\n## Files to Create\n- `src/app/api/copilot/stream/route.ts`\n- `src/lib/copilot/types.ts`\n- `src/lib/copilot/session-manager.ts`\n- `src/lib/copilot/index.ts`",
+      "acceptanceCriteria": [
+        "WebSocket endpoint accepts connections at /api/copilot/stream",
+        "Connection authenticates via token parameter",
+        "Audio chunks received and available for processing pipeline",
+        "Session manager tracks active sessions in memory",
+        "Proper lifecycle handling (open, message, close, error)",
+        "TypeScript types defined for all copilot data structures",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A client connecting to ws://localhost:3000/api/copilot/stream?token=valid_jwt receives a 'connected' message with sessionId",
+        "Negative: A connection attempt with an invalid or expired token is rejected with a 401 WebSocket close code"
+      ],
+      "status": "open",
+      "notes": "System context: This is the transport layer for the Live Call Copilot. Audio flows: browser mic \u2192 WebSocket \u2192 this endpoint \u2192 STT (US-029) \u2192 analyzer (US-030). For Next.js 15 WebSocket support, may need to use a custom server or Edge Runtime.",
+      "size": "L",
+      "updatedAt": "2026-02-12T12:37:42.224501+00:00",
+      "dependsOn": []
+    },
+    {
+      "id": "US-032",
+      "epic_id": "E06",
+      "phase": 3,
+      "title": "Live STT pipeline with Deepgram streaming API",
+      "description": "As a developer, I want real-time speech-to-text with < 2s latency so that the copilot can process live conversation.\n\n## Technical Requirements\n\n1. Create `src/lib/copilot/live-stt.ts`:\n   - `createLiveTranscriber(sessionId, onTranscript)` \u2014 Deepgram streaming connection\n   - Forwards audio chunks, receives interim and final transcripts\n   - Speaker diarization for user vs customer\n   - Handles reconnection\n\n2. Install @deepgram/sdk if needed\n3. Wire into copilot stream route\n\n## Files to Create\n- `src/lib/copilot/live-stt.ts`\n\n## Files to Modify\n- `src/app/api/copilot/stream/route.ts`",
+      "acceptanceCriteria": [
+        "Audio chunks forwarded to Deepgram streaming API",
+        "Interim and final transcripts received with < 2s latency",
+        "Speaker diarization distinguishes user from customer",
+        "Transcripts sent back through WebSocket to client",
+        "Deepgram connection handles reconnection gracefully",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Sending 16kHz PCM audio chunks through the WebSocket results in interim transcripts within 500ms and final transcripts with speaker labels (user/customer) within 2s",
+        "Negative: If Deepgram connection drops, the system reconnects within 3s and resumes transcription without losing the session"
+      ],
+      "status": "open",
+      "notes": "System context: Deepgram is already used by Vapi for STT. DEEPGRAM_API_KEY should be available in env. The live transcripts feed into the analyzer (US-030) and coaching engine.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-031"
+      ]
+    },
+    {
+      "id": "US-033",
+      "epic_id": "E06",
+      "phase": 3,
+      "title": "Live KPI analyzer, objection detector, and coaching engine",
+      "description": "As a developer, I want real-time KPI calculation, objection detection, and rule-based coaching suggestions so that the copilot provides instant guidance during calls.\n\n## Technical Requirements\n\n1. Create `src/lib/copilot/live-analyzer.ts` \u2014 running KPI state (talk ratio, fillers, pace, questions), sends updates every 5s\n\n2. Create `src/lib/copilot/objection-detector.ts` \u2014 pattern matching for price, timing, competitor, authority, need objections\n\n3. Create `src/lib/copilot/coaching-engine.ts` \u2014 rule-based suggestions (no LLM for latency):\n   - Talk ratio > 70% \u2192 \"Let the customer talk more\"\n   - Filler words > 5/min \u2192 \"Slow down\"\n   - No questions in 2+ min \u2192 \"Ask a discovery question\"\n   - Objection detected \u2192 surface rebuttal\n   - Dead air > 5s \u2192 \"Check in with customer\"\n\n4. Wire into copilot stream\n\n## Files to Create\n- `src/lib/copilot/live-analyzer.ts`\n- `src/lib/copilot/objection-detector.ts`\n- `src/lib/copilot/coaching-engine.ts`\n\n## Files to Modify\n- `src/app/api/copilot/stream/route.ts`",
+      "acceptanceCriteria": [
+        "Live KPIs (talk ratio, fillers, pace, questions) calculated and sent to client every 5 seconds",
+        "Objection detector identifies 5+ objection patterns (price, timing, competitor, authority, need)",
+        "Coaching engine generates rule-based suggestions with < 100ms latency (no LLM calls)",
+        "Suggestions triggered by KPI thresholds and objection detection",
+        "All outputs sent through WebSocket to client as typed messages",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After 2 minutes of conversation with 80% talk ratio, the coaching engine sends suggestion: { type: 'talk_ratio', message: 'Let the customer talk more \u2014 you\\'re at 80%', severity: 'warning' }",
+        "Negative: If no KPI thresholds are breached and no objections detected, no coaching suggestions are sent (silence is fine)"
+      ],
+      "status": "open",
+      "notes": "System context: Reference the existing deterministic analysis patterns in src/lib/analysis/transcript-analyzer.ts (filler detection, question detection, fumble detection). The copilot analysis is a real-time version of the same logic, running on a streaming transcript instead of a complete one. No LLM calls in this hot path \u2014 deterministic rules only.",
+      "size": "XL",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-032"
+      ]
+    },
+    {
+      "id": "US-034",
+      "epic_id": "E06",
+      "phase": 3,
+      "title": "Copilot floating overlay UI component",
+      "description": "As a sales rep, I want a floating overlay showing live KPIs and coaching suggestions so that I get real-time guidance during calls.\n\n## Technical Requirements\n\n1. Create `src/components/copilot/copilot-overlay.tsx` \u2014 floating, draggable panel with KPI strip, coaching suggestions stack, live transcript\n\n2. Create `src/components/copilot/kpi-strip.tsx` \u2014 compact horizontal KPIs with color coding (green/yellow/red)\n\n3. Create `src/components/copilot/suggestion-card.tsx` \u2014 animated notification cards, auto-dismiss after 10s\n\n4. Create `src/hooks/useCopilotStream.ts` \u2014 WebSocket hook managing mic capture, KPI/suggestion/transcript state\n\n## Files to Create\n- `src/components/copilot/copilot-overlay.tsx`\n- `src/components/copilot/kpi-strip.tsx`\n- `src/components/copilot/suggestion-card.tsx`\n- `src/hooks/useCopilotStream.ts`\n- `src/components/copilot/index.ts`",
+      "acceptanceCriteria": [
+        "Floating overlay renders on top of page content, draggable",
+        "KPI strip shows live talk ratio, filler count, pace, and duration with color coding",
+        "Coaching suggestions appear as animated cards, auto-dismiss after 10 seconds",
+        "Live transcript scrolls with speaker labels",
+        "Overlay can be minimized, dragged, and closed",
+        "useCopilotStream hook manages WebSocket lifecycle and mic capture",
+        "ShadCN components, matches app design system",
+        "Verify in browser",
+        "pnpm build and pnpm typecheck pass",
+        "Example: The overlay renders floating on top of the call page showing live KPIs (talk ratio 55% in green, 2 fillers in yellow), and when an objection is detected, a coaching card slides in and auto-dismisses after 10s",
+        "Negative: If the WebSocket disconnects, the overlay shows a 'Reconnecting...' state instead of disappearing or showing stale data"
+      ],
+      "status": "open",
+      "notes": "System context: This is a client-only component that connects to the copilot WebSocket (US-028). Uses framer-motion (already in dependencies) for animations. ShadCN Card, Badge, and Sheet components from @/components/ui/*.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-033"
+      ]
+    },
+    {
+      "id": "US-035",
+      "epic_id": "E08",
+      "phase": 4,
+      "title": "Call recording upload, ingestion pipeline, and source table migration",
+      "description": "As a manager, I want to upload real call recordings so that the system can transcribe and prepare them for persona/objection extraction.\n\n## Technical Requirements\n\n1. Supabase migration for `scenario_gen_sources` table:\n   - Columns: id, org_id, file_url, transcript, speakers, status ('uploaded'|'transcribing'|'transcribed'|'extracting'|'complete'|'failed'), uploaded_by, metadata, created_at, updated_at\n   - RLS: org_id match\n\n2. Create `src/actions/recording-upload.ts`:\n   - File upload server action (manager/admin only via withRoleGuard)\n   - Stores to Supabase Storage under org-assets/ bucket\n   - Emits recording.uploaded event\n\n3. Create `src/lib/agents/scenario-gen/recording-ingester.ts`:\n   - Download recording, send to Deepgram batch transcription API, store transcript with speaker diarization\n\n4. Create `src/lib/inngest/functions/ingest-recording.ts`:\n   - Subscribes to recording.uploaded event, runs ingestion pipeline\n\n## Files to Create\n- `supabase/migrations/YYYYMMDD_create_scenario_gen_sources.sql`\n- `src/actions/recording-upload.ts`\n- `src/lib/agents/scenario-gen/recording-ingester.ts`\n- `src/lib/inngest/functions/ingest-recording.ts`\n\n## Files to Modify\n- `src/lib/events/types.ts` \u2014 add recording.uploaded event\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "scenario_gen_sources table migration with status tracking and RLS",
+        "Recording files uploadable by managers via server action (withRoleGuard)",
+        "Files stored in Supabase Storage under org-assets/ bucket",
+        "Deepgram batch API transcribes recordings with speaker diarization",
+        "Ingestion pipeline runs asynchronously via Inngest on recording.uploaded event",
+        "Status transitions tracked: uploaded -> transcribing -> transcribed",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A manager uploads a .wav recording, which triggers ingest-recording Inngest function: downloads file, sends to Deepgram batch API, stores transcript in scenario_gen_sources with status 'transcribed'",
+        "Negative: Uploading a non-audio file (e.g. .pdf) is rejected by the server action with a clear validation error before any processing"
+      ],
+      "status": "open",
+      "notes": "System context: Split from original US-034. Persona and objection extraction are in US-036. Uses DEEPGRAM_API_KEY for batch transcription. Stores in Supabase Storage.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-001",
+        "US-009"
+      ]
+    },
+    {
+      "id": "US-036",
+      "epic_id": "E08",
+      "phase": 4,
+      "title": "Persona and objection extractors from transcribed recordings",
+      "description": "As a developer, I want LLM-based extraction of personas and objections from transcribed recordings so that realistic practice scenarios can be generated from real conversations.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/scenario-gen/persona-extractor.ts`:\n   - `extractPersona(transcript, speakers): Promise<ExtractedPersona>` \u2014 LLM-based persona extraction\n   - Output: role, background, personality traits, objectives, pain_points, communication_style\n\n2. Create `src/lib/agents/scenario-gen/objection-extractor.ts`:\n   - `extractObjections(transcript): Promise<ExtractedObjection[]>` \u2014 identify and categorize objections\n   - Output per objection: type (price/timing/competitor/authority/need), verbatim phrase, context, severity\n\n3. Wire into ingestion pipeline: after transcription completes, run both extractors, update source status to 'complete'\n\n## Files to Create\n- `src/lib/agents/scenario-gen/persona-extractor.ts`\n- `src/lib/agents/scenario-gen/objection-extractor.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/ingest-recording.ts` \u2014 add extraction steps",
+      "acceptanceCriteria": [
+        "Persona extractor identifies customer archetype from transcript via Gemini Flash",
+        "Objection extractor categorizes objections with verbatim phrases and types",
+        "Both extractors use generateObject() with Zod schemas for structured output",
+        "Extraction results stored in scenario_gen_sources metadata",
+        "Source status updated to 'complete' after both extractors finish",
+        "pnpm build and pnpm typecheck pass",
+        "Example: From a transcribed recording, persona extractor identifies: { role: 'CFO', background: 'mid-market SaaS', painPoints: ['budget constraints', 'ROI justification'] } and objection extractor finds: [{ type: 'price', verbatim: 'That\\'s more than we budgeted for this quarter' }]",
+        "Negative: A recording with poor audio quality (mostly unintelligible) produces a persona with low confidence score and is flagged for human review"
+      ],
+      "status": "open",
+      "notes": "System context: Depends on transcribed recordings from US-035. Extracted data feeds into scenario generator (US-025) for creating realistic practice scenarios. Uses google('gemini-2.0-flash-exp') for LLM extraction.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-035"
+      ]
+    },
+    {
+      "id": "US-037",
+      "epic_id": "E09",
+      "phase": 4,
+      "title": "CRM integration tables and HubSpot OAuth client",
+      "description": "As an admin, I want to authenticate with HubSpot via OAuth so that the system can access CRM data for deal outcome tracking.\n\n## Technical Requirements\n\n1. Supabase migration for `crm_integrations` table:\n   - Columns: id, org_id, provider ('hubspot'), access_token (encrypted), refresh_token (encrypted), token_expires_at, scopes, status ('active'|'disconnected'|'error'), last_sync_at, metadata, created_at\n   - RLS: org_id match, Unique on (org_id, provider)\n\n2. Supabase migration for `deal_outcomes` table:\n   - Columns: id, org_id, crm_deal_id, rep_user_id, deal_name, amount, stage, close_date, won (bool), synced_at, metadata, created_at\n   - RLS: org_id match, Index on (org_id, rep_user_id)\n\n3. Create `src/lib/integrations/hubspot/oauth.ts` \u2014 OAuth flow helpers (getAuthUrl, exchangeCode, refreshToken)\n\n4. Create `src/lib/integrations/hubspot/client.ts` \u2014 authenticated API client with auto-refresh\n\n5. Create `src/app/api/integrations/hubspot/callback/route.ts` \u2014 OAuth callback handler\n\n6. Create `src/actions/integrations.ts` \u2014 connect/disconnect actions (admin only via withRoleGuard)\n\n## Files to Create\n- `supabase/migrations/YYYYMMDD_create_crm_tables.sql`\n- `src/lib/integrations/hubspot/oauth.ts`\n- `src/lib/integrations/hubspot/client.ts`\n- `src/app/api/integrations/hubspot/callback/route.ts`\n- `src/actions/integrations.ts`\n- `src/lib/integrations/index.ts`",
+      "acceptanceCriteria": [
+        "HubSpot OAuth flow works end-to-end (authorize -> callback -> tokens stored)",
+        "crm_integrations table stores tokens with RLS on org_id",
+        "deal_outcomes table migration with proper indexes and RLS",
+        "Token refresh works automatically on expiration",
+        "HubSpot client can fetch contacts and deals with authenticated requests",
+        "Connect/disconnect require admin role via withRoleGuard",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Admin clicks 'Connect HubSpot', is redirected to HubSpot OAuth consent screen, approves, and returns to the app with tokens stored in crm_integrations table",
+        "Negative: If the OAuth callback receives an error (user denied access), the app redirects to settings page with a clear error message, not a 500 error"
+      ],
+      "status": "open",
+      "notes": "System context: Split from original US-035. Deal sync cron is in US-038, attribution model is in US-039. Requires HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, HUBSPOT_REDIRECT_URI env vars.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": []
+    },
+    {
+      "id": "US-038",
+      "epic_id": "E09",
+      "phase": 4,
+      "title": "HubSpot deal sync with daily cron",
+      "description": "As a developer, I want automated daily deal syncing from HubSpot so that deal outcomes stay current for attribution analysis.\n\n## Technical Requirements\n\n1. Create `src/lib/integrations/hubspot/deal-sync.ts`:\n   - `syncDeals(orgId): Promise<SyncResult>` \u2014 incremental deal sync\n   - Fetches deals modified since last_sync_at\n   - Matches reps by email (HubSpot contact owner email \u2192 Clerk user email)\n   - Upserts into deal_outcomes table\n\n2. Create `src/lib/inngest/functions/sync-crm-deals.ts`:\n   - Daily cron for connected orgs, runs syncDeals per org\n\n## Files to Create\n- `src/lib/integrations/hubspot/deal-sync.ts`\n- `src/lib/inngest/functions/sync-crm-deals.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "Deal sync fetches from HubSpot and matches reps by email",
+        "Incremental sync only processes deals modified since last_sync_at",
+        "Daily cron syncs deals for all connected orgs",
+        "Sync results logged with count of new/updated/skipped deals",
+        "last_sync_at updated in crm_integrations after successful sync",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Daily cron syncs 50 new deals from HubSpot, matches 30 to existing reps by email, and stores them in deal_outcomes with last_sync_at updated",
+        "Negative: If HubSpot API rate limit is hit, the sync pauses and retries after the rate limit window, logging the delay"
+      ],
+      "status": "open",
+      "notes": "System context: Depends on OAuth client from US-037. Uses Inngest cron for scheduling. Synced data feeds into attribution model (US-039).",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-037"
+      ]
+    },
+    {
+      "id": "US-039",
+      "epic_id": "E09",
+      "phase": 4,
+      "title": "Training-to-deal attribution model",
+      "description": "As a developer, I want an attribution model that correlates training activity with deal outcomes so that ROI can be measured.\n\n## Technical Requirements\n\n1. Create `src/lib/intelligence/attribution.ts`:\n   - `calculateAttribution(orgId): Promise<AttributionResult>` \u2014 org-wide attribution\n   - `calculateRepAttribution(orgId, userId): Promise<RepAttribution>` \u2014 per-rep\n   - Compares deal outcomes before and after training periods per rep\n   - Metrics: training hours vs close rate, score improvement vs deal size, engagement vs win rate\n   - Confidence levels: high (30+ training sessions, 10+ deals), medium (10-29, 5-9), low (< 10, < 5)\n\n## Files to Create\n- `src/lib/intelligence/attribution.ts`",
+      "acceptanceCriteria": [
+        "calculateAttribution() correlates training activity with deal metrics at org level",
+        "calculateRepAttribution() provides per-rep training-to-outcome correlation",
+        "Confidence levels based on data volume (high/medium/low/insufficient_data)",
+        "Handles orgs with no CRM data gracefully (returns insufficient_data)",
+        "No any types, well-typed interfaces",
+        "pnpm build and pnpm typecheck pass",
+        "Example: For a rep who completed 20 training sessions in Q1 and closed 15 deals (up from 10 in Q4), the attribution model returns { trainingCorrelation: 0.72, revenueImpact: '+$50,000', confidence: 'medium' }",
+        "Negative: A rep with fewer than 5 training sessions gets attribution.confidence = 'insufficient_data' instead of a misleading correlation"
+      ],
+      "status": "open",
+      "notes": "System context: Depends on synced deal data from US-038. Used by ROI dashboard (US-040) and auto-generated renewal report (US-050).",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-038"
+      ]
+    },
+    {
+      "id": "US-040",
+      "epic_id": "E09",
+      "phase": 4,
+      "title": "ROI dashboard with training attribution data",
+      "description": "As a manager, I want an ROI dashboard showing the business impact of training so that I can justify the platform investment.\n\n## Technical Requirements\n\n1. Create `src/app/(authenticated)/analytics/roi/page.tsx` \u2014 manager/admin only:\n   - ROI Summary cards, Per-Rep Attribution table, Trend Chart, ROI Calculator\n\n2. Create components: roi-summary-cards.tsx, attribution-table.tsx, roi-chart.tsx\n\n3. Create `src/actions/roi.ts` \u2014 getROIData(), getROISummary() with role guard\n\n## Files to Create\n- `src/app/(authenticated)/analytics/roi/page.tsx`\n- `src/components/analytics/roi-summary-cards.tsx`\n- `src/components/analytics/attribution-table.tsx`\n- `src/components/analytics/roi-chart.tsx`\n- `src/actions/roi.ts`",
+      "acceptanceCriteria": [
+        "ROI page restricted to manager/admin roles",
+        "Summary cards show training hours, score improvement, close rate delta, revenue impact",
+        "Per-rep attribution table sortable with correlation strength indicator",
+        "Trend chart shows training engagement vs close rate over time (recharts dual-axis)",
+        "Handles insufficient data gracefully ('insufficient data' state, not errors)",
+        "ROI calculator projects annual impact from deal size and close rate inputs",
+        "Uses recharts (already in dependencies)",
+        "ShadCN components, matches app design",
+        "Verify in browser",
+        "pnpm build and pnpm typecheck pass",
+        "Example: The ROI summary cards show: { trainingHours: 156, avgScoreImprovement: '+12%', closeRateDelta: '+8%', estimatedRevenueImpact: '$230,000' }",
+        "Negative: An org with no CRM integration connected shows an 'insufficient data' state with a CTA to connect HubSpot, not empty charts"
+      ],
+      "status": "open",
+      "notes": "System context: Data comes from attribution model (US-035). Similar layout to existing analytics page (src/app/(authenticated)/analytics/page.tsx) which already uses recharts. This is the key page for proving platform value to customers during renewals.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-039"
+      ]
+    },
+    {
+      "id": "US-041",
+      "epic_id": "E10",
+      "phase": 5,
+      "title": "Coach chat streaming API route",
+      "description": "As a developer, I want a streaming chat API for the Coach Agent so that trainees can have real-time conversations with their AI coach.\n\n## Technical Requirements\n\n1. Create `src/app/api/coach/chat/route.ts`:\n   - POST handler streaming via streamText() from Vercel AI SDK\n   - System prompt includes user's weakness profile, recent attempts, recommendations via getAgentContext()\n   - Uses google('gemini-2.0-flash-exp') for fast responses\n   - Handles intents: practice recommendations, progress summaries, last call review\n   - Requires auth via getCurrentUser()\n\n## Files to Create\n- `src/app/api/coach/chat/route.ts`",
+      "acceptanceCriteria": [
+        "Chat API streams responses using streamText() from ai package with google('gemini-2.0-flash-exp')",
+        "System prompt includes user's weakness profile and recent performance from getAgentContext()",
+        "Chat handles intents: practice recommendation, progress summary, last call review",
+        "Route requires authentication via getCurrentUser()",
+        "Streaming response follows existing patterns (see src/app/api/calls/analyze/route.ts)",
+        "pnpm build and pnpm typecheck pass",
+        "Example: POST /api/coach/chat with message 'What should I practice?' returns a streaming response referencing the user's weakest skill with a scenario recommendation",
+        "Negative: If getAgentContext returns no weakness data (new user), the coach responds with a welcome message and suggests trying any scenario, not an error"
+      ],
+      "status": "open",
+      "notes": "System context: Split from original US-031. Chat UI is in US-042. Uses getAgentContext() from US-012 for weakness data. Uses google() from @ai-sdk/google.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-018",
+        "US-012"
+      ]
+    },
+    {
+      "id": "US-042",
+      "epic_id": "E10",
+      "phase": 5,
+      "title": "Coach chat UI components and page",
+      "description": "As a trainee, I want a conversational chat interface with my Coach Agent so that I can ask questions, get recommendations, and review my progress naturally.\n\n## Technical Requirements\n\n1. Create `src/components/coach/coach-chat.tsx` \u2014 chat interface with message list, input, streaming display\n2. Create `src/components/coach/coach-message.tsx` \u2014 markdown rendering, embedded action cards\n3. Create `src/components/coach/quick-actions.tsx` \u2014 predefined action chips (\"What should I practice?\", \"Show progress\")\n4. Create `src/app/(authenticated)/coach/page.tsx` \u2014 full-page coach interface\n\n## Files to Create\n- `src/components/coach/coach-chat.tsx`\n- `src/components/coach/coach-message.tsx`\n- `src/components/coach/quick-actions.tsx`\n- `src/app/(authenticated)/coach/page.tsx`\n\n## Files to Modify\n- `src/app/(authenticated)/layout.tsx` \u2014 add Coach link to nav",
+      "acceptanceCriteria": [
+        "Chat UI renders messages with streaming text support using useChat() hook",
+        "Quick action buttons send predefined messages",
+        "Coach messages can embed scenario recommendation action cards",
+        "Responsive for desktop and mobile",
+        "Coach page accessible from app navigation",
+        "ShadCN components, matches app design system",
+        "pnpm build and pnpm typecheck pass",
+        "Example: User sends 'Show my progress' via quick action chip, coach responds with streaming markdown showing score trend, top improvement, and next recommended scenario with an embedded action card",
+        "Negative: If the chat API returns a 500 error, the UI shows a retry button with message 'Coach is temporarily unavailable', not an unhandled error"
+      ],
+      "status": "open",
+      "notes": "System context: Split from original US-031. Depends on chat API from US-041. Uses ShadCN components and matches existing app design.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-041"
+      ]
+    },
+    {
+      "id": "US-043",
+      "epic_id": "E10",
+      "phase": 5,
+      "title": "Agent activity feed and timeline UI",
+      "description": "As a user, I want to see a timeline of all agent actions so that I understand what the AI is doing on my behalf.\n\n## Technical Requirements\n\n1. Create `src/components/agent/activity-feed.tsx` \u2014 vertical timeline from agent_activity_log\n   - Color-coded by agent, grouped by date, expandable details, pagination\n\n2. Create `src/components/agent/activity-item.tsx` \u2014 individual timeline entry\n\n3. Create `src/app/(authenticated)/coach/activity/page.tsx` \u2014 full activity feed page\n\n## Files to Create\n- `src/components/agent/activity-feed.tsx`\n- `src/components/agent/activity-item.tsx`\n- `src/app/(authenticated)/coach/activity/page.tsx`",
+      "acceptanceCriteria": [
+        "Activity feed displays agent_activity_log entries chronologically (newest first)",
+        "Entries color-coded by agent type (coach=blue, manager=green)",
+        "Entries grouped by date with date headers",
+        "Details expandable for full payload inspection",
+        "Pagination implemented",
+        "Uses getAgentActivityForUser() server action from US-007",
+        "ShadCN components, matches app style",
+        "Verify in browser",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Activity feed shows timeline entries like '10:30 AM - Coach Agent updated weakness profile: objection_handling 45 \u2192 52 (improving)' with expandable JSON details",
+        "Negative: A user with no agent activity sees an empty state message 'Your AI coach hasn\\'t taken any actions yet', not a loading spinner"
+      ],
+      "status": "open",
+      "notes": "System context: Data comes from agent_activity_log table via getAgentActivityForUser() server action (US-007). Each entry has agent_id, action, details (jsonb), and created_at. Use ShadCN Card, Collapsible from @/components/ui/*.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-007"
+      ]
+    },
+    {
+      "id": "US-044",
+      "epic_id": "E10",
+      "phase": 5,
+      "title": "Manager agent control panel and team intelligence dashboard",
+      "description": "As a manager, I want an agent-powered team dashboard that shows insights, coaching briefs, and alerts so that I can manage my team with AI assistance.\n\n## Technical Requirements\n\n1. Create `src/app/(authenticated)/team/intelligence/page.tsx` \u2014 manager-only page:\n   - Team Health cards (avg score, active %, trend, top gap)\n   - At-Risk Reps list with action buttons\n   - Recent Insights feed from manager agent\n   - 1:1 Coaching Briefs with expandable content\n\n2. Create `src/components/manager/team-health-cards.tsx`\n3. Create `src/components/manager/at-risk-reps.tsx`\n4. Create `src/components/manager/coaching-brief-card.tsx`\n\n## Files to Create\n- `src/app/(authenticated)/team/intelligence/page.tsx`\n- `src/components/manager/team-health-cards.tsx`\n- `src/components/manager/at-risk-reps.tsx`\n- `src/components/manager/coaching-brief-card.tsx`\n\n## Files to Modify\n- `src/app/(authenticated)/layout.tsx` \u2014 add Intelligence link to manager nav",
+      "acceptanceCriteria": [
+        "Page restricted to manager and admin roles (redirect or 403 for trainees)",
+        "Team health cards display aggregate metrics from team analyzer",
+        "At-risk reps section lists trainees flagged by manager intelligence agent",
+        "Coaching brief cards expandable with full brief content and talking points",
+        "Action buttons for assigning recommended scenarios work",
+        "Responsive layout with ShadCN components",
+        "Verify in browser",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Manager dashboard shows: Team Health (avg score 72, 80% active), At-Risk Reps (John - declining 3 weeks, no attempts 10 days), and expandable coaching briefs for each team member",
+        "Negative: A trainee navigating to /team/intelligence is redirected to /training (role guard), not shown an empty or broken page"
+      ],
+      "status": "open",
+      "notes": "System context: Data comes from team analyzer (US-025), coaching briefs (US-026), and agent activity log (US-007). Page should use requireRole(['manager', 'admin']) pattern from src/lib/auth.ts or role check in the page component. Similar structure to existing analytics page (src/app/(authenticated)/analytics/page.tsx).",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-027",
+        "US-029"
+      ]
+    },
+    {
+      "id": "US-045",
+      "epic_id": "E01",
+      "phase": 1,
+      "title": "Agent health monitoring and error recovery",
+      "description": "As a developer, I want agent health monitoring so that failures are detected, retried, and surfaced for debugging.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/health.ts`:\n   - `getAgentHealth(orgId): Promise<AgentHealthReport>` \u2014 checks each registered agent's recent activity, error rate, last successful run\n   - Health states: 'healthy' (recent success, low errors), 'degraded' (recent errors, still running), 'unhealthy' (failed 1+ hour), 'idle' (no recent activity)\n   - Reads from agent_activity_log table\n\n2. Create `src/lib/agents/error-recovery.ts`:\n   - `configureRetryPolicy(agentId): RetryConfig` \u2014 per-agent retry configuration\n   - Dead letter queue: failed events stored in agent_activity_log with action='dead_letter' for manual review\n\n3. Create `src/actions/agent-health.ts`:\n   - `getAgentHealthReport()` \u2014 withRoleGuard(['admin'])\n\n## Files to Create\n- `src/lib/agents/health.ts`\n- `src/lib/agents/error-recovery.ts`\n- `src/actions/agent-health.ts`",
+      "acceptanceCriteria": [
+        "getAgentHealth() returns health status per registered agent",
+        "Health states correctly classified: healthy/degraded/unhealthy/idle",
+        "Error rate calculated from agent_activity_log entries with error details",
+        "Dead letter entries stored for failed events with full context",
+        "Retry configuration per agent with sensible defaults",
+        "Server action requires admin role",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Agent health dashboard shows: Coach Agent - healthy (last run 2 min ago, 0 errors), Manager Agent - degraded (3 retries in last hour)",
+        "Negative: If an agent function has been failing for 1+ hour, the health status shows 'unhealthy' with the last error message, not 'healthy'"
+      ],
+      "status": "open",
+      "notes": "System context: Reads from agent_activity_log (US-007). Uses agent registry (US-006) to enumerate agents. Health data feeds agent status dashboard (US-052).",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-006",
+        "US-007"
+      ]
+    },
+    {
+      "id": "US-046",
+      "epic_id": "E05",
+      "phase": 2,
+      "title": "Scenario variation engine for diverse practice",
+      "description": "As a trainee, I want practice scenarios that vary in context even when targeting the same skill gap so that I build flexible skills, not scripted responses.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/coach/scenario-variation.ts`:\n   - `generateVariation(params: { orgId, userId, targetSkill, existingScenarioIds }): Promise<GeneratedScenario | null>`\n   - Takes a target skill and IDs of scenarios already practiced\n   - Generates a NEW scenario with: same skill target, different persona (industry, seniority, communication style), different objection framing, different context\n   - Uses generateObject() with Gemini Flash and Zod schema\n   - Returns null if insufficient base scenarios to create meaningful variation\n\n2. Wire into Coach Agent recommendation flow: when recommending review drills, optionally use variation engine\n\n## Files to Create\n- `src/lib/agents/coach/scenario-variation.ts`\n\n## Files to Modify\n- `src/lib/agents/coach/on-attempt-scored.ts`",
+      "acceptanceCriteria": [
+        "generateVariation() produces scenarios with same skill target but different persona and context",
+        "Personas vary across industry, seniority, and communication style dimensions",
+        "Objection framing changes while targeting the same underlying skill",
+        "Uses generateObject() with Zod schema matching existing Scenario types",
+        "Returns null with reason if insufficient base data for meaningful variation",
+        "pnpm build and pnpm typecheck pass",
+        "Example: For a user weak in objection_handling who has practiced 3 price-objection scenarios, the variation engine generates a scenario with the SAME skill target but a different persona (technical buyer vs. CFO) and different objection framing",
+        "Negative: If only 1 scenario exists for a skill gap, variation engine returns null with reason 'insufficient_base_scenarios' instead of generating a near-duplicate"
+      ],
+      "status": "open",
+      "notes": "System context: Extension of scenario generation (US-025). Prevents trainees from memorizing specific scenario scripts. Uses same Gemini Flash + Zod pattern.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-025"
+      ]
+    },
+    {
+      "id": "US-047",
+      "epic_id": "E06",
+      "phase": 3,
+      "title": "Post-call copilot auto-debrief feeding Coach Agent",
+      "description": "As a trainee, I want an automatic debrief generated after each live copilot session so that my coaching data stays current without manual input.\n\n## Technical Requirements\n\n1. Create `src/lib/copilot/auto-debrief.ts`:\n   - `generateDebrief(sessionId): Promise<CopilotDebrief>` \u2014 processes session data after copilot ends\n   - Output: keyMoments, skillsObserved (with estimated scores), coachRecommendation, sessionDuration, kpiSummary\n   - Minimum 30s of transcribed audio required\n\n2. Create `src/lib/inngest/functions/process-copilot-debrief.ts`:\n   - Subscribes to `copilot.session.ended` event\n   - Generates debrief, feeds skill observations into Coach Agent weakness profile via upsertMemory()\n   - Logs activity\n\n## Files to Create\n- `src/lib/copilot/auto-debrief.ts`\n- `src/lib/inngest/functions/process-copilot-debrief.ts`\n\n## Files to Modify\n- `src/lib/events/types.ts` \u2014 add copilot.session.ended event\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "generateDebrief() produces structured debrief from copilot session data",
+        "Skills observed mapped to existing skill dimensions (objection_handling, rapport_building, etc.)",
+        "Debrief results feed into user_memory via upsertMemory()",
+        "Inngest function subscribes to copilot.session.ended event",
+        "Agent activity logged for each debrief",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After a live copilot session ends, the auto-debrief generates: { keyMoments: ['Strong opening', 'Missed pricing objection at 4:12'], skillsObserved: { objection_handling: 55, rapport_building: 82 }, coachRecommendation: 'Practice price negotiation scenarios' }",
+        "Negative: If the copilot session had < 30 seconds of transcribed audio, no debrief is generated (insufficient data)"
+      ],
+      "status": "open",
+      "notes": "System context: Bridges live copilot data (US-033) back into the Coach Agent's memory system (US-010). This ensures live call performance informs future coaching recommendations.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-033",
+        "US-014"
+      ]
+    },
+    {
+      "id": "US-048",
+      "epic_id": "E07",
+      "phase": 3,
+      "title": "Team comparison insights and org benchmarking",
+      "description": "As a manager, I want team-level benchmarks against org-wide averages so that I can identify whether my team's gaps are unique or organization-wide.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/manager/team-benchmarks.ts`:\n   - `generateBenchmarks(orgId, teamId?): Promise<TeamBenchmark>` \u2014 compares team vs org averages per skill dimension\n   - Output: perSkillComparison (team avg vs org avg, delta), trendOverTime, relativeRank\n   - Requires 2+ teams in org to be meaningful\n\n2. Create `src/actions/team-benchmarks.ts`:\n   - `getTeamBenchmarks(teamId?)` \u2014 withRoleGuard(['manager', 'admin'])\n\n## Files to Create\n- `src/lib/agents/manager/team-benchmarks.ts`\n- `src/actions/team-benchmarks.ts`",
+      "acceptanceCriteria": [
+        "generateBenchmarks() compares team skill averages against org-wide averages",
+        "Per-skill delta calculated (team avg - org avg) with direction indicator",
+        "Trend over time shows the gap widening or closing",
+        "Requires manager or admin role via withRoleGuard",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Team comparison shows: 'Your team avg objection_handling: 58 vs org avg: 72 \u2014 14 points below benchmark' with a trend chart showing the gap over time",
+        "Negative: An org with only 1 team shows 'Benchmarking requires 2+ teams' message instead of comparing a team against itself"
+      ],
+      "status": "open",
+      "notes": "System context: Extension of team analyzer (US-027). Data feeds into Manager Intelligence Dashboard (US-044).",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-027"
+      ]
+    },
+    {
+      "id": "US-049",
+      "epic_id": "E08",
+      "phase": 4,
+      "title": "Market-aware scenario updates from org-wide objection patterns",
+      "description": "As a system, I want to detect new objection patterns emerging across the org so that practice scenarios stay relevant to what reps actually encounter.\n\n## Technical Requirements\n\n1. Create `src/lib/agents/scenario-gen/market-detector.ts`:\n   - `detectEmergingPatterns(orgId): Promise<EmergingPattern[]>` \u2014 analyzes objection data across all reps\n   - Threshold: 3+ reps encountering same objection type in last 30 days\n   - Cross-references against existing scenario library to find gaps\n\n2. Create `src/lib/inngest/functions/detect-market-patterns.ts`:\n   - Weekly cron, runs pattern detection per org\n   - If new pattern found: generates scenario targeting it, notifies managers\n\n## Files to Create\n- `src/lib/agents/scenario-gen/market-detector.ts`\n- `src/lib/inngest/functions/detect-market-patterns.ts`\n\n## Files to Modify\n- `src/lib/inngest/functions/index.ts`",
+      "acceptanceCriteria": [
+        "detectEmergingPatterns() identifies objection patterns shared by 3+ reps",
+        "Cross-references existing scenarios to find coverage gaps",
+        "Weekly cron detects and surfaces new patterns",
+        "Manager notified when new market-level patterns detected",
+        "pnpm build and pnpm typecheck pass",
+        "Example: After 5 reps encounter 'AI replacement concern' objections in real calls (via recording ingestion), the system auto-generates a practice scenario targeting this new objection pattern and notifies managers",
+        "Negative: An objection pattern mentioned by only 1 rep is NOT surfaced as a market trend (threshold: 3+ reps)"
+      ],
+      "status": "open",
+      "notes": "System context: Uses weakness profiles (US-011) and scenario generation (US-025). Enables the scenario library to evolve based on real market conditions.",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-011",
+        "US-025"
+      ]
+    },
+    {
+      "id": "US-050",
+      "epic_id": "E09",
+      "phase": 4,
+      "title": "Auto-generated renewal report with ROI proof",
+      "description": "As a customer success manager, I want auto-generated ROI reports so that subscription renewals are backed by data-driven impact evidence.\n\n## Technical Requirements\n\n1. Create `src/lib/intelligence/renewal-report.ts`:\n   - `generateRenewalReport(orgId): Promise<RenewalReport>` \u2014 compiles training metrics, score improvements, and CRM attribution into a structured report\n   - Sections: Executive Summary, Training Utilization, Performance Improvement, Revenue Impact (if CRM connected), Per-Rep Highlights, Recommendations\n   - Supports PDF generation via react-pdf or similar\n\n2. Create `src/actions/renewal-reports.ts`:\n   - `generateReport(orgId)` \u2014 withRoleGuard(['admin'])\n   - `getReportHistory(orgId)` \u2014 past generated reports\n\n3. Create `src/app/api/reports/renewal/route.ts`:\n   - GET handler returning PDF or JSON based on Accept header\n\n## Files to Create\n- `src/lib/intelligence/renewal-report.ts`\n- `src/actions/renewal-reports.ts`\n- `src/app/api/reports/renewal/route.ts`",
+      "acceptanceCriteria": [
+        "generateRenewalReport() produces structured report with all required sections",
+        "Training utilization calculated from attempt counts and active user percentage",
+        "Performance improvement section shows score trend across org",
+        "Revenue impact section populated when CRM is connected, graceful fallback when not",
+        "Report exportable as PDF or JSON",
+        "Requires admin role",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Auto-generated renewal report PDF shows: training utilization 85%, avg score improvement +18%, estimated revenue impact $430K, with per-rep attribution table and trend charts",
+        "Negative: If CRM data is unavailable, the report generates with training metrics only and a section noting 'Revenue impact unavailable \u2014 connect CRM for full ROI data'"
+      ],
+      "status": "open",
+      "notes": "System context: Depends on attribution model (US-039) for revenue impact data. This is the key deliverable for proving platform value during renewals.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-039"
+      ]
+    },
+    {
+      "id": "US-051",
+      "epic_id": "E10",
+      "phase": 5,
+      "title": "Agent settings for trainee controls",
+      "description": "As a trainee, I want to control my AI coach's behavior so that coaching intensity and focus match my preferences.\n\n## Technical Requirements\n\n1. Supabase migration to add columns to user_memory or create `agent_settings` table:\n   - coaching_intensity: 'light' | 'moderate' | 'intensive' (default 'moderate')\n   - focus_areas: text[] (skill dimension keys, default all)\n   - max_nudges_per_day: integer (default 5)\n   - auto_assign_scenarios: boolean (default true)\n\n2. Create `src/actions/agent-settings.ts`:\n   - `getAgentSettings()`, `updateAgentSettings(settings)` with Zod validation, withOrgGuard\n\n3. Create `src/components/settings/agent-settings-form.tsx`:\n   - Coaching intensity selector, focus area multi-select, nudge limit, auto-assign toggle\n\n4. Wire Coach Agent to respect these settings when generating recommendations\n\n## Files to Create\n- `src/actions/agent-settings.ts`\n- `src/components/settings/agent-settings-form.tsx`\n\n## Files to Modify\n- `src/app/(authenticated)/settings/preferences/page.tsx` \u2014 add agent settings section\n- `src/lib/agents/coach/on-attempt-scored.ts` \u2014 respect settings",
+      "acceptanceCriteria": [
+        "Agent settings persisted per user with Zod validation",
+        "Coaching intensity affects recommendation frequency and urgency",
+        "Focus areas filter which skill dimensions the coach targets",
+        "Max nudges per day respected by notification dispatcher",
+        "Settings form integrated into existing preferences page",
+        "Coach Agent reads and respects settings during recommendation generation",
+        "pnpm build and pnpm typecheck pass",
+        "Example: A trainee sets coaching intensity to 'light' (max 2 nudges/day) and focus areas to ['objection_handling', 'closing'], and subsequent coach recommendations respect these constraints",
+        "Negative: Setting an invalid focus area (not matching any known skill dimension) is rejected by Zod validation"
+      ],
+      "status": "open",
+      "notes": "System context: Extends the Coach Agent (US-014) with user-controllable settings. Integrated into existing settings page (src/app/(authenticated)/settings/preferences/).",
+      "size": "M",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-014"
+      ]
+    },
+    {
+      "id": "US-052",
+      "epic_id": "E10",
+      "phase": 5,
+      "title": "Agent status dashboard for org health",
+      "description": "As an admin, I want an org-wide agent status dashboard so that I can monitor all AI agents' health, activity levels, and resource usage.\n\n## Technical Requirements\n\n1. Create `src/app/(authenticated)/settings/agents/page.tsx` \u2014 admin-only page:\n   - Per-agent cards: name, health status, last run time, actions today, error count, memory usage estimate\n   - Activity chart (actions per day over last 30 days)\n   - Error log (recent failures with details)\n\n2. Create `src/components/agent/agent-status-card.tsx`:\n   - Health indicator (green/yellow/red), key metrics, expandable error details\n\n3. Create `src/components/agent/agent-activity-chart.tsx`:\n   - Recharts bar chart of daily agent actions\n\n## Files to Create\n- `src/app/(authenticated)/settings/agents/page.tsx`\n- `src/components/agent/agent-status-card.tsx`\n- `src/components/agent/agent-activity-chart.tsx`\n\n## Files to Modify\n- `src/app/(authenticated)/layout.tsx` \u2014 add Agents link to admin nav",
+      "acceptanceCriteria": [
+        "Page restricted to admin role (redirect for non-admins)",
+        "Per-agent status cards show health, last run, actions today, errors",
+        "Health indicator color-coded: green=healthy, yellow=degraded, red=unhealthy, grey=idle",
+        "Activity chart shows 30-day trend of agent actions using recharts",
+        "Error log lists recent failures with expandable details",
+        "Uses getAgentHealth() from US-045",
+        "ShadCN components, matches app design",
+        "pnpm build and pnpm typecheck pass",
+        "Example: Dashboard shows: Coach Agent \u2014 142 actions today, 3 errors, memory usage 2.1GB; Manager Agent \u2014 12 actions today, 0 errors, last run 6h ago",
+        "Negative: An org with no agent activity (brand new org) shows all agents in 'idle' state with 0 actions, not 'unhealthy'"
+      ],
+      "status": "open",
+      "notes": "System context: Depends on agent health monitoring (US-045). Admin-only page for org-wide agent oversight. Uses recharts for charts.",
+      "size": "L",
+      "startedAt": null,
+      "completedAt": null,
+      "updatedAt": null,
+      "dependsOn": [
+        "US-045"
+      ]
+    }
+  ]
+}

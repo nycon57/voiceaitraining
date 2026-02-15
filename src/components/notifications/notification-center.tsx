@@ -36,8 +36,11 @@ function getNotificationIcon(type: string) {
 }
 
 function formatRelativeTime(dateStr: string): string {
+  const dateObj = new Date(dateStr)
+  if (Number.isNaN(dateObj.getTime())) return ''
+
   const now = Date.now()
-  const date = new Date(dateStr).getTime()
+  const date = dateObj.getTime()
   const diffMs = now - date
   const diffMin = Math.floor(diffMs / 60_000)
   const diffHr = Math.floor(diffMs / 3_600_000)
