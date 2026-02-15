@@ -22,10 +22,12 @@ const TREND_PRIORITY: Record<Trend, number> = {
   improving: 3,
 }
 
+const TOP_GAPS_LIMIT = 3
+
 /**
  * Analyze a trainee's skill gaps from their agent context.
- * Returns the top 3 weaknesses prioritized by trend (declining first),
- * then by lowest score as a tiebreaker.
+ * Returns the top weaknesses prioritized by trend urgency
+ * (declining > stable > new > improving), then by lowest score.
  */
 export function analyzeSkillGaps(context: AgentContext): SkillGapAnalysis {
   const { weaknesses } = context
@@ -38,25 +40,36 @@ export function analyzeSkillGaps(context: AgentContext): SkillGapAnalysis {
     }
   }
 
-  const gaps: SkillGap[] = weaknesses.map((w) => ({
+  const gaps = weaknesses.map((w): SkillGap => ({
     key: w.key,
     score: w.score ?? 0,
     trend: w.trend ?? 'new',
     evidenceCount: w.evidenceCount,
   }))
 
-  // Sort by trend priority (declining first), then by score ascending (worst first)
-  gaps.sort((a, b) => {
-    const trendDiff = TREND_PRIORITY[a.trend] - TREND_PRIORITY[b.trend]
-    if (trendDiff !== 0) return trendDiff
-    return a.score - b.score
-  })
+  const notImproving = gaps
+    .filter((gap) => gap.trend !== 'improving')
+    .sort(compareGapPriority)
 
-  const topGaps = gaps.slice(0, 3)
-  const focusArea = topGaps[0].key
+  const improving = gaps
+    .filter((gap) => gap.trend === 'improving')
+    .sort(compareGapPriority)
+
+  const topGaps = [...notImproving, ...improving].slice(0, TOP_GAPS_LIMIT)
+  const focusArea = topGaps[0]?.key ?? null
   const reasoning = buildReasoning(topGaps)
 
   return { topGaps, focusArea, reasoning }
+}
+
+function compareGapPriority(a: SkillGap, b: SkillGap): number {
+  const trendDiff = TREND_PRIORITY[a.trend] - TREND_PRIORITY[b.trend]
+  if (trendDiff !== 0) return trendDiff
+
+  const scoreDiff = a.score - b.score
+  if (scoreDiff !== 0) return scoreDiff
+
+  return a.evidenceCount - b.evidenceCount
 }
 
 function trendLabel(trend: Trend): string {
@@ -69,10 +82,14 @@ function trendLabel(trend: Trend): string {
 }
 
 function buildReasoning(gaps: SkillGap[]): string {
+  if (gaps.length === 0) {
+    return 'No prioritized skill gaps were found.'
+  }
+
   const parts = gaps.map((gap) => {
     const label = gap.key.replace(/_/g, ' ')
     return `${label} at ${gap.score}% (${trendLabel(gap.trend)})`
   })
 
-  return `Top gaps: ${parts.join(', ')}.`
+  return `Prioritized by trend (declining > stable > new > improving): ${parts.join(', ')}.`
 }
