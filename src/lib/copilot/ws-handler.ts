@@ -1,6 +1,5 @@
 import { randomUUID } from 'crypto'
 import type { IncomingMessage } from 'http'
-import { URL } from 'url'
 import type { WebSocket } from 'ws'
 
 import { verifyToken } from '@clerk/backend'
@@ -53,6 +52,17 @@ async function authenticateToken(token: string): Promise<TokenClaims | null> {
 }
 
 // ============================================================================
+// Origin allowlist
+// ============================================================================
+
+/** Reads comma-separated origin allowlist from env. Empty list = skip check. */
+function getAllowedOrigins(): string[] {
+  const raw = process.env.COPILOT_ALLOWED_ORIGINS
+  if (!raw) return []
+  return raw.split(',').map((o) => o.trim().toLowerCase()).filter(Boolean)
+}
+
+// ============================================================================
 // Send helper
 // ============================================================================
 
@@ -70,19 +80,43 @@ function send(ws: WebSocket, message: ServerMessage): void {
  * Handles a new WebSocket connection for the copilot stream.
  *
  * Flow:
- * 1. Extract token from query params
- * 2. Verify JWT → reject with 4001 if invalid
- * 3. Create session → send 'connected' message
- * 4. Listen for binary audio chunks and JSON control messages
- * 5. Clean up on close/error
+ * 1. Validate Origin against allowlist
+ * 2. Extract token from Authorization header (or cookie fallback)
+ * 3. Verify JWT → reject with 4001 if invalid
+ * 4. Validate org_id presence → reject if missing
+ * 5. Create session → send 'connected' message
+ * 6. Listen for binary audio chunks and JSON control messages
+ * 7. Clean up on close/error
  */
 export async function handleCopilotConnection(
   ws: WebSocket,
   req: IncomingMessage,
 ): Promise<void> {
-  // Parse token from query string
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`)
-  const token = url.searchParams.get('token')
+  // ── Origin validation ──────────────────────────────────────────────
+  const allowedOrigins = getAllowedOrigins()
+  const origin = req.headers.origin?.toLowerCase()
+  if (allowedOrigins.length > 0 && (!origin || !allowedOrigins.includes(origin))) {
+    send(ws, { type: 'error', code: 'AUTH_ORIGIN', message: 'Origin not allowed' })
+    ws.close(WS_CLOSE_CODES.AUTH_FAILED, 'Origin not allowed')
+    return
+  }
+
+  // ── Token extraction ───────────────────────────────────────────────
+  // Prefer Authorization header; fall back to HttpOnly cookie for browser clients.
+  let token: string | null = null
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.slice(7)
+  } else {
+    const cookieHeader = req.headers.cookie ?? ''
+    const match = cookieHeader
+      .split(';')
+      .map((c) => c.trim())
+      .find((c) => c.startsWith('copilot_token='))
+    if (match) {
+      token = match.split('=').slice(1).join('=')
+    }
+  }
 
   if (!token) {
     send(ws, { type: 'error', code: 'AUTH_MISSING', message: 'Token required' })
@@ -102,10 +136,17 @@ export async function handleCopilotConnection(
     return
   }
 
+  // Validate org membership
+  const orgId = claims.org_id
+  if (!orgId) {
+    send(ws, { type: 'error', code: 'MISSING_ORG', message: 'Organization ID required' })
+    ws.close(WS_CLOSE_CODES.AUTH_FAILED, 'Organization ID required')
+    return
+  }
+
   // Create session
   const sessionId = randomUUID()
   const userId = claims.sub
-  const orgId = claims.org_id ?? ''
 
   const session = createSession(sessionId, userId, orgId)
   let sequenceNumber = 0

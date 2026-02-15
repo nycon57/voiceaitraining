@@ -36,10 +36,42 @@ const server = createServer((req, res) => {
 // WebSocket server — no HTTP server of its own; we handle upgrades manually
 const wss = new WebSocketServer({ noServer: true })
 
+// Allowed origins for WebSocket upgrade requests.
+// In production, set WS_ALLOWED_ORIGINS as a comma-separated list of origins.
+function normalizeOrigin(raw) {
+  if (!raw || typeof raw !== 'string') return null
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  try {
+    return new URL(trimmed).origin.toLowerCase()
+  } catch {
+    return trimmed.toLowerCase().replace(/\/+$/, '')
+  }
+}
+
+const ALLOWED_ORIGINS = (process.env.WS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => normalizeOrigin(o))
+  .filter(Boolean)
+
+function isOriginAllowed(origin) {
+  if (ALLOWED_ORIGINS.length === 0 && dev) return true // permissive in dev only
+  const normalized = normalizeOrigin(origin)
+  if (!normalized) return false
+  return ALLOWED_ORIGINS.includes(normalized)
+}
+
 server.on('upgrade', (req, socket, head) => {
   const { pathname } = parse(req.url ?? '/', true)
 
   if (pathname === '/api/copilot/stream') {
+    const origin = req.headers.origin
+    if (!origin || !isOriginAllowed(origin)) {
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
+      socket.destroy()
+      return
+    }
+
     wss.handleUpgrade(req, socket, head, async (ws) => {
       const { handleCopilotConnection } = await import(
         './src/lib/copilot/ws-handler.ts'

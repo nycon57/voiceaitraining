@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import { createElement } from 'react'
 import { Resend } from 'resend'
 import { z } from 'zod'
@@ -189,8 +190,9 @@ async function sendEmail(params: SendNotificationParams): Promise<boolean> {
   })
 
   if (error) {
+    const emailHash = createHash('sha256').update(params.recipientEmail).digest('hex').slice(0, 12)
     console.error(
-      `[notifications] Failed to send email to ${params.recipientEmail}:`,
+      `[notifications] Failed to send email (recipient=${emailHash}, userId=${params.userId}):`,
       error.message,
     )
     return false

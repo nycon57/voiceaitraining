@@ -18,8 +18,11 @@ export async function GET(): Promise<NextResponse> {
     protocol: 'websocket',
     path: '/api/copilot/stream',
     activeSessions: getActiveSessionCount(),
+    // Token-based auth: use short-lived handshake tokens issued via /api/copilot/handshake.
+    // For non-browser clients, prefer Authorization: Bearer <token> header on the upgrade request.
+    // Do NOT pass long-lived JWTs as query parameters — they may be logged by reverse proxies.
     instructions:
-      'Connect via WebSocket: ws(s)://host/api/copilot/stream?token=<jwt>',
+      'Connect via WebSocket: ws(s)://host/api/copilot/stream. Authenticate using a short-lived handshake token or Authorization header.',
     audioFormat: {
       encoding: 'pcm',
       sampleRate: 16000,

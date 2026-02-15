@@ -36,10 +36,17 @@ export async function getTeamBriefs(): Promise<CoachingBrief[]> {
     const briefs: CoachingBrief[] = []
     for (let i = 0; i < traineeIds.length; i += BATCH_SIZE) {
       const batch = traineeIds.slice(i, i + BATCH_SIZE)
-      const results = await Promise.all(
+      const results = await Promise.allSettled(
         batch.map((id) => generateCoachingBrief(orgId, user.id, id)),
       )
-      briefs.push(...results)
+      for (let j = 0; j < results.length; j++) {
+        const result = results[j]
+        if (result.status === 'fulfilled') {
+          briefs.push(result.value)
+        } else {
+          console.warn(`Failed to generate coaching brief for trainee ${batch[j]}:`, result.reason)
+        }
+      }
     }
 
     return briefs

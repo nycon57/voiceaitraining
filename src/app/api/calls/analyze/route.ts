@@ -112,7 +112,6 @@ export async function POST(req: NextRequest) {
       criteria: rubricScore.criterion_scores.map(c => ({ name: c.criterion_name, score: c.score, max: c.max_score }))
     })
 
-    // Fire-and-forget: notify subscribers that scoring finished
     const scoreBreakdown = Object.fromEntries(
       rubricScore.criterion_scores.map(
         (c: { criterion_name: string; score: number; max_score: number; percentage: number }) => [
@@ -121,16 +120,22 @@ export async function POST(req: NextRequest) {
         ]
       )
     )
-    emitAttemptScored({
-      attemptId,
-      userId: user.id,
-      orgId: user.orgId!,
-      scenarioId: attempt.scenario_id,
-      score: rubricScore.overall_score,
-      scoreBreakdown,
-      kpis,
-      criticalFailures: rubricScore.critical_failures,
-    }).catch((err: unknown) => console.error('[analyze] Failed to emit attempt.scored:', err))
+
+    // Await scoring event emission so it completes before the serverless function exits
+    try {
+      await emitAttemptScored({
+        attemptId,
+        userId: user.id,
+        orgId: user.orgId!,
+        scenarioId: attempt.scenario_id,
+        score: rubricScore.overall_score,
+        scoreBreakdown,
+        kpis,
+        criticalFailures: rubricScore.critical_failures,
+      })
+    } catch (err: unknown) {
+      console.error('[analyze] Failed to emit attempt.scored:', err)
+    }
 
     // Build context-aware AI prompt
     const analysisPrompt = buildEnhancedPrompt(
@@ -198,14 +203,18 @@ export async function POST(req: NextRequest) {
 
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(analysis)}\n\n`))
 
-          // Fire-and-forget: notify subscribers that feedback is ready
-          emitAttemptFeedbackGenerated({
-            attemptId,
-            userId: user.id,
-            orgId: user.orgId!,
-            feedbackSections: analysis.analysis.feedback,
-            nextSteps: analysis.analysis.nextSteps,
-          }).catch((err: unknown) => console.error('[analyze] Failed to emit attempt.feedback.generated:', err))
+          // Ensure event emission completes before closing the stream
+          try {
+            await emitAttemptFeedbackGenerated({
+              attemptId,
+              userId: user.id,
+              orgId: user.orgId!,
+              feedbackSections: analysis.analysis.feedback,
+              nextSteps: analysis.analysis.nextSteps,
+            })
+          } catch (err: unknown) {
+            console.error('[analyze] Failed to emit attempt.feedback.generated:', err)
+          }
 
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()

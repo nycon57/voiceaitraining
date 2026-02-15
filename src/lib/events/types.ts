@@ -49,11 +49,12 @@ export const assignmentOverdueSchema = z.object({
   dueAt: z.string(),
 })
 
+/** PII-minimized: email is optional and should only be included when legally required. Prefer userId for identification. */
 export const userJoinedOrgSchema = z.object({
   userId: z.string(),
   orgId: z.string(),
   role: z.string(),
-  email: z.string(),
+  email: z.string().optional(),
   name: z.string(),
 })
 

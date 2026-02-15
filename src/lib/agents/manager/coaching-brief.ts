@@ -72,9 +72,12 @@ const MAX_RECENT_SCORES = 10
 const MAX_STRENGTHS = 3
 const MAX_AREAS_TO_DISCUSS = 3
 const MAX_RECOMMENDED_ASSIGNMENTS = 3
+const MAX_TALKING_POINTS = 5
 const RECENT_DAYS = 7
 const RECENT_ATTEMPT_THRESHOLD = 3
 const COMPARISON_THRESHOLD = 5
+const OBJECTION_POINT_1 = 'Ask about specific objections encountered'
+const OBJECTION_POINT_2 = 'Review feel-felt-found technique'
 
 /** Rubric fields that target each gap key. */
 const GAP_TO_RUBRIC_FIELD: Record<string, keyof ScenarioRubric> = {
@@ -107,10 +110,12 @@ const SKILL_LABELS: Record<string, string> = {
 // ── Helpers ────────────────────────────────────────────────────────
 
 function roundedMean(values: number[]): number {
+  if (values.length === 0) return 0
   return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length)
 }
 
 function mean(values: number[]): number {
+  if (values.length === 0) return 0
   return values.reduce((sum, v) => sum + v, 0) / values.length
 }
 
@@ -139,6 +144,34 @@ function trendSuffix(trend: WeaknessEntry['trend']): string {
   if (trend === 'declining') return ' (declining)'
   if (trend === 'stable') return ' (not improving)'
   return ''
+}
+
+function ensureCriticalTalkingPoints(points: string[], areasToDiscuss: string[]): string[] {
+  const normalized = points
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+  const needsObjectionPoints = areasToDiscuss.some((area) => {
+    const lower = area.toLowerCase()
+    return lower.includes('objection') && lower.includes('declining')
+  })
+
+  if (!needsObjectionPoints) {
+    return normalized
+  }
+
+  const required = [OBJECTION_POINT_1, OBJECTION_POINT_2]
+  const withRequired = [...required, ...normalized]
+  const seen = new Set<string>()
+  const deduped: string[] = []
+
+  for (const point of withRequired) {
+    const key = point.trim().toLowerCase()
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    deduped.push(point.trim())
+  }
+
+  return deduped.slice(0, MAX_TALKING_POINTS)
 }
 
 // ── Main entry point ───────────────────────────────────────────────
@@ -260,10 +293,16 @@ async function fetchTeamAttempts(
   return (data ?? []) as AttemptRow[]
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 async function fetchActiveScenarios(
   supabase: SupabaseClient,
   orgId: string,
 ): Promise<ScenarioRow[]> {
+  if (!UUID_RE.test(orgId)) {
+    throw new Error(`Invalid orgId format: ${orgId}`)
+  }
+
   const { data, error } = await supabase
     .from('scenarios')
     .select('id, title, difficulty, rubric')
@@ -482,15 +521,17 @@ Rules:
 
   try {
     const { text } = await generateText({
-      model: google('gemini-2.0-flash-exp'),
+      model: google('gemini-2.5-flash'),
       maxOutputTokens: 300,
       prompt,
     })
 
-    return text
+    const generatedPoints = text
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
+
+    return ensureCriticalTalkingPoints(generatedPoints, areasToDiscuss)
   } catch (error) {
     console.error('[manager-agent] Failed to generate talking points:', error)
     return buildFallbackTalkingPoints(areasToDiscuss, strengths)
@@ -506,7 +547,8 @@ function buildFallbackTalkingPoints(
   for (const area of areasToDiscuss) {
     const label = area.split(' at ')[0].toLowerCase()
     if (label.includes('objection')) {
-      points.push('Review objections encountered and practice the feel-felt-found technique.')
+      points.push(OBJECTION_POINT_1)
+      points.push(OBJECTION_POINT_2)
     } else if (label.includes('question')) {
       points.push('Practice framing open-ended questions that uncover prospect needs.')
     } else {
@@ -518,7 +560,9 @@ function buildFallbackTalkingPoints(
     points.push(`Reinforce strong performance in ${strengths[0].toLowerCase()}.`)
   }
 
-  return points.length > 0
+  const fallbackPoints = points.length > 0
     ? points
     : ['Review recent call recordings together.', 'Set goals for the next practice session.']
+
+  return ensureCriticalTalkingPoints(fallbackPoints, areasToDiscuss)
 }

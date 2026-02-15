@@ -104,10 +104,10 @@ export const managerAlerts = inngest.createFunction(
             .filter((s): s is number => typeof s === 'number'),
         ]
 
-        // Scores are newest-first; declining means each older score is higher
+        // Scores are newest-first; declining means each older score is higher than the newer one
         const isDeclining =
           scores.length >= DECLINING_WINDOW &&
-          scores.every((s, i) => i === 0 || s < scores[i - 1])
+          scores.every((s, i) => i === 0 || s > scores[i - 1])
 
         if (isDeclining) {
           const chronological = [...scores].reverse()
@@ -149,9 +149,9 @@ export const managerAlerts = inngest.createFunction(
 
     const managers = await step.run('find-managers', async (): Promise<Manager[]> => {
       const supabase = createServiceClient()
-      const { data: members, error } = await supabase
-        .from('org_members')
-        .select('user_id')
+      const { data: managerUsers, error } = await supabase
+        .from('users')
+        .select('clerk_user_id, first_name, email')
         .eq('org_id', orgId)
         .eq('role', 'manager')
 
@@ -160,27 +160,12 @@ export const managerAlerts = inngest.createFunction(
         return []
       }
 
-      if (!members || members.length === 0) return []
+      if (!managerUsers || managerUsers.length === 0) return []
 
-      const managerIds = members.map((m) => m.user_id)
-      const { data: managerUsers, error: usersError } = await supabase
-        .from('users')
-        .select('clerk_user_id, first_name, email')
-        .in('clerk_user_id', managerIds)
-
-      if (usersError) {
-        console.error('[manager-alerts] Failed to fetch manager details:', usersError.message)
-        return managerIds.map((id) => ({ userId: id, name: undefined, email: undefined }))
-      }
-
-      const userMap = new Map(
-        (managerUsers ?? []).map((u) => [u.clerk_user_id, u]),
-      )
-
-      return managerIds.map((id) => ({
-        userId: id,
-        name: userMap.get(id)?.first_name ?? undefined,
-        email: userMap.get(id)?.email ?? undefined,
+      return managerUsers.map((manager) => ({
+        userId: manager.clerk_user_id,
+        name: manager.first_name ?? undefined,
+        email: manager.email ?? undefined,
       }))
     })
 

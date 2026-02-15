@@ -66,7 +66,7 @@ export function updateSessionActivity(id: string, audioBytes?: number): void {
   const session = sessions.get(id)
   if (!session) return
   session.lastActivityAt = new Date()
-  if (audioBytes) {
+  if (typeof audioBytes === 'number') {
     session.audioByteCount += audioBytes
   }
 }

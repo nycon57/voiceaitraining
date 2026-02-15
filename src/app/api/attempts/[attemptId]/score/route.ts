@@ -87,17 +87,25 @@ export async function POST(
 
     console.log(`Scored attempt ${attemptId}: ${total_score}/100`)
 
-    // Fire-and-forget: notify subscribers that scoring finished
-    emitAttemptScored({
-      attemptId,
-      userId: attempt.clerk_user_id,
-      orgId: attempt.org_id,
-      scenarioId: attempt.scenario_id,
-      score: total_score,
-      scoreBreakdown: breakdown,
-      kpis,
-      criticalFailures: [],
-    }).catch((err: unknown) => console.error('[score] Failed to emit attempt.scored:', err))
+    // TODO: implement evaluateCriticalFailures(attempt, globalKPIs, scenarioKPIs)
+    // to populate criticalFailures from real detection logic (e.g., missed_greeting, no_close)
+    const criticalFailures: string[] = []
+
+    // Ensure event emission completes before the serverless function exits
+    try {
+      await emitAttemptScored({
+        attemptId,
+        userId: attempt.clerk_user_id,
+        orgId: attempt.org_id,
+        scenarioId: attempt.scenario_id,
+        score: total_score,
+        scoreBreakdown: breakdown,
+        kpis,
+        criticalFailures,
+      })
+    } catch (err: unknown) {
+      console.error('[score] Failed to emit attempt.scored:', err)
+    }
 
     return NextResponse.json({
       success: true,

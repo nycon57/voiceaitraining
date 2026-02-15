@@ -65,6 +65,12 @@ CREATE POLICY "org_members_read_notifications"
   FOR SELECT
   USING (org_id = current_setting('jwt.claims.org_id', true)::uuid);
 
+CREATE POLICY "org_members_update_notifications_read"
+  ON notifications
+  FOR UPDATE
+  USING (org_id = current_setting('jwt.claims.org_id', true)::uuid)
+  WITH CHECK (org_id = current_setting('jwt.claims.org_id', true)::uuid);
+
 -- Primary query path: unread notifications for a user, newest first.
 CREATE INDEX idx_notifications_org_user_read_created
   ON notifications (org_id, user_id, read, created_at DESC);
