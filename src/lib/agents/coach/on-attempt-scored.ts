@@ -80,22 +80,23 @@ export const onAttemptScored = inngest.createFunction(
       return recommendNextScenario(orgId, userId, gapAnalysis.topGaps)
     })
 
-    if (result.recommendation) {
-      await step.run('emit-recommendation', async () => {
-        const payload: CoachRecommendationReadyPayload = {
-          userId,
-          orgId,
-          recommendationType: 'next_scenario',
-          scenarioId: result.recommendation!.scenarioId,
-          message: result.recommendation!.reason,
-        }
+    await step.run('emit-recommendation', async () => {
+      const payload: CoachRecommendationReadyPayload = {
+        userId,
+        orgId,
+        recommendationType: 'next_scenario',
+        message: result.recommendation?.reason ?? result.reason,
+      }
 
-        await inngest.send({
-          name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
-          data: payload,
-        })
+      if (result.recommendation?.scenarioId) {
+        payload.scenarioId = result.recommendation.scenarioId
+      }
+
+      await inngest.send({
+        name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
+        data: payload,
       })
-    }
+    })
 
     return {
       updated: profile.length,

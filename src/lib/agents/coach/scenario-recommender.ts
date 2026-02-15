@@ -26,6 +26,16 @@ interface RecentAttemptCountRow {
   count: number
 }
 
+interface RecentAttemptRow {
+  scenario_id: string | null
+}
+
+interface CandidateScore {
+  scenario: ScenarioRow
+  score: number
+  matchedGapKeys: string[]
+}
+
 /**
  * Map from gap keys to the ScenarioRubric fields that address them.
  * A scenario with a matching rubric field is a good fit for practicing that gap.
@@ -49,6 +59,9 @@ const CONVERSATION_QUALITY_GAPS = new Set([
 
 const RECENT_DAYS = 7
 const RECENT_ATTEMPT_THRESHOLD = 3
+const DIRECT_RUBRIC_MATCH_SCORE = 10
+const CONVERSATION_QUALITY_MATCH_SCORE = 4
+const EASY_DIFFICULTY_CONFIDENCE_SCORE = 6
 
 /**
  * Recommend the best next scenario for a trainee based on their skill gaps.
@@ -66,12 +79,12 @@ export async function recommendNextScenario(
 
   const supabase = createServiceClient()
 
-  // Fetch active scenarios for this org (including universal ones)
+  // Fetch active scenarios scoped to the organization.
   const { data: scenarios, error: scenarioError } = await supabase
     .from('scenarios')
     .select('id, title, difficulty, rubric')
+    .eq('org_id', orgId)
     .eq('status', 'active')
-    .or(`visibility.eq.universal,org_id.eq.${orgId}`)
 
   if (scenarioError) {
     throw new Error(`Failed to fetch scenarios: ${scenarioError.message}`)
@@ -95,14 +108,14 @@ export async function recommendNextScenario(
   const candidates = (scenarios as ScenarioRow[]).filter((s) => !overPracticed.has(s.id))
 
   if (candidates.length === 0) {
-    return { recommendation: null, reason: 'All matching scenarios have been practiced 3+ times in the last 7 days.' }
+    return {
+      recommendation: null,
+      reason: 'All active scenarios have been practiced 3+ times in the last 7 days.',
+    }
   }
 
   // Score each candidate against the gaps
-  const scored = candidates.map((scenario) => ({
-    scenario,
-    score: scoreScenarioForGaps(scenario, gaps),
-  }))
+  const scored = candidates.map((scenario) => scoreScenarioForGaps(scenario, gaps))
 
   // Sort by score descending, pick best
   scored.sort((a, b) => b.score - a.score)
@@ -112,7 +125,7 @@ export async function recommendNextScenario(
     return { recommendation: null, reason: 'No scenarios match the identified skill gaps.' }
   }
 
-  const reason = buildRecommendationReason(best.scenario, gaps)
+  const reason = buildRecommendationReason(best.scenario, best.matchedGapKeys, gaps)
 
   return {
     recommendation: {
@@ -125,25 +138,18 @@ export async function recommendNextScenario(
   }
 }
 
-/** Check whether a scenario's rubric addresses a particular gap key. */
-function rubricMatchesGap(rubric: ScenarioRubric | null, gapKey: string): boolean {
-  const rubricField = GAP_TO_RUBRIC_FIELD[gapKey]
-  if (rubricField && rubric?.[rubricField]) return true
-  if (rubric?.conversation_quality && CONVERSATION_QUALITY_GAPS.has(gapKey)) return true
-  return false
-}
-
 /**
  * Score a scenario against skill gaps. Higher = better match.
  *
  * Scoring rules:
  * - Rubric field matches a gap key: +10 points per matching gap (weighted by gap position)
- * - Confidence-related gaps + easy difficulty: +5 points
- * - conversation_quality rubric present for general quality gaps: +3 points
+ * - confidence/professionalism/clarity gap + easy scenario: +6 points
+ * - conversation_quality rubric present for quality gaps: +4 points
  */
-function scoreScenarioForGaps(scenario: ScenarioRow, gaps: SkillGap[]): number {
+function scoreScenarioForGaps(scenario: ScenarioRow, gaps: SkillGap[]): CandidateScore {
   const { rubric } = scenario
   let score = 0
+  const matchedGapKeys: string[] = []
 
   for (let i = 0; i < gaps.length; i++) {
     const gap = gaps[i]
@@ -152,26 +158,35 @@ function scoreScenarioForGaps(scenario: ScenarioRow, gaps: SkillGap[]): number {
     // Direct rubric field match (e.g. objection_handling -> objections_handled)
     const rubricField = GAP_TO_RUBRIC_FIELD[gap.key]
     if (rubricField && rubric?.[rubricField]) {
-      score += 10 * positionWeight
+      score += DIRECT_RUBRIC_MATCH_SCORE * positionWeight
+      matchedGapKeys.push(gap.key)
     }
 
     if (CONFIDENCE_RELATED_GAPS.has(gap.key) && scenario.difficulty === 'easy') {
-      score += 5 * positionWeight
+      score += EASY_DIFFICULTY_CONFIDENCE_SCORE * positionWeight
+      matchedGapKeys.push(gap.key)
     }
 
     // conversation_quality rubric covers general quality gaps
     if (rubric?.conversation_quality && CONVERSATION_QUALITY_GAPS.has(gap.key)) {
-      score += 3 * positionWeight
+      score += CONVERSATION_QUALITY_MATCH_SCORE * positionWeight
+      matchedGapKeys.push(gap.key)
     }
   }
 
-  return score
+  return {
+    scenario,
+    score,
+    matchedGapKeys: Array.from(new Set(matchedGapKeys)),
+  }
 }
 
-function buildRecommendationReason(scenario: ScenarioRow, gaps: SkillGap[]): string {
-  const matchedGaps = gaps
-    .filter((gap) => rubricMatchesGap(scenario.rubric, gap.key))
-    .map((gap) => gap.key.replace(/_/g, ' '))
+function buildRecommendationReason(
+  scenario: ScenarioRow,
+  matchedGapKeys: string[],
+  gaps: SkillGap[],
+): string {
+  const matchedGaps = matchedGapKeys.map((gapKey) => gapKey.replace(/_/g, ' '))
 
   if (matchedGaps.length > 0) {
     return `This scenario targets your weakest areas: ${matchedGaps.join(', ')}.`
@@ -197,14 +212,17 @@ async function getRecentAttemptCounts(
     .select('scenario_id')
     .eq('org_id', orgId)
     .eq('clerk_user_id', userId)
+    .eq('status', 'completed')
     .gte('started_at', cutoff)
+    .not('scenario_id', 'is', null)
 
   if (error) {
     throw new Error(`Failed to fetch recent attempts: ${error.message}`)
   }
 
   const counts = new Map<string, number>()
-  for (const row of data ?? []) {
+  for (const row of (data ?? []) as RecentAttemptRow[]) {
+    if (!row.scenario_id) continue
     counts.set(row.scenario_id, (counts.get(row.scenario_id) ?? 0) + 1)
   }
 
