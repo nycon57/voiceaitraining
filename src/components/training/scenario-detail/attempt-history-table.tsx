@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { History, ArrowUpDown } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
+import { formatRelativeDate, formatShortDate } from "@/lib/date-display"
 
 interface Attempt {
   id: string
@@ -23,7 +23,7 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'duration'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
-  const sortedAttempts = [...attempts].sort((a, b) => {
+  const sortedAttempts = attempts.toSorted((a, b) => {
     let comparison = 0
 
     switch (sortBy) {
@@ -71,14 +71,14 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
       <Card>
         <CardHeader>
           <CardTitle className="font-headline flex items-center gap-2">
-            <History className="h-5 w-5" />
+            <History className="size-5" />
             Attempt History
           </CardTitle>
           <CardDescription>Your previous attempts at this scenario</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <History className="h-12 w-12 text-muted-foreground/50 mb-3" />
+            <History className="size-12 text-muted-foreground/50 mb-3" />
             <p className="text-sm text-muted-foreground">
               No attempts yet. Start practicing to see your history here.
             </p>
@@ -92,7 +92,7 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
-          <History className="h-5 w-5" />
+          <History className="size-5" />
           Attempt History
         </CardTitle>
         <CardDescription>Click any attempt to view detailed analytics</CardDescription>
@@ -108,7 +108,7 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
                     className="flex items-center gap-1 hover:text-foreground transition-colors"
                   >
                     Date
-                    <ArrowUpDown className="h-3 w-3" />
+                    <ArrowUpDown className="size-3" />
                   </button>
                 </th>
                 <th className="text-left py-3 px-2">
@@ -117,7 +117,7 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
                     className="flex items-center gap-1 hover:text-foreground transition-colors"
                   >
                     Duration
-                    <ArrowUpDown className="h-3 w-3" />
+                    <ArrowUpDown className="size-3" />
                   </button>
                 </th>
                 <th className="text-left py-3 px-2">
@@ -126,7 +126,7 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
                     className="flex items-center gap-1 hover:text-foreground transition-colors"
                   >
                     Score
-                    <ArrowUpDown className="h-3 w-3" />
+                    <ArrowUpDown className="size-3" />
                   </button>
                 </th>
                 <th className="text-left py-3 px-2">Status</th>
@@ -140,11 +140,11 @@ export function AttemptHistoryTable({ attempts, onAttemptClick }: AttemptHistory
                   className="border-b border-border/50 hover:bg-muted/50 cursor-pointer transition-colors"
                 >
                   <td className="py-3 px-2">
-                    <div className="text-sm">
-                      {formatDistanceToNow(new Date(attempt.started_at), { addSuffix: true })}
+                    <div suppressHydrationWarning className="text-sm">
+                      {formatRelativeDate(attempt.started_at)}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(attempt.started_at).toLocaleDateString()}
+                    <div suppressHydrationWarning className="text-xs text-muted-foreground">
+                      {formatShortDate(attempt.started_at)}
                     </div>
                   </td>
                   <td className="py-3 px-2">

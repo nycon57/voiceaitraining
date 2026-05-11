@@ -26,18 +26,6 @@ export interface ScenarioInsight {
   difficulty: string
 }
 
-export interface UserPerformance {
-  user_id: string
-  user_name: string
-  user_email: string
-  role: string
-  total_attempts: number
-  average_score: number
-  improvement_trend: number
-  last_attempt_date: string
-  total_training_hours: number
-}
-
 export interface TeamMetrics {
   team_average_score: number
   team_completion_rate: number
@@ -260,7 +248,7 @@ export async function getScenarioInsights(): Promise<ScenarioInsight[]> {
   })
 }
 
-export async function getUserPerformanceData(): Promise<UserPerformance[]> {
+async function getUserPerformanceData(): Promise<UserPerformance[]> {
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Get org members with their attempt data
@@ -280,10 +268,7 @@ export async function getUserPerformanceData(): Promise<UserPerformance[]> {
       throw new Error(`Failed to get user performance data: ${error.message}`)
     }
 
-    const userPerformance: UserPerformance[] = []
-
-    for (const member of data || []) {
-      // Get attempts for this user
+    const userPerformance = await Promise.all((data || []).map(async (member) => {
       const { data: attemptsData, error: attemptsError } = await supabase
         .from('scenario_attempts')
         .select('score, started_at, duration_seconds, status')
@@ -294,11 +279,11 @@ export async function getUserPerformanceData(): Promise<UserPerformance[]> {
 
       if (attemptsError) {
         console.error(`Failed to get attempts for user ${member.user_id}:`, attemptsError)
-        continue
+        return null
       }
 
       const attempts = attemptsData || []
-      const scores = attempts.filter(a => a.score !== null).map(a => a.score!)
+      const scores = attempts.flatMap((a) => (a.score !== null ? [a.score!] : []))
       const totalDuration = attempts.reduce((sum, a) => sum + (a.duration_seconds || 0), 0)
 
       // Calculate improvement trend (last 5 vs first 5 attempts)
@@ -311,7 +296,7 @@ export async function getUserPerformanceData(): Promise<UserPerformance[]> {
         improvementTrend = Math.round((lastAvg - firstAvg) * 100) / 100
       }
 
-      userPerformance.push({
+      return {
         user_id: member.user_id,
         user_name: member.users.name || 'Unknown',
         user_email: member.users.email || '',
@@ -323,10 +308,12 @@ export async function getUserPerformanceData(): Promise<UserPerformance[]> {
         improvement_trend: improvementTrend,
         last_attempt_date: attempts.length > 0 ? attempts[attempts.length - 1].started_at : '',
         total_training_hours: Math.round(totalDuration / 3600 * 100) / 100
-      })
-    }
+      }
+    }))
 
-    return userPerformance.sort((a, b) => b.average_score - a.average_score)
+    return userPerformance
+      .flatMap((item) => item ? [item] : [])
+      .toSorted((a, b) => b.average_score - a.average_score)
   })
 }
 
@@ -353,7 +340,7 @@ export async function getTeamMetrics(): Promise<TeamMetrics> {
     }
 
     const attempts = data || []
-    const scores = attempts.filter(a => a.score !== null).map(a => a.score!)
+    const scores = attempts.flatMap((a) => (a.score !== null ? [a.score!] : []))
     const totalAttempts = attempts.length
     const completedAttempts = attempts.filter(a => a.status === 'completed').length
 
@@ -383,14 +370,19 @@ export async function getTeamMetrics(): Promise<TeamMetrics> {
     })
 
     const topPerformers = Object.entries(userScores)
-      .map(([userId, data]) => ({
-        user_id: userId,
-        user_name: data.name,
-        average_score: data.scores.length > 0
+      .flatMap(([userId, data]) => {
+        const averageScore = data.scores.length > 0
           ? Math.round(data.scores.reduce((sum, score) => sum + score, 0) / data.scores.length * 100) / 100
           : 0
-      }))
-      .filter(performer => performer.average_score > 0)
+
+        return averageScore > 0
+          ? [{
+              user_id: userId,
+              user_name: data.name,
+              average_score: averageScore,
+            }]
+          : []
+      })
       .sort((a, b) => b.average_score - a.average_score)
       .slice(0, 5)
 

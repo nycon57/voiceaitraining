@@ -67,7 +67,7 @@ export function LiveCallInterface({
         <div className="container max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-headline text-lg font-bold">
+              <h1 className="font-headline text-lg font-semibold">
                 {scenario.title}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -81,11 +81,11 @@ export function LiveCallInterface({
                 status === "connecting" && "border-warning/50 text-warning"
               )}
             >
-              <span className="relative flex h-2 w-2 mr-2">
+              <span className="relative flex size-2 mr-2">
                 {status === "active" && (
                   <>
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                    <span className="animate-ping absolute inline-flex size-full rounded-full bg-success opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-success"></span>
                   </>
                 )}
               </span>
@@ -120,7 +120,7 @@ export function LiveCallInterface({
                 {/* Agent */}
                 <Card className="p-3">
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="size-10">
                       <AvatarImage
                         src={scenario.persona.image_url}
                         alt={scenario.persona.name}
@@ -135,9 +135,9 @@ export function LiveCallInterface({
                       </p>
                       <div className="flex items-center gap-1">
                         {isAgentSpeaking && (
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                          <span className="relative flex size-2">
+                            <span className="animate-ping absolute inline-flex size-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
                           </span>
                         )}
                         <p className="text-xs text-muted-foreground truncate">
@@ -151,7 +151,7 @@ export function LiveCallInterface({
                 {/* User */}
                 <Card className="p-3">
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="size-10">
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback>{userInitials}</AvatarFallback>
                     </Avatar>
@@ -159,9 +159,9 @@ export function LiveCallInterface({
                       <p className="font-medium text-sm truncate">{user.name}</p>
                       <div className="flex items-center gap-1">
                         {isUserSpeaking && (
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                          <span className="relative flex size-2">
+                            <span className="animate-ping absolute inline-flex size-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
                           </span>
                         )}
                         <p className="text-xs text-muted-foreground">
@@ -192,7 +192,7 @@ export function LiveCallInterface({
             <div className="hidden lg:block lg:col-span-3 space-y-4">
               {/* User Card */}
               <Card className="p-4">
-                <div className="flex flex-col items-center text-center space-y-3">
+                <div className="flex flex-col items-center text-center gap-3">
                   <div className="relative">
                     <div
                       className={cn(
@@ -202,7 +202,7 @@ export function LiveCallInterface({
                           : "bg-transparent"
                       )}
                     />
-                    <Avatar className="h-16 w-16 border-4 border-background relative z-10">
+                    <Avatar className="size-16 border-4 border-background relative z-10">
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback className="text-lg">
                         {userInitials}
@@ -210,8 +210,8 @@ export function LiveCallInterface({
                     </Avatar>
                     {isUserSpeaking && (
                       <div className="absolute -bottom-1 -right-1 z-20">
-                        <div className="h-5 w-5 bg-primary rounded-full flex items-center justify-center">
-                          <div className="h-3 w-3 bg-white rounded-full animate-pulse" />
+                        <div className="size-5 bg-primary rounded-full flex items-center justify-center">
+                          <div className="size-3 bg-white rounded-full animate-pulse" />
                         </div>
                       </div>
                     )}
@@ -219,7 +219,7 @@ export function LiveCallInterface({
                   <div>
                     <p className="font-medium">{user.name}</p>
                     <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                      <User className="h-3 w-3" />
+                      <User className="size-3" />
                       Trainee
                     </p>
                   </div>

@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Training | SpeakStride',
+}
+
 import { Suspense } from 'react'
 import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -110,6 +116,7 @@ export default async function TrainingPage({ searchParams }: PageProps) {
 
   const params = await searchParams
   const currentPage = Number(params.page) || 1
+  const initialTab = typeof params.tab === 'string' ? params.tab : 'all'
   const itemsPerPage = 20
 
   // Fetch library data
@@ -148,7 +155,7 @@ export default async function TrainingPage({ searchParams }: PageProps) {
         {/* Browse Library */}
         <section className="space-y-4">
           <div>
-            <h2 className="font-headline text-2xl font-bold tracking-tight">Browse Library</h2>
+            <h2 className="font-headline text-2xl font-semibold tracking-tight">Browse Library</h2>
             <p className="text-sm text-muted-foreground">
               Filter and explore available training content
             </p>
@@ -175,6 +182,7 @@ export default async function TrainingPage({ searchParams }: PageProps) {
               totalTracks={libraryData.totalTracks}
               currentPage={currentPage}
               itemsPerPage={itemsPerPage}
+              initialTab={initialTab}
             />
           </Suspense>
         </section>

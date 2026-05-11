@@ -23,7 +23,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
           <CardContent>
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-6 bg-gray-200 rounded animate-pulse" />
+                <div key={i} className="h-6 bg-zinc-200 rounded animate-pulse" />
               ))}
             </div>
           </CardContent>
@@ -35,9 +35,9 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
           <CardContent>
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
-                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                <div key={i} className="flex items-center gap-3">
+                  <div className="size-8 bg-zinc-200 rounded-full animate-pulse" />
+                  <div className="h-4 w-24 bg-zinc-200 rounded animate-pulse" />
                 </div>
               ))}
             </div>
@@ -65,7 +65,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+            <Users className="size-5" />
             Team Overview
           </CardTitle>
           <CardDescription>Overall team performance metrics</CardDescription>
@@ -73,7 +73,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Team Average Score</span>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <span className={`font-bold ${getScoreColor(metrics.team_average_score)}`}>
                 {metrics.team_average_score}%
               </span>
@@ -83,7 +83,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Completion Rate</span>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <span className="font-bold">{metrics.team_completion_rate}%</span>
               <Progress value={metrics.team_completion_rate} className="w-16 h-2" />
             </div>
@@ -105,7 +105,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+            <TrendingUp className="size-5" />
             Top Performers
           </CardTitle>
           <CardDescription>Highest scoring team members</CardDescription>
@@ -113,11 +113,11 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
         <CardContent>
           <div className="space-y-3">
             {metrics.top_performers.slice(0, 5).map((performer, index) => (
-              <div key={performer.user_id} className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold">
+              <div key={performer.user_id} className="flex items-center gap-3">
+                <div className="flex items-center justify-center size-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold">
                   {index + 1}
                 </div>
-                <Avatar className="w-8 h-8">
+                <Avatar className="size-8">
                   <AvatarFallback className="text-xs">
                     {performer.user_name.split(' ').map(n => n[0]).join('').toUpperCase()}
                   </AvatarFallback>
@@ -134,7 +134,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
 
             {metrics.top_performers.length === 0 && (
               <div className="text-center py-4 text-muted-foreground">
-                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <Users className="size-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No performance data available</p>
               </div>
             )}
@@ -146,7 +146,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
+            <AlertTriangle className="size-5" />
             Focus Areas
           </CardTitle>
           <CardDescription>Areas needing team attention</CardDescription>
@@ -154,14 +154,14 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
         <CardContent>
           <div className="space-y-3">
             {metrics.improvement_areas.slice(0, 5).map((area, index) => (
-              <div key={index} className="space-y-2">
+              <div key={JSON.stringify(area)} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{area.kpi_name}</span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     {area.improvement_needed ? (
-                      <TrendingDown className="h-4 w-4 text-red-500" />
+                      <TrendingDown className="size-4 text-red-500" />
                     ) : (
-                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      <TrendingUp className="size-4 text-green-500" />
                     )}
                     <span className={`text-sm font-medium ${getScoreColor(area.average_score)}`}>
                       {area.average_score}%
@@ -182,7 +182,7 @@ export function TeamPerformance({ metrics, isLoading = false }: TeamPerformanceP
 
             {metrics.improvement_areas.length === 0 && (
               <div className="text-center py-4 text-muted-foreground">
-                <TrendingUp className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <TrendingUp className="size-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Great job! No major areas needing focus.</p>
               </div>
             )}

@@ -8,18 +8,6 @@
 import type { ScenarioRubric } from '@/types/scenario'
 import type { TranscriptAnalysis } from './transcript-analyzer'
 
-export interface CriterionScore {
-  criterion_id: string
-  criterion_name: string
-  score: number
-  max_score: number
-  percentage: number
-  weight: number
-  evidence: string[]
-  reasoning: string
-  met: boolean
-}
-
 export interface RubricScore {
   overall_score: number
   weighted_score: number
@@ -229,8 +217,7 @@ function evaluateRequiredPhrases(
   transcript: Array<{ role: string; text: string }>
 ): CriterionScore {
   const traineeMessages = transcript
-    .filter(m => m.role === 'user')
-    .map(m => m.text.toLowerCase())
+    .flatMap((message) => message.role === 'user' ? [message.text.toLowerCase()] : [])
     .join(' ')
 
   const mentionedPhrases: string[] = []
@@ -547,7 +534,11 @@ function generateBasicScore(
       ...criticalFailures,
       ...(analysis.unanswered_questions.length > 2 ? ['Multiple unanswered questions'] : [])
     ],
-    strengths: criterionScores.filter(c => c.percentage >= 80).map(c => c.criterion_name),
-    areas_for_improvement: criterionScores.filter(c => c.percentage < 70).map(c => c.criterion_name),
+    strengths: criterionScores.flatMap((criterion) =>
+      criterion.percentage >= 80 ? [criterion.criterion_name] : [],
+    ),
+    areas_for_improvement: criterionScores.flatMap((criterion) =>
+      criterion.percentage < 70 ? [criterion.criterion_name] : [],
+    ),
   }
 }

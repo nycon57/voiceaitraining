@@ -31,13 +31,13 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
   const getPlanIcon = (planId: string) => {
     switch (planId) {
       case 'STARTER':
-        return <Star className="h-5 w-5" />
+        return <Star className="size-5" />
       case 'PROFESSIONAL':
-        return <Zap className="h-5 w-5" />
+        return <Zap className="size-5" />
       case 'ENTERPRISE':
-        return <Crown className="h-5 w-5" />
+        return <Crown className="size-5" />
       default:
-        return <Star className="h-5 w-5" />
+        return <Star className="size-5" />
     }
   }
 
@@ -61,7 +61,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="font-headline text-2xl font-bold">Choose Your Plan</h2>
+        <h2 className="font-headline text-2xl font-semibold">Choose Your Plan</h2>
         <p className="text-muted-foreground mt-2">
           Select the plan that best fits your organization's training needs
         </p>
@@ -110,8 +110,8 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
                 {/* Features */}
                 <div className="space-y-2">
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    <div key={JSON.stringify(feature)} className="flex items-center gap-2">
+                      <Check className="size-4 text-green-500 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
@@ -236,7 +236,7 @@ export function PlanSelector({ currentPlan, plans, orgId }: PlanSelectorProps) {
       {/* Enterprise Contact */}
       <Card className="border-dashed">
         <CardContent className="text-center py-8">
-          <Crown className="h-8 w-8 mx-auto mb-4 text-yellow-600" />
+          <Crown className="size-8 mx-auto mb-4 text-yellow-600" />
           <h3 className="font-headline font-semibold mb-2">Need Something Custom?</h3>
           <p className="text-muted-foreground mb-4">
             For large organizations with specific requirements, we offer custom enterprise solutions.

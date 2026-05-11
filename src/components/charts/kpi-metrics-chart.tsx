@@ -1,13 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { Activity } from "lucide-react";
 
 import {
@@ -29,6 +23,12 @@ import { cn } from "@/lib/utils";
 
 import type { BaseChartProps, KPIMetricsData } from "./types";
 
+const Area = dynamic(() => import("recharts").then((mod) => mod.Area), { ssr: false });
+const AreaChart = dynamic(() => import("recharts").then((mod) => mod.AreaChart), { ssr: false });
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false });
+
 export interface KPIMetricsChartProps extends BaseChartProps {
   data: KPIMetricsData[];
   metrics?: string[];
@@ -46,6 +46,9 @@ const defaultMetricColors: Record<string, string> = {
   kpi5: "hsl(var(--chart-2))",
   kpi6: "hsl(var(--chart-3))",
 };
+const defaultMetrics = ["kpi1", "kpi2", "kpi3"];
+const emptyMetricLabels: Record<string, string> = {};
+const emptyMetricColors: Record<string, string> = {};
 
 function ChartLoadingSkeleton() {
   return (
@@ -64,7 +67,7 @@ function ChartEmptyState() {
   return (
     <div className="flex h-[250px] w-full items-center justify-center rounded-lg border border-dashed">
       <div className="flex flex-col items-center gap-2 text-center">
-        <Activity className="h-8 w-8 text-muted-foreground" />
+        <Activity className="size-8 text-muted-foreground" />
         <div className="text-sm text-muted-foreground">
           No KPI metrics data available yet
         </div>
@@ -79,9 +82,9 @@ export function KPIMetricsChart({
   description = "Track multiple KPI metrics over time",
   isLoading = false,
   className,
-  metrics = ["kpi1", "kpi2", "kpi3"],
-  metricLabels = {},
-  metricColors = {},
+  metrics = defaultMetrics,
+  metricLabels = emptyMetricLabels,
+  metricColors = emptyMetricColors,
   showLegend = true,
   stacked = false,
 }: KPIMetricsChartProps) {
@@ -118,9 +121,9 @@ export function KPIMetricsChart({
     const averages: Record<string, number> = {};
 
     metrics.forEach((metric) => {
-      const values = data
-        .map((item) => item[metric])
-        .filter((val): val is number => typeof val === "number");
+      const values = data.flatMap((item) =>
+        typeof item[metric] === "number" ? [item[metric] as number] : []
+      );
 
       if (values.length > 0) {
         const sum = values.reduce((acc, val) => acc + val, 0);
@@ -233,7 +236,7 @@ export function KPIMetricsChart({
                 >
                   <div className="flex items-center gap-2">
                     <div
-                      className="h-2 w-2 rounded-full"
+                      className="size-2 rounded-full"
                       style={{
                         backgroundColor: chartConfig[metric].color,
                       }}

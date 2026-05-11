@@ -173,7 +173,7 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="space-y-2">
-        <h2 className="font-headline text-3xl font-bold tracking-tight">
+        <h2 className="font-headline text-3xl font-semibold tracking-tight">
           Team <span className="text-gradient">Management</span>
         </h2>
         <p className="text-muted-foreground">
@@ -232,15 +232,15 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
 
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                       <div className="flex items-center gap-1">
-                        <UserCheck className="h-3 w-3" />
+                        <UserCheck className="size-3" />
                         {assignment.assignedTo}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="size-3" />
                         Due: {assignment.dueDate}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Target className="h-3 w-3" />
+                        <Target className="size-3" />
                         {assignment.completedBy}/{assignment.totalUsers} completed
                       </div>
                     </div>
@@ -251,7 +251,7 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
                   <div className="ml-4">
                     <Button size="sm" variant="outline" asChild>
                       <Link href={`/assignments/${assignment.id}`}>
-                        <Eye className="h-4 w-4" />
+                        <Eye className="size-4" />
                       </Link>
                     </Button>
                   </div>
@@ -271,19 +271,19 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
             <CardContent className="space-y-3">
               <Button className="w-full" asChild>
                 <Link href="/assignments/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   Create Assignment
                 </Link>
               </Button>
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/team">
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="size-4 mr-2" />
                   View Team
                 </Link>
               </Button>
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/reports">
-                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <BarChart3 className="size-4 mr-2" />
                   Team Reports
                 </Link>
               </Button>
@@ -292,14 +292,14 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
 
           {/* Alerts & Notifications */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardHeader className="flex flex-row items-center justify-between gap-0">
               <div>
                 <CardTitle className="font-headline">Alerts</CardTitle>
                 <CardDescription className="text-sm">
                   Items requiring attention
                 </CardDescription>
               </div>
-              <AlertTriangle className="h-5 w-5 text-warning" />
+              <AlertTriangle className="size-5 text-warning" />
             </CardHeader>
             <CardContent className="space-y-4">
               {mockAlerts.map((alert) => (
@@ -308,7 +308,7 @@ export function ManagerOverview({ user }: ManagerOverviewProps) {
                   className={`p-3 border rounded-lg ${getAlertColors(alert.type)}`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <alert.icon className="h-4 w-4" />
+                    <alert.icon className="size-4" />
                     <span className="text-sm font-medium">{alert.title}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">

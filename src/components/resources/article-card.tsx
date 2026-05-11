@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from 'framer-motion'
+import { m as motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Clock, User, Eye } from 'lucide-react'
@@ -38,7 +38,7 @@ export function ArticleCard({
             ) : (
               <div className="flex items-center justify-center h-full bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5">
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
+                  <div className="size-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
                   <span className="text-sm font-medium text-muted-foreground font-headline">
                     {article.title.slice(0, 20)}...
                   </span>
@@ -64,7 +64,7 @@ export function ArticleCard({
             {/* View Count */}
             {article.view_count > 0 && (
               <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-xs">
-                <Eye className="w-3 h-3" />
+                <Eye className="size-3" />
                 <span>{article.view_count}</span>
               </div>
             )}
@@ -89,14 +89,14 @@ export function ArticleCard({
               <div className="flex items-center gap-3">
                 {showAuthor && article.author_name && (
                   <div className="flex items-center gap-1">
-                    <User className="w-3 h-3" />
+                    <User className="size-3" />
                     <span>{article.author_name}</span>
                   </div>
                 )}
 
                 {showReadTime && (
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="size-3" />
                     <span>{formatReadTime(article.read_time_minutes)}</span>
                   </div>
                 )}

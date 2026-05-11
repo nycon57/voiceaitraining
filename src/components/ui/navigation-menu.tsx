@@ -122,10 +122,15 @@ function NavigationMenuViewport({
   );
 }
 
-const NavigationMenuLink = React.forwardRef<
-  HTMLAnchorElement,
-  React.ComponentPropsWithoutRef<typeof Link>
->(({ className, href, children, ...props }, ref) => {
+function NavigationMenuLink({
+  className,
+  href,
+  children,
+  ref,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof Link> & {
+  ref?: React.Ref<HTMLAnchorElement>
+}) {
   return (
     <NavigationMenuPrimitive.Link asChild>
       <Link
@@ -142,8 +147,7 @@ const NavigationMenuLink = React.forwardRef<
       </Link>
     </NavigationMenuPrimitive.Link>
   );
-});
-NavigationMenuLink.displayName = 'NavigationMenuLink';
+}
 
 function NavigationMenuIndicator({
   className,
@@ -158,7 +162,7 @@ function NavigationMenuIndicator({
       )}
       {...props}
     >
-      <div className="bg-border relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm shadow-md" />
+      <div className="bg-border relative top-[60%] size-2 rotate-45 rounded-tl-sm shadow-md" />
     </NavigationMenuPrimitive.Indicator>
   );
 }
@@ -170,7 +174,6 @@ export {
   NavigationMenuContent,
   NavigationMenuTrigger,
   NavigationMenuLink,
-  NavigationMenuIndicator,
-  NavigationMenuViewport,
+
   navigationMenuTriggerStyle,
 };

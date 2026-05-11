@@ -54,8 +54,8 @@ export function FeedbackTab({ feedback }: FeedbackTabProps) {
               <div className="space-y-3">
                 {feedback.strengths!.map((strength, index) => (
                   <div
-                    key={index}
-                    className="border-l-4 border-success pl-3"
+                    key={JSON.stringify(strength)}
+                    className="border border-success pl-3"
                   >
                     <div className="font-medium text-sm">{strength.area}</div>
                     <div className="text-sm text-muted-foreground mt-1">
@@ -79,8 +79,8 @@ export function FeedbackTab({ feedback }: FeedbackTabProps) {
               <div className="space-y-3">
                 {feedback.improvements!.map((improvement, index) => (
                   <div
-                    key={index}
-                    className="border-l-4 border-warning pl-3"
+                    key={JSON.stringify(improvement)}
+                    className="border border-warning pl-3"
                   >
                     <div className="font-medium text-sm">{improvement.area}</div>
                     <div className="text-sm text-muted-foreground mt-1">
@@ -106,8 +106,8 @@ export function FeedbackTab({ feedback }: FeedbackTabProps) {
           <CardContent>
             <div className="space-y-2">
               {feedback.next_steps!.map((step, index) => (
-                <div key={index} className="flex items-start gap-2">
-                  <div className="w-6 h-6 bg-info/20 text-info rounded-full flex items-center justify-center text-sm font-medium mt-0.5">
+                <div key={JSON.stringify(step)} className="flex items-start gap-2">
+                  <div className="size-6 bg-info/20 text-info rounded-full flex items-center justify-center text-sm font-medium mt-0.5">
                     {index + 1}
                   </div>
                   <div className="text-sm">{step}</div>

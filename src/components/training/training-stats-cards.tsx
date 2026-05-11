@@ -54,7 +54,7 @@ export function TrainingStatsCards({ enrollmentStats }: TrainingStatsCardsProps)
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>{stat.label}</CardDescription>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{stat.value}</CardTitle>
             </CardHeader>

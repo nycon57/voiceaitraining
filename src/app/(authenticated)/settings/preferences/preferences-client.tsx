@@ -102,6 +102,8 @@ const defaultPreferences: Preferences = {
   developerMode: false,
 }
 
+const USER_PREFERENCES_STORAGE_KEY = 'userPreferences:v1'
+
 export function PreferencesClient({ user }: PreferencesClientProps) {
   const [preferences, setPreferences] = useState<Preferences>(defaultPreferences)
   const [hasChanges, setHasChanges] = useState(false)
@@ -146,14 +148,14 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
     setIsSubmitting(true)
     try {
       // Save to localStorage
-      localStorage.setItem('userPreferences', JSON.stringify(preferences))
+      localStorage.setItem(USER_PREFERENCES_STORAGE_KEY, JSON.stringify(preferences))
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800))
 
       toast.success('Preferences saved', {
         description: 'Your settings have been updated.',
-        icon: <CheckCircle2 className="h-4 w-4" />
+        icon: <CheckCircle2 className="size-4" />
       })
       setHasChanges(false)
     } catch (error) {
@@ -166,7 +168,7 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
   }
 
   const handleDiscard = () => {
-    const stored = localStorage.getItem('userPreferences')
+    const stored = localStorage.getItem(USER_PREFERENCES_STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored)
       setPreferences({ ...defaultPreferences, ...parsed })
@@ -211,12 +213,22 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
     { keys: ['?'], description: 'Show keyboard shortcuts' },
   ]
 
+  const sectionProps = {
+    preferences,
+    updatePreference,
+    accentColors,
+    keyboardShortcuts,
+    handleTestAudio,
+    handleExportData,
+    handleClearCache,
+  }
+
   return (
     <>
       <Header />
       <div className="space-y-6 p-4 max-w-5xl mx-auto">
         <div className="flex flex-col gap-2">
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Preferences</h1>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">Preferences</h1>
           <p className="text-muted-foreground">
             Customize your training experience and application settings
           </p>
@@ -224,7 +236,7 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
 
         {hasChanges && (
           <Alert>
-            <AlertTriangle className="h-4 w-4" />
+            <AlertTriangle className="size-4" />
             <AlertDescription>
               You have unsaved changes. Don't forget to save your preferences.
             </AlertDescription>
@@ -234,551 +246,41 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:flex sm:inline-flex">
             <TabsTrigger value="appearance" className="gap-2">
-              <Palette className="h-4 w-4" />
+              <Palette className="size-4" />
               <span className="hidden sm:inline">Appearance</span>
             </TabsTrigger>
             <TabsTrigger value="training" className="gap-2">
-              <Zap className="h-4 w-4" />
+              <Zap className="size-4" />
               <span className="hidden sm:inline">Training</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="h-4 w-4" />
+              <Bell className="size-4" />
               <span className="hidden sm:inline">Notifications</span>
             </TabsTrigger>
             <TabsTrigger value="privacy" className="gap-2">
-              <Lock className="h-4 w-4" />
+              <Lock className="size-4" />
               <span className="hidden sm:inline">Privacy</span>
             </TabsTrigger>
             <TabsTrigger value="advanced" className="gap-2 col-span-2 sm:col-span-1">
-              <Settings2 className="h-4 w-4" />
+              <Settings2 className="size-4" />
               <span className="hidden sm:inline">Advanced</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Appearance Tab */}
-          <TabsContent value="appearance" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Theme</CardTitle>
-                <CardDescription>
-                  Choose how the application looks to you
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <RadioGroup
-                  value={preferences.theme}
-                  onValueChange={(value) => updatePreference('theme', value as 'light' | 'dark' | 'auto')}
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Label
-                      htmlFor="light"
-                      className="flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                      data-state={preferences.theme === 'light' ? 'checked' : 'unchecked'}
-                    >
-                      <RadioGroupItem value="light" id="light" className="sr-only" />
-                      <Sun className="h-8 w-8" />
-                      <div className="text-center">
-                        <p className="font-medium">Light</p>
-                        <p className="text-sm text-muted-foreground">Day mode</p>
-                      </div>
-                    </Label>
-
-                    <Label
-                      htmlFor="dark"
-                      className="flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                      data-state={preferences.theme === 'dark' ? 'checked' : 'unchecked'}
-                    >
-                      <RadioGroupItem value="dark" id="dark" className="sr-only" />
-                      <Moon className="h-8 w-8" />
-                      <div className="text-center">
-                        <p className="font-medium">Dark</p>
-                        <p className="text-sm text-muted-foreground">Night mode</p>
-                      </div>
-                    </Label>
-
-                    <Label
-                      htmlFor="auto"
-                      className="flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                      data-state={preferences.theme === 'auto' ? 'checked' : 'unchecked'}
-                    >
-                      <RadioGroupItem value="auto" id="auto" className="sr-only" />
-                      <Monitor className="h-8 w-8" />
-                      <div className="text-center">
-                        <p className="font-medium">Auto</p>
-                        <p className="text-sm text-muted-foreground">System</p>
-                      </div>
-                    </Label>
-                  </div>
-                </RadioGroup>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <Label>Accent Color</Label>
-                  <div className="flex gap-3">
-                    {accentColors.map((color) => (
-                      <button
-                        key={color.value}
-                        onClick={() => updatePreference('accentColor', color.value)}
-                        className={`h-10 w-10 rounded-full ${color.class} transition-all ${
-                          preferences.accentColor === color.value
-                            ? 'ring-2 ring-offset-2 ring-offset-background ring-primary scale-110'
-                            : 'hover:scale-105'
-                        }`}
-                        title={color.label}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="sidebarCollapsed" className="text-base cursor-pointer">
-                        Sidebar Collapsed by Default
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Start with a collapsed sidebar for more screen space
-                      </p>
-                    </div>
-                    <Switch
-                      id="sidebarCollapsed"
-                      checked={preferences.sidebarCollapsed}
-                      onCheckedChange={(checked) => updatePreference('sidebarCollapsed', checked)}
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="compactMode" className="text-base cursor-pointer">
-                        Compact Mode
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Reduce spacing for a denser interface
-                      </p>
-                    </div>
-                    <Switch
-                      id="compactMode"
-                      checked={preferences.compactMode}
-                      onCheckedChange={(checked) => updatePreference('compactMode', checked)}
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="showAnimations" className="text-base cursor-pointer">
-                        Show Animations
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Enable smooth transitions and animations
-                      </p>
-                    </div>
-                    <Switch
-                      id="showAnimations"
-                      checked={preferences.showAnimations}
-                      onCheckedChange={(checked) => updatePreference('showAnimations', checked)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <PreferencesAppearanceTab {...sectionProps} />
 
           {/* Training Tab */}
-          <TabsContent value="training" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Session Settings
-                </CardTitle>
-                <CardDescription>
-                  Configure your default training session preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="sessionDuration">
-                      Default Session Duration
-                    </Label>
-                    <span className="text-sm font-medium">
-                      {preferences.sessionDuration} minutes
-                    </span>
-                  </div>
-                  <Slider
-                    id="sessionDuration"
-                    min={5}
-                    max={60}
-                    step={5}
-                    value={[preferences.sessionDuration]}
-                    onValueChange={([value]) => updatePreference('sessionDuration', value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: 15-30 minutes for optimal learning
-                  </p>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <Label htmlFor="preferredDifficulty">Preferred Difficulty</Label>
-                  <Select
-                    value={preferences.preferredDifficulty}
-                    onValueChange={(value) => updatePreference('preferredDifficulty', value as 'easy' | 'medium' | 'hard')}
-                  >
-                    <SelectTrigger id="preferredDifficulty">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="easy">Easy - Beginner friendly</SelectItem>
-                      <SelectItem value="medium">Medium - Standard challenge</SelectItem>
-                      <SelectItem value="hard">Hard - Expert level</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="autoStartSessions" className="text-base cursor-pointer">
-                      Auto-Start Sessions
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically begin recording when you join
-                    </p>
-                  </div>
-                  <Switch
-                    id="autoStartSessions"
-                    checked={preferences.autoStartSessions}
-                    onCheckedChange={(checked) => updatePreference('autoStartSessions', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="showHints" className="text-base cursor-pointer flex items-center gap-2">
-                      Show Hints
-                      <Lightbulb className="h-4 w-4" />
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Display helpful tips during training sessions
-                    </p>
-                  </div>
-                  <Switch
-                    id="showHints"
-                    checked={preferences.showHints}
-                    onCheckedChange={(checked) => updatePreference('showHints', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Headphones className="h-5 w-5" />
-                  Audio Preferences
-                </CardTitle>
-                <CardDescription>
-                  Configure microphone and speaker settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="microphoneDevice">Microphone</Label>
-                  <div className="flex gap-2">
-                    <Select
-                      value={preferences.microphoneDevice}
-                      onValueChange={(value) => updatePreference('microphoneDevice', value)}
-                    >
-                      <SelectTrigger id="microphoneDevice" className="flex-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="default">Default Microphone</SelectItem>
-                        <SelectItem value="built-in">Built-in Microphone</SelectItem>
-                        <SelectItem value="usb">USB Microphone</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleTestAudio('microphone')}
-                    >
-                      <Mic className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="speakerDevice">Speakers</Label>
-                  <div className="flex gap-2">
-                    <Select
-                      value={preferences.speakerDevice}
-                      onValueChange={(value) => updatePreference('speakerDevice', value)}
-                    >
-                      <SelectTrigger id="speakerDevice" className="flex-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="default">Default Speakers</SelectItem>
-                        <SelectItem value="built-in">Built-in Speakers</SelectItem>
-                        <SelectItem value="headphones">Headphones</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleTestAudio('speaker')}
-                    >
-                      <Volume2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Feedback Preferences
-                </CardTitle>
-                <CardDescription>
-                  Customize how you receive feedback
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="detailedFeedback" className="text-base cursor-pointer">
-                      Detailed Feedback
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Get in-depth analysis and suggestions
-                    </p>
-                  </div>
-                  <Switch
-                    id="detailedFeedback"
-                    checked={preferences.detailedFeedback}
-                    onCheckedChange={(checked) => updatePreference('detailedFeedback', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="showTranscript" className="text-base cursor-pointer">
-                      Show Transcript
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Display full conversation transcript
-                    </p>
-                  </div>
-                  <Switch
-                    id="showTranscript"
-                    checked={preferences.showTranscript}
-                    onCheckedChange={(checked) => updatePreference('showTranscript', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <PreferencesTrainingTab {...sectionProps} />
 
           {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-6">
-            <NotificationPreferences />
-          </TabsContent>
+          <PreferencesNotificationsTab {...sectionProps} />
 
           {/* Privacy Tab */}
-          <TabsContent value="privacy" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
-                  Privacy Settings
-                </CardTitle>
-                <CardDescription>
-                  Control your visibility and data sharing
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="leaderboardVisible" className="text-base cursor-pointer flex items-center gap-2">
-                      {preferences.leaderboardVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                      Leaderboard Visibility
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Show your performance on public leaderboards
-                    </p>
-                  </div>
-                  <Switch
-                    id="leaderboardVisible"
-                    checked={preferences.leaderboardVisible}
-                    onCheckedChange={(checked) => updatePreference('leaderboardVisible', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="profileVisibleToTeam" className="text-base cursor-pointer flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Profile Visible to Team
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow team members to view your profile
-                    </p>
-                  </div>
-                  <Switch
-                    id="profileVisibleToTeam"
-                    checked={preferences.profileVisibleToTeam}
-                    onCheckedChange={(checked) => updatePreference('profileVisibleToTeam', checked)}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="shareProgressWithManagers" className="text-base cursor-pointer">
-                      Share Progress with Managers
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow managers to view your detailed progress
-                    </p>
-                  </div>
-                  <Switch
-                    id="shareProgressWithManagers"
-                    checked={preferences.shareProgressWithManagers}
-                    onCheckedChange={(checked) => updatePreference('shareProgressWithManagers', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Alert>
-              <Lock className="h-4 w-4" />
-              <AlertDescription>
-                Your data is encrypted and secure. We never share your personal information with third parties.
-              </AlertDescription>
-            </Alert>
-          </TabsContent>
+          <PreferencesPrivacyTab {...sectionProps} />
 
           {/* Advanced Tab */}
-          <TabsContent value="advanced" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Keyboard className="h-5 w-5" />
-                  Keyboard Shortcuts
-                </CardTitle>
-                <CardDescription>
-                  Quick reference for keyboard shortcuts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {keyboardShortcuts.map((shortcut, index) => (
-                    <div key={index} className="flex items-center justify-between py-2">
-                      <span className="text-sm">{shortcut.description}</span>
-                      <div className="flex gap-1">
-                        {shortcut.keys.map((key, keyIndex) => (
-                          <kbd
-                            key={keyIndex}
-                            className="px-2 py-1 text-xs font-semibold bg-muted border border-border rounded"
-                          >
-                            {key}
-                          </kbd>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Settings2 className="h-5 w-5" />
-                  Data Management
-                </CardTitle>
-                <CardDescription>
-                  Manage your data and cache
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Export Your Data</p>
-                    <p className="text-sm text-muted-foreground">
-                      Download all your training data and progress
-                    </p>
-                  </div>
-                  <Button variant="outline" onClick={handleExportData}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">Clear Cache</p>
-                    <p className="text-sm text-muted-foreground">
-                      Clear application cache and temporary files
-                    </p>
-                  </div>
-                  <Button variant="outline" onClick={handleClearCache}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Clear
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <Settings2 className="h-5 w-5" />
-                  Developer Options
-                </CardTitle>
-                <CardDescription>
-                  Advanced settings for debugging
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="developerMode" className="text-base cursor-pointer">
-                      Developer Mode
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Enable debugging tools and console logs
-                    </p>
-                  </div>
-                  <Switch
-                    id="developerMode"
-                    checked={preferences.developerMode}
-                    onCheckedChange={(checked) => updatePreference('developerMode', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <PreferencesAdvancedTab {...sectionProps} />
         </Tabs>
 
         {/* Action Buttons - Fixed at bottom on mobile */}
@@ -791,14 +293,14 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
                   onClick={handleDiscard}
                   disabled={!hasChanges || isSubmitting}
                 >
-                  <RotateCcw className="h-4 w-4 mr-2" />
+                  <RotateCcw className="size-4 mr-2" />
                   Discard Changes
                 </Button>
                 <Button
                   onClick={handleSave}
                   disabled={!hasChanges || isSubmitting}
                 >
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="size-4 mr-2" />
                   {isSubmitting ? 'Saving...' : 'Save Preferences'}
                 </Button>
               </div>
@@ -807,5 +309,560 @@ export function PreferencesClient({ user }: PreferencesClientProps) {
         </div>
       </div>
     </>
+  )
+}
+
+type PreferencesSectionProps = {
+  preferences: Preferences
+  updatePreference: (key: keyof Preferences, value: any) => void
+  accentColors: Array<{ value: string; label: string; class: string }>
+  keyboardShortcuts: Array<{ keys: string[]; description: string }>
+  handleTestAudio: (type: 'microphone' | 'speaker') => void
+  handleExportData: () => void
+  handleClearCache: () => void
+}
+
+function PreferencesAppearanceTab(props: PreferencesSectionProps) {
+  const { preferences, updatePreference, accentColors, keyboardShortcuts, handleTestAudio, handleExportData, handleClearCache } = props
+  return (
+              <TabsContent value="appearance" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline">Theme</CardTitle>
+                    <CardDescription>
+                      Choose how the application looks to you
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <RadioGroup
+                      value={preferences.theme}
+                      onValueChange={(value) => updatePreference('theme', value as 'light' | 'dark' | 'auto')}
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <Label
+                          htmlFor="light"
+                          className="flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                          data-state={preferences.theme === 'light' ? 'checked' : 'unchecked'}
+                        >
+                          <RadioGroupItem value="light" id="light" className="sr-only" />
+                          <Sun className="size-8" />
+                          <div className="text-center">
+                            <p className="font-medium">Light</p>
+                            <p className="text-sm text-muted-foreground">Day mode</p>
+                          </div>
+                        </Label>
+    
+                        <Label
+                          htmlFor="dark"
+                          className="flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                          data-state={preferences.theme === 'dark' ? 'checked' : 'unchecked'}
+                        >
+                          <RadioGroupItem value="dark" id="dark" className="sr-only" />
+                          <Moon className="size-8" />
+                          <div className="text-center">
+                            <p className="font-medium">Dark</p>
+                            <p className="text-sm text-muted-foreground">Night mode</p>
+                          </div>
+                        </Label>
+    
+                        <Label
+                          htmlFor="auto"
+                          className="flex flex-col items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-accent transition-colors"
+                          data-state={preferences.theme === 'auto' ? 'checked' : 'unchecked'}
+                        >
+                          <RadioGroupItem value="auto" id="auto" className="sr-only" />
+                          <Monitor className="size-8" />
+                          <div className="text-center">
+                            <p className="font-medium">Auto</p>
+                            <p className="text-sm text-muted-foreground">System</p>
+                          </div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+    
+                    <Separator />
+    
+                    <div className="space-y-3">
+                      <Label>Accent Color</Label>
+                      <div className="flex gap-3">
+                        {accentColors.map((color) => (
+                          <button
+                            key={color.value}
+                            onClick={() => updatePreference('accentColor', color.value)}
+                            className={`size-10 rounded-full ${color.class} transition-all ${
+                              preferences.accentColor === color.value
+                                ? 'ring-2 ring-offset-2 ring-offset-background ring-primary scale-110'
+                                : 'hover:scale-105'
+                            }`}
+                            title={color.label}
+                          />
+                        ))}
+                      </div>
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="sidebarCollapsed" className="text-base cursor-pointer">
+                            Sidebar Collapsed by Default
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Start with a collapsed sidebar for more screen space
+                          </p>
+                        </div>
+                        <Switch
+                          id="sidebarCollapsed"
+                          checked={preferences.sidebarCollapsed}
+                          onCheckedChange={(checked) => updatePreference('sidebarCollapsed', checked)}
+                        />
+                      </div>
+    
+                      <Separator />
+    
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="compactMode" className="text-base cursor-pointer">
+                            Compact Mode
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Reduce spacing for a denser interface
+                          </p>
+                        </div>
+                        <Switch
+                          id="compactMode"
+                          checked={preferences.compactMode}
+                          onCheckedChange={(checked) => updatePreference('compactMode', checked)}
+                        />
+                      </div>
+    
+                      <Separator />
+    
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="showAnimations" className="text-base cursor-pointer">
+                            Show Animations
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable smooth transitions and animations
+                          </p>
+                        </div>
+                        <Switch
+                          id="showAnimations"
+                          checked={preferences.showAnimations}
+                          onCheckedChange={(checked) => updatePreference('showAnimations', checked)}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+  )
+}
+
+function PreferencesTrainingTab(props: PreferencesSectionProps) {
+  const { preferences, updatePreference, accentColors, keyboardShortcuts, handleTestAudio, handleExportData, handleClearCache } = props
+  return (
+              <TabsContent value="training" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Target className="size-5" />
+                      Session Settings
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your default training session preferences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="sessionDuration">
+                          Default Session Duration
+                        </Label>
+                        <span className="text-sm font-medium">
+                          {preferences.sessionDuration} minutes
+                        </span>
+                      </div>
+                      <Slider
+                        id="sessionDuration"
+                        min={5}
+                        max={60}
+                        step={5}
+                        value={[preferences.sessionDuration]}
+                        onValueChange={([value]) => updatePreference('sessionDuration', value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Recommended: 15-30 minutes for optimal learning
+                      </p>
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="space-y-3">
+                      <Label htmlFor="preferredDifficulty">Preferred Difficulty</Label>
+                      <Select
+                        value={preferences.preferredDifficulty}
+                        onValueChange={(value) => updatePreference('preferredDifficulty', value as 'easy' | 'medium' | 'hard')}
+                      >
+                        <SelectTrigger id="preferredDifficulty">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="easy">Easy - Beginner friendly</SelectItem>
+                          <SelectItem value="medium">Medium - Standard challenge</SelectItem>
+                          <SelectItem value="hard">Hard - Expert level</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="autoStartSessions" className="text-base cursor-pointer">
+                          Auto-Start Sessions
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Automatically begin recording when you join
+                        </p>
+                      </div>
+                      <Switch
+                        id="autoStartSessions"
+                        checked={preferences.autoStartSessions}
+                        onCheckedChange={(checked) => updatePreference('autoStartSessions', checked)}
+                      />
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="showHints" className="text-base cursor-pointer flex items-center gap-2">
+                          Show Hints
+                          <Lightbulb className="size-4" />
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Display helpful tips during training sessions
+                        </p>
+                      </div>
+                      <Switch
+                        id="showHints"
+                        checked={preferences.showHints}
+                        onCheckedChange={(checked) => updatePreference('showHints', checked)}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+    
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Headphones className="size-5" />
+                      Audio Preferences
+                    </CardTitle>
+                    <CardDescription>
+                      Configure microphone and speaker settings
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="microphoneDevice">Microphone</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={preferences.microphoneDevice}
+                          onValueChange={(value) => updatePreference('microphoneDevice', value)}
+                        >
+                          <SelectTrigger id="microphoneDevice" className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Default Microphone</SelectItem>
+                            <SelectItem value="built-in">Built-in Microphone</SelectItem>
+                            <SelectItem value="usb">USB Microphone</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleTestAudio('microphone')}
+                        >
+                          <Mic className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+    
+                    <div className="space-y-3">
+                      <Label htmlFor="speakerDevice">Speakers</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={preferences.speakerDevice}
+                          onValueChange={(value) => updatePreference('speakerDevice', value)}
+                        >
+                          <SelectTrigger id="speakerDevice" className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Default Speakers</SelectItem>
+                            <SelectItem value="built-in">Built-in Speakers</SelectItem>
+                            <SelectItem value="headphones">Headphones</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleTestAudio('speaker')}
+                        >
+                          <Volume2 className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+    
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <MessageSquare className="size-5" />
+                      Feedback Preferences
+                    </CardTitle>
+                    <CardDescription>
+                      Customize how you receive feedback
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="detailedFeedback" className="text-base cursor-pointer">
+                          Detailed Feedback
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Get in-depth analysis and suggestions
+                        </p>
+                      </div>
+                      <Switch
+                        id="detailedFeedback"
+                        checked={preferences.detailedFeedback}
+                        onCheckedChange={(checked) => updatePreference('detailedFeedback', checked)}
+                      />
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="showTranscript" className="text-base cursor-pointer">
+                          Show Transcript
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Display full conversation transcript
+                        </p>
+                      </div>
+                      <Switch
+                        id="showTranscript"
+                        checked={preferences.showTranscript}
+                        onCheckedChange={(checked) => updatePreference('showTranscript', checked)}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+  )
+}
+
+function PreferencesNotificationsTab(props: PreferencesSectionProps) {
+  const { preferences, updatePreference, accentColors, keyboardShortcuts, handleTestAudio, handleExportData, handleClearCache } = props
+  return (
+              <TabsContent value="notifications" className="space-y-6">
+                <NotificationPreferences />
+              </TabsContent>
+  )
+}
+
+function PreferencesPrivacyTab(props: PreferencesSectionProps) {
+  const { preferences, updatePreference, accentColors, keyboardShortcuts, handleTestAudio, handleExportData, handleClearCache } = props
+  return (
+              <TabsContent value="privacy" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Lock className="size-5" />
+                      Privacy Settings
+                    </CardTitle>
+                    <CardDescription>
+                      Control your visibility and data sharing
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="leaderboardVisible" className="text-base cursor-pointer flex items-center gap-2">
+                          {preferences.leaderboardVisible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                          Leaderboard Visibility
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Show your performance on public leaderboards
+                        </p>
+                      </div>
+                      <Switch
+                        id="leaderboardVisible"
+                        checked={preferences.leaderboardVisible}
+                        onCheckedChange={(checked) => updatePreference('leaderboardVisible', checked)}
+                      />
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="profileVisibleToTeam" className="text-base cursor-pointer flex items-center gap-2">
+                          <Users className="size-4" />
+                          Profile Visible to Team
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow team members to view your profile
+                        </p>
+                      </div>
+                      <Switch
+                        id="profileVisibleToTeam"
+                        checked={preferences.profileVisibleToTeam}
+                        onCheckedChange={(checked) => updatePreference('profileVisibleToTeam', checked)}
+                      />
+                    </div>
+    
+                    <Separator />
+    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="shareProgressWithManagers" className="text-base cursor-pointer">
+                          Share Progress with Managers
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow managers to view your detailed progress
+                        </p>
+                      </div>
+                      <Switch
+                        id="shareProgressWithManagers"
+                        checked={preferences.shareProgressWithManagers}
+                        onCheckedChange={(checked) => updatePreference('shareProgressWithManagers', checked)}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+    
+                <Alert>
+                  <Lock className="size-4" />
+                  <AlertDescription>
+                    Your data is encrypted and secure. We never share your personal information with third parties.
+                  </AlertDescription>
+                </Alert>
+              </TabsContent>
+  )
+}
+
+function PreferencesAdvancedTab(props: PreferencesSectionProps) {
+  const { preferences, updatePreference, accentColors, keyboardShortcuts, handleTestAudio, handleExportData, handleClearCache } = props
+  return (
+              <TabsContent value="advanced" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Keyboard className="size-5" />
+                      Keyboard Shortcuts
+                    </CardTitle>
+                    <CardDescription>
+                      Quick reference for keyboard shortcuts
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {keyboardShortcuts.map((shortcut, index) => (
+                        <div key={JSON.stringify(shortcut)} className="flex items-center justify-between py-2">
+                          <span className="text-sm">{shortcut.description}</span>
+                          <div className="flex gap-1">
+                            {shortcut.keys.map((key, keyIndex) => (
+                              <kbd
+                                key={keyIndex}
+                                className="px-2 py-1 text-xs font-semibold bg-muted border border-border rounded"
+                              >
+                                {key}
+                              </kbd>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+    
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Settings2 className="size-5" />
+                      Data Management
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your data and cache
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">Export Your Data</p>
+                        <p className="text-sm text-muted-foreground">
+                          Download all your training data and progress
+                        </p>
+                      </div>
+                      <Button variant="outline" onClick={handleExportData}>
+                        <Download className="size-4 mr-2" />
+                        Export
+                      </Button>
+                    </div>
+    
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">Clear Cache</p>
+                        <p className="text-sm text-muted-foreground">
+                          Clear application cache and temporary files
+                        </p>
+                      </div>
+                      <Button variant="outline" onClick={handleClearCache}>
+                        <Trash2 className="size-4 mr-2" />
+                        Clear
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+    
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                      <Settings2 className="size-5" />
+                      Developer Options
+                    </CardTitle>
+                    <CardDescription>
+                      Advanced settings for debugging
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="developerMode" className="text-base cursor-pointer">
+                          Developer Mode
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Enable debugging tools and console logs
+                        </p>
+                      </div>
+                      <Switch
+                        id="developerMode"
+                        checked={preferences.developerMode}
+                        onCheckedChange={(checked) => updatePreference('developerMode', checked)}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
   )
 }

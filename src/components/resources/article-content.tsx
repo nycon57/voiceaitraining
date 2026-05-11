@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, Fragment } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Linkedin, LucideIcon, Twitter, Clock, Calendar } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
@@ -81,9 +82,10 @@ export function ArticleContent({ article }: ArticleContentProps) {
   useEffect(() => {
     // Query all h2 elements with IDs that match the chapter anchors
     const chapterIds = headings.map(h => h.id)
-    const headingElements = chapterIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[];
+    const headingElements = chapterIds.flatMap((id) => {
+      const element = document.getElementById(id)
+      return element ? [element] : []
+    })
 
     const observer = new window.IntersectionObserver(
       (entries) => {
@@ -152,12 +154,12 @@ export function ArticleContent({ article }: ArticleContentProps) {
               <div className="flex w-full flex-col gap-5">
                 <div className="text-muted-foreground flex items-center justify-center gap-2.5 text-sm font-medium">
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="size-4" />
                     {formatReadTime(article.read_time_minutes)}
                   </div>
                   <div>|</div>
                   <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="size-4" />
                     {formatPublishDate(article.publish_date)}
                   </div>
                 </div>
@@ -170,10 +172,10 @@ export function ArticleContent({ article }: ArticleContentProps) {
                   </p>
                 )}
                 <div className="flex items-center justify-center gap-2.5">
-                  {shareLinks.map((link, index) => (
-                    <Button asChild key={`share-link-${index}`} size="icon">
+                  {shareLinks.map((link) => (
+                    <Button asChild key={link.url} size="icon">
                       <a href={link.url} target="_blank" rel="noopener noreferrer">
-                        <link.icon className="h-4 w-4" />
+                        <link.icon className="size-4" />
                       </a>
                     </Button>
                   ))}
@@ -238,13 +240,16 @@ export function ArticleContent({ article }: ArticleContentProps) {
                         </h2>
                       )
                     },
-                    img: ({ src, alt, ...props }) => (
-                      <img
-                        src={src}
-                        alt={alt}
-                        className="w-full max-w-[40rem] overflow-hidden size-full object-cover object-center rounded-lg"
-                        {...props}
-                      />
+                    img: ({ src, alt }) => (
+                      <span className="relative block aspect-video w-full max-w-[40rem] overflow-hidden rounded-lg">
+                        <Image
+                          src={String(src)}
+                          alt={alt ?? ''}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 40rem"
+                          className="object-cover object-center"
+                        />
+                      </span>
                     ),
                     a: ({ href, children, ...props }) => (
                       <a
@@ -278,10 +283,10 @@ export function ArticleContent({ article }: ArticleContentProps) {
               <Author author={author} />
               <p>{author.description}</p>
               <div className="flex items-center gap-2.5">
-                {author.socials.map((link, index) => (
-                  <Button asChild key={`author-socials-${index}`} size="icon">
+                {author.socials.map((link) => (
+                  <Button asChild key={link.url} size="icon">
                     <a href={link.url} target="_blank" rel="noopener noreferrer">
-                      <link.icon className="h-4 w-4" />
+                      <link.icon className="size-4" />
                     </a>
                   </Button>
                 ))}

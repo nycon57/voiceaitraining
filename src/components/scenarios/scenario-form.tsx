@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -25,8 +25,8 @@ interface ScenarioFormProps {
 }
 
 export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { push, back } = useRouter()
+  const [isLoading, startSaveTransition] = useTransition()
   const [activeTab, setActiveTab] = useState('basic')
 
   const [formData, setFormData] = useState({
@@ -61,31 +61,29 @@ export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setIsLoading(true)
+    startSaveTransition(async () => {
+      try {
+        const form = new FormData()
+        form.append('title', formData.title)
+        form.append('description', formData.description)
+        form.append('difficulty', formData.difficulty)
+        form.append('estimated_duration', formData.estimated_duration.toString())
+        form.append('ai_prompt', formData.ai_prompt)
+        form.append('persona', JSON.stringify(formData.persona))
+        form.append('rubric', JSON.stringify(formData.rubric))
+        form.append('kpi_config', JSON.stringify(formData.kpi_config))
 
-    try {
-      const form = new FormData()
-      form.append('title', formData.title)
-      form.append('description', formData.description)
-      form.append('difficulty', formData.difficulty)
-      form.append('estimated_duration', formData.estimated_duration.toString())
-      form.append('ai_prompt', formData.ai_prompt)
-      form.append('persona', JSON.stringify(formData.persona))
-      form.append('rubric', JSON.stringify(formData.rubric))
-      form.append('kpi_config', JSON.stringify(formData.kpi_config))
+        if (scenario) {
+          await updateScenario(scenario.id, form)
+        } else {
+          await createScenario(form)
+        }
 
-      if (scenario) {
-        await updateScenario(scenario.id, form)
-      } else {
-        await createScenario(form)
+        push('/scenarios')
+      } catch (error) {
+        console.error('Failed to save scenario:', error)
       }
-
-      router.push('/scenarios')
-    } catch (error) {
-      console.error('Failed to save scenario:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    })
   }
 
   const updateFormData = (path: string, value: any) => {
@@ -109,19 +107,19 @@ export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
+            <BookOpen className="size-4" />
             Basic Info
           </TabsTrigger>
           <TabsTrigger value="persona" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+            <User className="size-4" />
             Persona
           </TabsTrigger>
           <TabsTrigger value="prompt" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
+            <Zap className="size-4" />
             AI Prompt
           </TabsTrigger>
           <TabsTrigger value="scoring" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+            <Settings className="size-4" />
             Scoring
           </TabsTrigger>
         </TabsList>
@@ -286,64 +284,94 @@ export function ScenarioForm({ orgId, scenario }: ScenarioFormProps) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="scoring" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Scoring Rubric</CardTitle>
-              <CardDescription>
-                Define how performance will be evaluated for this scenario
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(formData.rubric).map(([key, criteria]) => {
-                  const typedCriteria = criteria as { weight: number; description: string }
-                  return (
-                    <div key={key} className="space-y-2 p-4 border rounded-lg">
-                      <Label className="capitalize font-medium">
-                        {key.replace('_', ' ')}
-                      </Label>
-                      <div className="space-y-2">
-                        <Input
-                          type="number"
-                          value={typedCriteria.weight}
-                          onChange={(e) => updateFormData(`rubric.${key}.weight`, parseInt(e.target.value))}
-                          placeholder="Weight %"
-                          max="100"
-                          min="0"
-                        />
-                        <Textarea
-                          value={typedCriteria.description}
-                          onChange={(e) => updateFormData(`rubric.${key}.description`, e.target.value)}
-                          placeholder="Description..."
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <ScenarioScoringTab
+          rubric={formData.rubric}
+          updateFormData={updateFormData}
+        />
       </Tabs>
 
-      <div className="flex items-center justify-between pt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
-          Cancel
-        </Button>
-        <div className="flex gap-2">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            <Save className="h-4 w-4 mr-2" />
-            {scenario ? 'Update' : 'Create'} Scenario
-          </Button>
-        </div>
-      </div>
+      <ScenarioFormActions
+        isLoading={isLoading}
+        isEditing={Boolean(scenario)}
+        onCancel={back}
+      />
     </form>
+  )
+}
+
+function ScenarioScoringTab({
+  rubric,
+  updateFormData,
+}: {
+  rubric: Record<string, { weight: number; description: string }>
+  updateFormData: (path: string, value: any) => void
+}) {
+  return (
+    <TabsContent value="scoring" className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Scoring Rubric</CardTitle>
+          <CardDescription>
+            Define how performance will be evaluated for this scenario
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            {Object.entries(rubric).map(([key, criteria]) => (
+              <div key={key} className="space-y-2 p-4 border rounded-lg">
+                <Label className="capitalize font-medium">
+                  {key.replace('_', ' ')}
+                </Label>
+                <div className="space-y-2">
+                  <Input
+                    type="number"
+                    value={criteria.weight}
+                    onChange={(e) => updateFormData(`rubric.${key}.weight`, parseInt(e.target.value))}
+                    placeholder="Weight %"
+                    max="100"
+                    min="0"
+                  />
+                  <Textarea
+                    value={criteria.description}
+                    onChange={(e) => updateFormData(`rubric.${key}.description`, e.target.value)}
+                    placeholder="Description..."
+                    rows={2}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </TabsContent>
+  )
+}
+
+function ScenarioFormActions({
+  isLoading,
+  isEditing,
+  onCancel,
+}: {
+  isLoading: boolean
+  isEditing: boolean
+  onCancel: () => void
+}) {
+  return (
+    <div className="flex items-center justify-between pt-6">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onCancel}
+      >
+        Cancel
+      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="size-4 mr-2 animate-spin" />}
+          <Save className="size-4 mr-2" />
+          {isEditing ? 'Update' : 'Create'} Scenario
+        </Button>
+      </div>
+    </div>
   )
 }

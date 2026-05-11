@@ -80,7 +80,7 @@ export function StatCard({
           )}>
             {label}
           </CardTitle>
-          {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+          {Icon && <Icon className="size-4 text-muted-foreground" />}
         </div>
         <div className="text-3xl font-headline font-bold">{value}</div>
       </CardHeader>
@@ -96,9 +96,9 @@ export function StatCard({
                   : "text-destructive"
               )}>
                 {calculatedTrend.direction === 'up' ? (
-                  <TrendingUp className="h-3 w-3" />
+                  <TrendingUp className="size-3" />
                 ) : (
-                  <TrendingDown className="h-3 w-3" />
+                  <TrendingDown className="size-3" />
                 )}
                 <span className="text-xs font-medium">
                   {calculatedTrend.value}
@@ -133,7 +133,7 @@ export function StatCard({
 /**
  * StatCard with gradient accent
  */
-export function StatCardGradient(props: StatCardProps) {
+function StatCardGradient(props: StatCardProps) {
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-transparent rounded-xl pointer-events-none" />
@@ -145,7 +145,7 @@ export function StatCardGradient(props: StatCardProps) {
 /**
  * Compact stat card for dense layouts
  */
-export function StatCardCompact({
+function StatCardCompact({
   label,
   value,
   trend,
@@ -159,8 +159,8 @@ export function StatCardCompact({
     )}>
       <div className="flex items-center gap-3">
         {Icon && (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-            <Icon className="h-5 w-5 text-muted-foreground" />
+          <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+            <Icon className="size-5 text-muted-foreground" />
           </div>
         )}
         <div>
@@ -174,9 +174,9 @@ export function StatCardCompact({
           trend.isPositive !== false ? "text-success" : "text-destructive"
         )}>
           {trend.direction === 'up' ? (
-            <TrendingUp className="h-4 w-4" />
+            <TrendingUp className="size-4" />
           ) : (
-            <TrendingDown className="h-4 w-4" />
+            <TrendingDown className="size-4" />
           )}
           <span>{trend.value}</span>
         </div>

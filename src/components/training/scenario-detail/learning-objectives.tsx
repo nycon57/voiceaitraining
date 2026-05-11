@@ -65,15 +65,15 @@ export function LearningObjectives({ scenario }: LearningObjectivesProps) {
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
-          <Lightbulb className="h-5 w-5" />
+          <Lightbulb className="size-5" />
           What You'll Learn
         </CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-3">
           {objectives.map((objective, index) => (
-            <li key={index} className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+            <li key={JSON.stringify(objective)} className="flex items-start gap-3">
+              <CheckCircle2 className="size-5 text-green-600 mt-0.5 shrink-0" />
               <div>
                 <div className="font-medium">{objective.title}</div>
                 {objective.description && (

@@ -15,15 +15,15 @@ export function OverviewCards({ metrics, isLoading = false }: OverviewCardsProps
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between gap-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-24 bg-zinc-200 rounded animate-pulse" />
               </CardTitle>
-              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+              <div className="size-4 bg-zinc-200 rounded animate-pulse" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-1" />
-              <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-8 w-16 bg-zinc-200 rounded animate-pulse mb-1" />
+              <div className="h-3 w-32 bg-zinc-200 rounded animate-pulse" />
             </CardContent>
           </Card>
         ))}
@@ -79,9 +79,9 @@ export function OverviewCards({ metrics, isLoading = false }: OverviewCardsProps
   const getTrendIcon = (trend: string | null) => {
     switch (trend) {
       case 'up':
-        return <TrendingUp className="h-4 w-4 text-green-600" />
+        return <TrendingUp className="size-4 text-green-600" />
       case 'down':
-        return <TrendingDown className="h-4 w-4 text-red-600" />
+        return <TrendingDown className="size-4 text-red-600" />
       default:
         return null
     }
@@ -105,15 +105,15 @@ export function OverviewCards({ metrics, isLoading = false }: OverviewCardsProps
         const trendIcon = getTrendIcon(card.trend)
 
         return (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card key={JSON.stringify(card)}>
+            <CardHeader className="flex flex-row items-center justify-between gap-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {card.title}
               </CardTitle>
-              <Icon className="h-4 w-4 text-muted-foreground" />
+              <Icon className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <div className="text-2xl font-bold">{card.value}</div>
                 {trendIcon}
               </div>

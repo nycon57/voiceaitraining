@@ -120,7 +120,7 @@ function NotificationEmailLayout({
             )}
             <Hr style={hr} />
             <Text style={footer}>
-              VoiceAI Training — Your AI sales coach.
+              VoiceAI Training : Your AI sales coach.
               <br />
               You can manage notification preferences in your account settings.
             </Text>

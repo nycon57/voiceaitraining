@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import {
   Github,
   Linkedin,
@@ -47,12 +47,12 @@ interface SocialLinkProps {
 const SocialLink = ({ href, icon: Icon, label }: SocialLinkProps) => (
   <Link
     href={href}
-    className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted hover:bg-accent transition-colors duration-200 group"
+    className="flex items-center justify-center size-10 rounded-lg bg-muted hover:bg-accent transition-colors duration-200 group"
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
   >
-    <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+    <Icon className="size-5 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
   </Link>
 );
 
@@ -121,14 +121,14 @@ export default function Footer() {
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <span className="bg-gradient-to-r from-[var(--chart-1)] to-[var(--chart-2)] bg-clip-text text-transparent font-medium">
+              <span className="font-medium text-primary">
                 🚀 Ready to Transform Your Sales Training?
               </span>
             </motion.div>
 
             {/* Headline */}
             <motion.h2
-              className="font-headline text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance"
+              className="font-headline text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-balance"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -160,7 +160,7 @@ export default function Footer() {
             >
               <Button size="lg" className="min-w-48 group bg-gradient-to-r from-[var(--chart-1)] to-[var(--chart-2)] hover:from-[var(--chart-1)]/90 hover:to-[var(--chart-2)]/90 border-0 text-white font-medium">
                 Start Free Trial
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                <ArrowRight className="size-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
               </Button>
               <Button size="lg" variant="outline" className="min-w-48 bg-background/20 backdrop-blur-sm border-white/20 hover:bg-background/30">
                 Book a Demo
@@ -176,15 +176,15 @@ export default function Footer() {
               viewport={{ once: true }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <div className="size-2 rounded-full bg-green-500" />
                 No credit card required
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <div className="size-2 rounded-full bg-blue-500" />
                 14-day free trial
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-chart-1/50" />
+                <div className="size-2 rounded-full bg-chart-1/50" />
                 Setup in 5 minutes
               </div>
             </motion.div>
@@ -208,15 +208,15 @@ export default function Footer() {
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Mail className="w-4 h-4" />
+                <Mail className="size-4" />
                 hello@speakstride.com
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Phone className="w-4 h-4" />
+                <Phone className="size-4" />
                 +1 (555) 123-4567
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4" />
+                <MapPin className="size-4" />
                 San Francisco, CA
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {PLATFORM_LINKS.map((link) => (
                 <li key={link.href} className="flex items-center gap-2">
-                  <link.icon className="w-4 h-4 text-muted-foreground" />
+                  <link.icon className="size-4 text-muted-foreground" />
                   <FooterLink href={link.href}>{link.label}</FooterLink>
                 </li>
               ))}

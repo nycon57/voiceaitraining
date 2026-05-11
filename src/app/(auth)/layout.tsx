@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { Mic, TrendingUp, Users } from 'lucide-react';
 import Logo from '@/components/layout/logo';
 
@@ -22,7 +22,7 @@ export default function AuthLayout({
       {/* Enhanced Floating Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-20 left-10 w-40 h-40 rounded-full bg-gradient-to-br from-[var(--chart-1)]/10 via-[var(--chart-2)]/8 to-[var(--chart-3)]/10 dark:from-[var(--chart-1)]/15 dark:via-[var(--chart-2)]/12 dark:to-[var(--chart-3)]/15 blur-3xl"
+          className="absolute top-20 left-10 size-40 rounded-full bg-gradient-to-br from-[var(--chart-1)]/10 via-[var(--chart-2)]/8 to-[var(--chart-3)]/10 dark:from-[var(--chart-1)]/15 dark:via-[var(--chart-2)]/12 dark:to-[var(--chart-3)]/15 blur-3xl"
           animate={{
             x: [0, 30, 0],
             y: [0, -20, 0],
@@ -35,7 +35,7 @@ export default function AuthLayout({
           }}
         />
         <motion.div
-          className="absolute top-40 right-20 w-32 h-32 rounded-full bg-gradient-to-br from-[var(--chart-2)]/8 via-[var(--chart-3)]/10 to-[var(--chart-1)]/8 dark:from-[var(--chart-2)]/12 dark:via-[var(--chart-3)]/15 dark:to-[var(--chart-1)]/12 blur-2xl"
+          className="absolute top-40 right-20 size-32 rounded-full bg-gradient-to-br from-[var(--chart-2)]/8 via-[var(--chart-3)]/10 to-[var(--chart-1)]/8 dark:from-[var(--chart-2)]/12 dark:via-[var(--chart-3)]/15 dark:to-[var(--chart-1)]/12 blur-2xl"
           animate={{
             x: [0, -25, 0],
             y: [0, 25, 0],
@@ -49,7 +49,7 @@ export default function AuthLayout({
           }}
         />
         <motion.div
-          className="absolute bottom-40 left-1/4 w-24 h-24 rounded-full bg-gradient-to-br from-[var(--chart-3)]/10 via-[var(--chart-1)]/8 to-[var(--chart-2)]/10 dark:from-[var(--chart-3)]/15 dark:via-[var(--chart-1)]/12 dark:to-[var(--chart-2)]/15 blur-xl"
+          className="absolute bottom-40 left-1/4 size-24 rounded-full bg-gradient-to-br from-[var(--chart-3)]/10 via-[var(--chart-1)]/8 to-[var(--chart-2)]/10 dark:from-[var(--chart-3)]/15 dark:via-[var(--chart-1)]/12 dark:to-[var(--chart-2)]/15 blur-xl"
           animate={{
             x: [0, 15, 0],
             y: [0, -15, 0],
@@ -76,7 +76,7 @@ export default function AuthLayout({
             <Logo className="w-auto mx-auto" />
 
             <motion.h1
-              className="text-4xl lg:text-5xl font-headline font-bold text-balance leading-tight"
+              className="text-4xl lg:text-5xl font-headline font-semibold text-balance leading-tight"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -115,8 +115,8 @@ export default function AuthLayout({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
                 >
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--chart-1)] via-[var(--chart-2)] to-[var(--chart-3)] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                    <feature.icon className="w-5 h-5 text-white" />
+                  <div className="size-11 rounded-xl bg-gradient-to-br from-[var(--chart-1)] via-[var(--chart-2)] to-[var(--chart-3)] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                    <feature.icon className="size-5 text-white" />
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-sm text-foreground">{feature.title}</h3>
@@ -139,7 +139,7 @@ export default function AuthLayout({
             {/* Enhanced Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
               <Logo className="w-auto mx-auto mb-4" />
-              <h2 className="text-2xl font-headline font-bold text-foreground">Welcome to SpeakStride</h2>
+              <h2 className="text-2xl font-headline font-semibold text-foreground">Welcome to SpeakStride</h2>
               <p className="text-foreground/70 dark:text-foreground/80 mt-2 leading-relaxed">
                 Sign in to start training with AI voice agents
               </p>

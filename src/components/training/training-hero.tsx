@@ -37,7 +37,7 @@ export function TrainingHero({ totalScenarios, totalTracks, latestAdditions = 0 
     <div className="space-y-6">
       {/* Hero Header */}
       <div className="space-y-2">
-        <h1 className="font-headline text-3xl font-bold tracking-tight">
+        <h1 className="font-headline text-3xl font-semibold tracking-tight">
           <span className="text-gradient">Training Hub</span>
         </h1>
         <p className="text-muted-foreground">
@@ -50,10 +50,10 @@ export function TrainingHero({ totalScenarios, totalTracks, latestAdditions = 0 
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.label} animated={false} className="border-l-4 border-l-primary/20">
+            <Card key={stat.label} animated={false} className="border border-l-primary/20">
               <CardContent className="flex items-center gap-4 p-4">
                 <div className={cn("rounded-lg p-3", stat.bgColor)}>
-                  <Icon className={cn("h-5 w-5", stat.iconColor)} />
+                  <Icon className={cn("size-5", stat.iconColor)} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>

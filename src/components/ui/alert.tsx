@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -108,4 +108,4 @@ function AlertDescription({
   )
 }
 
-export { Alert, AlertTitle, AlertDescription, alertVariants }
+export { Alert, AlertTitle, AlertDescription }

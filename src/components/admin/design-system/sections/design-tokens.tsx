@@ -142,10 +142,10 @@ function SpacingDemo({ size, value }: { size: string, value: { px: string, rem: 
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="size-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => copyValue(value.rem)}
             >
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
             </Button>
           </div>
           <div className="text-xs text-muted-foreground">
@@ -184,10 +184,10 @@ function RadiusDemo({ name, value }: { name: string, value: { px: string, usage:
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="size-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => copyValue(value.px)}
             >
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
             </Button>
           </div>
           <div className="text-xs text-muted-foreground">{value.px}</div>
@@ -224,10 +224,10 @@ function ShadowDemo({ name, shadow }: { name: string, shadow: { value: string, u
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="size-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => copyValue(shadow.value)}
             >
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
             </Button>
           </div>
         </div>
@@ -271,10 +271,10 @@ function AnimationDemo({ name, animation }: { name: string, animation: any }) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="size-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => copyValue(name)}
             >
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
             </Button>
           </div>
           <Button
@@ -283,7 +283,7 @@ function AnimationDemo({ name, animation }: { name: string, animation: any }) {
             onClick={toggleAnimation}
             className="gap-1"
           >
-            {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+            {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
             {isPlaying ? "Stop" : "Play"}
           </Button>
         </div>
@@ -291,7 +291,7 @@ function AnimationDemo({ name, animation }: { name: string, animation: any }) {
         <div className="mb-3 flex justify-center h-16 items-center">
           <div
             className={cn(
-              "bg-primary h-8 w-8 rounded-full",
+              "bg-primary size-8 rounded-full",
               isPlaying && `animate-${name}`
             )}
           />
@@ -312,7 +312,7 @@ export function DesignTokensSection() {
     <div className="space-y-12">
       {/* Header */}
       <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Design Tokens</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Design Tokens</h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Our design tokens provide the fundamental building blocks for consistent spacing,
           sizing, elevation, and motion throughout the SpeakStride platform.
@@ -322,7 +322,7 @@ export function DesignTokensSection() {
       {/* Spacing System */}
       <section id="spacing" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Spacing System</h2>
+          <h2 className="text-3xl font-semibold">Spacing System</h2>
           <p className="text-lg text-muted-foreground">
             A systematic approach to spacing that creates visual rhythm and hierarchy.
             Built on a 4px base unit for pixel-perfect alignment.
@@ -362,7 +362,7 @@ export function DesignTokensSection() {
       {/* Border Radius */}
       <section id="radius" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Border Radius</h2>
+          <h2 className="text-3xl font-semibold">Border Radius</h2>
           <p className="text-lg text-muted-foreground">
             Carefully crafted border radius values that create a modern, friendly appearance
             while maintaining professional aesthetics.
@@ -401,7 +401,7 @@ export function DesignTokensSection() {
       {/* Shadows & Elevation */}
       <section id="shadows" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Shadows & Elevation</h2>
+          <h2 className="text-3xl font-semibold">Shadows & Elevation</h2>
           <p className="text-lg text-muted-foreground">
             Subtle shadows that create depth and hierarchy without overwhelming the interface.
             Designed for both light and dark themes.
@@ -442,7 +442,7 @@ export function DesignTokensSection() {
       {/* Animations & Transitions */}
       <section id="animations" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Animations & Transitions</h2>
+          <h2 className="text-3xl font-semibold">Animations & Transitions</h2>
           <p className="text-lg text-muted-foreground">
             Smooth, purposeful motion that enhances user experience without distraction.
             Respects user preferences for reduced motion.

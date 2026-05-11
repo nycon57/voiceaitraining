@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as MenubarPrimitive from "@radix-ui/react-menubar"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -274,7 +274,7 @@ function MenubarSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto h-4 w-4" />
+      <ChevronRightIcon className="ml-auto size-4" />
     </MenubarPrimitive.SubTrigger>
   )
 }
@@ -298,19 +298,13 @@ function MenubarSubContent({
 
 export {
   Menubar,
-  MenubarPortal,
+
   MenubarMenu,
   MenubarTrigger,
   MenubarContent,
-  MenubarGroup,
+
   MenubarSeparator,
-  MenubarLabel,
+
   MenubarItem,
-  MenubarShortcut,
-  MenubarCheckboxItem,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarSub,
-  MenubarSubTrigger,
-  MenubarSubContent,
+
 }

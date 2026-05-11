@@ -78,7 +78,7 @@ export default function ProductDashboard() {
           const IconComponent = card.icon;
           return (
             <Card
-              key={index}
+              key={JSON.stringify(card)}
               className="group bg-accent/80 gap-4 border-none shadow-none"
             >
               <CardHeader className="gap-2.5">

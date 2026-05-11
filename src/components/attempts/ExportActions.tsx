@@ -84,7 +84,7 @@ export function ExportActions({ attemptId }: ExportActionsProps) {
       <CardContent className="pt-6">
         <div className="flex flex-col gap-3">
           <h3 className="font-semibold mb-2 flex items-center gap-2">
-            <Download className="h-4 w-4 text-primary" />
+            <Download className="size-4 text-primary" />
             Export Reports
           </h3>
           <Button
@@ -94,9 +94,9 @@ export function ExportActions({ attemptId }: ExportActionsProps) {
             disabled={isDownloadingTranscript || isDownloadingReport}
           >
             {isDownloadingTranscript ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="size-4 mr-2 animate-spin" />
             ) : (
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="size-4 mr-2" />
             )}
             Download Transcript (PDF)
           </Button>
@@ -106,9 +106,9 @@ export function ExportActions({ attemptId }: ExportActionsProps) {
             disabled={isDownloadingTranscript || isDownloadingReport}
           >
             {isDownloadingReport ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="size-4 mr-2 animate-spin" />
             ) : (
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="size-4 mr-2" />
             )}
             Download Full Report (PDF)
           </Button>

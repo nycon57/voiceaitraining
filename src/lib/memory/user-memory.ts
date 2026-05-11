@@ -11,20 +11,8 @@ export type MemoryType =
 
 export type Trend = 'improving' | 'declining' | 'stable' | 'new'
 
-export interface MemoryEntry {
-  id: string
-  key: string
-  value: Record<string, unknown>
-  score: number | null
-  trend: Trend | null
-  lastEvidenceAt: string | null
-  evidenceCount: number
-  updatedAt: string
-}
-
 export type WeaknessEntry = MemoryEntry
 export type SkillLevel = MemoryEntry
-export type TrajectoryPoint = MemoryEntry
 
 export interface UpsertMemoryParams {
   orgId: string

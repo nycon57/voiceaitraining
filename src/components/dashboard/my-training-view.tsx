@@ -42,7 +42,7 @@ export function MyTrainingView({ enrollments, assignments, maxItems }: MyTrainin
       {/* Toggle Switch */}
       <div className="flex items-center justify-end gap-2">
         <Label htmlFor="view-toggle" className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-          <LayoutGrid className={`h-4 w-4 ${!isTableView ? 'text-primary' : ''}`} />
+          <LayoutGrid className={`size-4 ${!isTableView ? 'text-primary' : ''}`} />
           Grid
         </Label>
         <Switch
@@ -51,7 +51,7 @@ export function MyTrainingView({ enrollments, assignments, maxItems }: MyTrainin
           onCheckedChange={setIsTableView}
         />
         <Label htmlFor="view-toggle" className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-          <TableIcon className={`h-4 w-4 ${isTableView ? 'text-primary' : ''}`} />
+          <TableIcon className={`size-4 ${isTableView ? 'text-primary' : ''}`} />
           Table
         </Label>
       </div>

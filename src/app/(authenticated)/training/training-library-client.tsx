@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRef, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -35,6 +35,7 @@ interface TrainingLibraryClientProps {
   totalTracks: number
   currentPage: number
   itemsPerPage: number
+  initialTab?: string
 }
 
 export function TrainingLibraryClient({
@@ -46,24 +47,22 @@ export function TrainingLibraryClient({
   totalTracks,
   currentPage,
   itemsPerPage,
+  initialTab = 'all',
 }: TrainingLibraryClientProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isEnrolling, setIsEnrolling] = useState<string | null>(null)
-
-  // Get initial tab from URL or default to 'all'
-  const initialTab = searchParams?.get('tab') || 'all'
+  const { push, refresh } = useRouter()
+  const isEnrollingRef = useRef<string | null>(null)
+  const initialStateRef = useRef({ tab: initialTab, scenarios: initialScenarios, tracks: initialTracks })
 
   // Calculate total items and pages based on active tab
-  const [activeTab, setActiveTab] = useState(initialTab)
+  const [activeTab, setActiveTab] = useState(() => initialStateRef.current.tab)
   const totalItems = activeTab === 'scenarios' ? totalScenarios :
                      activeTab === 'tracks' ? totalTracks :
                      totalScenarios + totalTracks
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
   // Filter content based on search and filters
-  const [filteredScenarios, setFilteredScenarios] = useState(initialScenarios)
-  const [filteredTracks, setFilteredTracks] = useState(initialTracks)
+  const [filteredScenarios, setFilteredScenarios] = useState(() => initialStateRef.current.scenarios)
+  const [filteredTracks, setFilteredTracks] = useState(() => initialStateRef.current.tracks)
 
   const handleFilterChange = useCallback((filters: TrainingFiltersState) => {
     // Filter scenarios
@@ -124,7 +123,7 @@ export function TrainingLibraryClient({
   }, [initialScenarios, initialTracks])
 
   const handleEnroll = async (id: string, type: 'scenario' | 'track') => {
-    setIsEnrolling(id)
+    isEnrollingRef.current = id
     try {
       await enrollUser({
         type,
@@ -132,31 +131,31 @@ export function TrainingLibraryClient({
         trackId: type === 'track' ? id : undefined,
       })
       toast.success(`Successfully enrolled in ${type}!`)
-      router.refresh()
+      refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to enroll')
     } finally {
-      setIsEnrolling(null)
+      isEnrollingRef.current = null
     }
   }
 
   const handleContinue = (id: string, type: 'scenario' | 'track') => {
-    router.push(`/play/${id}`)
+    push(`/play/${id}`)
   }
 
   const handleTabChange = (value: string) => {
     setActiveTab(value)
     // Update URL with new tab
-    const params = new URLSearchParams(searchParams?.toString())
+    const params = new URLSearchParams(window.location.search)
     params.set('tab', value)
     params.set('page', '1') // Reset to first page when changing tabs
-    router.push(`?${params.toString()}`, { scroll: false })
+    push(`?${params.toString()}`, { scroll: false })
   }
 
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams?.toString())
+    const params = new URLSearchParams(window.location.search)
     params.set('page', page.toString())
-    router.push(`?${params.toString()}`, { scroll: true })
+    push(`?${params.toString()}`, { scroll: true })
   }
 
   const clearFilters = () => {
@@ -181,38 +180,11 @@ export function TrainingLibraryClient({
 
       {/* Tabs and Content */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-        <div className="flex items-center justify-between">
-          <TabsList className="grid w-full max-w-md grid-cols-4">
-            <TabsTrigger value="all">
-              All
-              <Badge variant="secondary" className="ml-2">
-                {filteredScenarios.length + filteredTracks.length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="scenarios">
-              Scenarios
-              <Badge variant="secondary" className="ml-2">
-                {filteredScenarios.length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="tracks">
-              Tracks
-              <Badge variant="secondary" className="ml-2">
-                {filteredTracks.length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="assignments">
-              Assignments
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Result count */}
-          <p className="text-sm text-muted-foreground">
-            {activeTab === 'all' && `${filteredScenarios.length + filteredTracks.length} items`}
-            {activeTab === 'scenarios' && `${filteredScenarios.length} scenarios`}
-            {activeTab === 'tracks' && `${filteredTracks.length} tracks`}
-          </p>
-        </div>
+        <TrainingLibraryTabsHeader
+          activeTab={activeTab}
+          scenarioCount={filteredScenarios.length}
+          trackCount={filteredTracks.length}
+        />
 
         {/* All Tab */}
         <TabsContent value="all" className="space-y-4">
@@ -295,7 +267,7 @@ export function TrainingLibraryClient({
           ) : (
             <EmptyLibraryState
               onClearFilters={clearFilters}
-              searchQuery={searchParams?.get('search') || undefined}
+              searchQuery={undefined}
             />
           )}
         </TabsContent>
@@ -316,7 +288,7 @@ export function TrainingLibraryClient({
           ) : (
             <EmptyLibraryState
               onClearFilters={clearFilters}
-              searchQuery={searchParams?.get('search') || undefined}
+              searchQuery={undefined}
             />
           )}
         </TabsContent>
@@ -337,7 +309,7 @@ export function TrainingLibraryClient({
           ) : (
             <EmptyLibraryState
               onClearFilters={clearFilters}
-              searchQuery={searchParams?.get('search') || undefined}
+              searchQuery={undefined}
             />
           )}
         </TabsContent>
@@ -356,5 +328,49 @@ export function TrainingLibraryClient({
         </TabsContent>
       </Tabs>
     </>
+  )
+}
+
+function TrainingLibraryTabsHeader({
+  activeTab,
+  scenarioCount,
+  trackCount,
+}: {
+  activeTab: string
+  scenarioCount: number
+  trackCount: number
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <TabsList className="grid w-full max-w-md grid-cols-4">
+        <TabsTrigger value="all">
+          All
+          <Badge variant="secondary" className="ml-2">
+            {scenarioCount + trackCount}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger value="scenarios">
+          Scenarios
+          <Badge variant="secondary" className="ml-2">
+            {scenarioCount}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger value="tracks">
+          Tracks
+          <Badge variant="secondary" className="ml-2">
+            {trackCount}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger value="assignments">
+          Assignments
+        </TabsTrigger>
+      </TabsList>
+
+      <p className="text-sm text-muted-foreground">
+        {activeTab === 'all' && `${scenarioCount + trackCount} items`}
+        {activeTab === 'scenarios' && `${scenarioCount} scenarios`}
+        {activeTab === 'tracks' && `${trackCount} tracks`}
+      </p>
+    </div>
   )
 }

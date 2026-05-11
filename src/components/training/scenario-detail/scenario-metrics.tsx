@@ -114,7 +114,7 @@ function MetricsGrid({
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
-          <Target className="h-5 w-5" />
+          <Target className="size-5" />
           Performance Metrics
         </CardTitle>
         <CardDescription>What we measure in this scenario</CardDescription>
@@ -126,9 +126,9 @@ function MetricsGrid({
             const Icon = metric.icon
 
             return (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border">
+              <div key={JSON.stringify(metric)} className="flex items-start gap-3 p-3 rounded-lg border">
                 <div className={`rounded-full ${colors.bg} p-2 shrink-0`}>
-                  <Icon className={`h-4 w-4 ${colors.text}`} />
+                  <Icon className={`size-4 ${colors.text}`} />
                 </div>
                 <div>
                   <div className="font-medium text-sm mb-1">{metric.title}</div>

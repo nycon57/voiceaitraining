@@ -58,7 +58,7 @@ export default async function AttemptResultsPage({
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/training`}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="size-4 mr-2" />
             Back to Training
           </Link>
         </Button>
@@ -81,7 +81,7 @@ export default async function AttemptResultsPage({
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-primary/10 p-2.5">
-                <Target className="h-5 w-5 text-primary" />
+                <Target className="size-5 text-primary" />
               </div>
               <div>
                 <div className="text-sm text-muted-foreground font-medium">Your Score</div>
@@ -96,7 +96,7 @@ export default async function AttemptResultsPage({
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-muted p-2.5">
-                <Users className="h-5 w-5 text-muted-foreground" />
+                <Users className="size-5 text-muted-foreground" />
               </div>
               <div>
                 <div className="text-sm text-muted-foreground font-medium">Platform Avg</div>
@@ -111,7 +111,7 @@ export default async function AttemptResultsPage({
               <div className={`rounded-full p-2.5 ${
                 (attempt.score || 0) > 82 ? 'bg-primary/10' : 'bg-destructive/10'
               }`}>
-                <TrendingUp className={`h-5 w-5 ${
+                <TrendingUp className={`size-5 ${
                   (attempt.score || 0) > 82 ? 'text-primary' : 'text-destructive'
                 }`} />
               </div>
@@ -130,7 +130,7 @@ export default async function AttemptResultsPage({
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-muted p-2.5">
-                <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                <BarChart3 className="size-5 text-muted-foreground" />
               </div>
               <div>
                 <div className="text-sm text-muted-foreground font-medium">Rank</div>
@@ -147,19 +147,19 @@ export default async function AttemptResultsPage({
       <Tabs defaultValue="feedback" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="feedback" className="flex items-center gap-2">
-            <Lightbulb className="h-4 w-4" />
+            <Lightbulb className="size-4" />
             AI Feedback
           </TabsTrigger>
           <TabsTrigger value="kpis" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
+            <BarChart3 className="size-4" />
             Performance KPIs
           </TabsTrigger>
           <TabsTrigger value="breakdown" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
+            <Target className="size-4" />
             Score Breakdown
           </TabsTrigger>
           <TabsTrigger value="transcript" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+            <FileText className="size-4" />
             Transcript
           </TabsTrigger>
         </TabsList>
@@ -223,7 +223,7 @@ export default async function AttemptResultsPage({
             <div className="rounded-lg border border-primary/20 p-4 hover:bg-primary/5 transition-colors">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-primary/10 p-2 shrink-0">
-                  <Lightbulb className="h-5 w-5 text-primary" />
+                  <Lightbulb className="size-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">Review Best Practices</h4>
@@ -239,7 +239,7 @@ export default async function AttemptResultsPage({
             <div className="rounded-lg border border-primary/20 p-4 hover:bg-primary/5 transition-colors">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-primary/10 p-2 shrink-0">
-                  <Target className="h-5 w-5 text-primary" />
+                  <Target className="size-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">Similar Scenarios</h4>
@@ -255,7 +255,7 @@ export default async function AttemptResultsPage({
             <div className="rounded-lg border border-primary/20 p-4 hover:bg-primary/5 transition-colors">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-primary/10 p-2 shrink-0">
-                  <BarChart3 className="h-5 w-5 text-primary" />
+                  <BarChart3 className="size-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm mb-1">Track Progress</h4>

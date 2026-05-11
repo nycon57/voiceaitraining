@@ -29,11 +29,11 @@ export function ScenarioInsightsTable({ data, isLoading = false }: ScenarioInsig
         <CardContent>
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div key={i} className="flex items-center gap-4">
+                <div className="h-4 w-32 bg-zinc-200 rounded animate-pulse" />
+                <div className="h-4 w-16 bg-zinc-200 rounded animate-pulse" />
+                <div className="h-4 w-20 bg-zinc-200 rounded animate-pulse" />
+                <div className="h-4 w-24 bg-zinc-200 rounded animate-pulse" />
               </div>
             ))}
           </div>
@@ -97,7 +97,7 @@ export function ScenarioInsightsTable({ data, isLoading = false }: ScenarioInsig
                   <span className="font-medium">{scenario.attempt_count}</span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <span className={`font-medium ${getScoreColor(scenario.average_score)}`}>
                       {scenario.average_score}%
                     </span>
@@ -108,7 +108,7 @@ export function ScenarioInsightsTable({ data, isLoading = false }: ScenarioInsig
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <span className="font-medium">{scenario.completion_rate}%</span>
                     <Progress
                       value={scenario.completion_rate}

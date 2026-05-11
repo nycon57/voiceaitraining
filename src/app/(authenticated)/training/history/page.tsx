@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Training History | SpeakStride',
+}
+
 import { Suspense } from 'react'
 import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -52,9 +58,7 @@ async function getMyCourses(userId: string): Promise<CourseEnrollment[]> {
   try {
     const enrollments = await getUserEnrollments(userId)
 
-    return enrollments
-      .filter(e => e.status === 'active') // Only show active enrollments
-      .map(enrollment => ({
+    return enrollments.flatMap((enrollment) => enrollment.status === 'active' ? [{
         id: enrollment.id,
         type: enrollment.type,
         title: enrollment.type === 'scenario'
@@ -65,7 +69,7 @@ async function getMyCourses(userId: string): Promise<CourseEnrollment[]> {
         href: enrollment.type === 'scenario'
           ? `/play/${enrollment.scenario_id}`
           : `/tracks/${enrollment.track_id}`,
-      }))
+      }] : [])
   } catch (error) {
     console.error('Failed to get my courses:', error)
     return []
@@ -102,7 +106,7 @@ export default async function TrainingHistoryPage() {
       <div className="space-y-8 p-4 md:p-6">
         {/* Page Header */}
         <div className="space-y-2">
-          <h1 className="font-headline text-3xl font-bold tracking-tight">
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">
             <span className="text-gradient">Training History</span>
           </h1>
           <p className="text-muted-foreground">
@@ -125,7 +129,7 @@ export default async function TrainingHistoryPage() {
         {myCourses.length > 0 && (
           <section className="space-y-4">
             <div>
-              <h2 className="font-headline text-2xl font-bold tracking-tight">Active Courses</h2>
+              <h2 className="font-headline text-2xl font-semibold tracking-tight">Active Courses</h2>
               <p className="text-sm text-muted-foreground">
                 Continue your enrolled scenarios and tracks
               </p>
@@ -147,7 +151,7 @@ export default async function TrainingHistoryPage() {
         {/* Activity History Table */}
         <section className="space-y-4">
           <div>
-            <h2 className="font-headline text-2xl font-bold tracking-tight">All Activity</h2>
+            <h2 className="font-headline text-2xl font-semibold tracking-tight">All Activity</h2>
             <p className="text-sm text-muted-foreground">
               Complete history of your training sessions
             </p>

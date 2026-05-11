@@ -74,15 +74,15 @@ export function TrackCurriculum({ track, progress }: TrackCurriculumProps) {
                 <div className="shrink-0 mt-1">
                   {isCompleted ? (
                     <div className="rounded-full bg-green-100 dark:bg-green-950 p-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <CheckCircle2 className="size-5 text-green-600" />
                     </div>
                   ) : isCurrent ? (
                     <div className="rounded-full bg-blue-100 dark:bg-blue-950 p-2">
-                      <ArrowRight className="h-5 w-5 text-blue-600" />
+                      <ArrowRight className="size-5 text-blue-600" />
                     </div>
                   ) : (
                     <div className="rounded-full bg-muted p-2">
-                      <Circle className="h-5 w-5 text-muted-foreground" />
+                      <Circle className="size-5 text-muted-foreground" />
                     </div>
                   )}
                 </div>
@@ -128,13 +128,13 @@ export function TrackCurriculum({ track, progress }: TrackCurriculumProps) {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         {scenario.estimated_duration && (
                           <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                            <Clock className="size-3" />
                             <span>{Math.round(scenario.estimated_duration / 60)} min</span>
                           </div>
                         )}
                         {attemptCount > 0 && (
                           <div className="flex items-center gap-1">
-                            <BarChart3 className="h-3 w-3" />
+                            <BarChart3 className="size-3" />
                             <span>{attemptCount} attempts</span>
                           </div>
                         )}
@@ -150,7 +150,7 @@ export function TrackCurriculum({ track, progress }: TrackCurriculumProps) {
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/training/scenarios/${scenario.id}`}>
                           View
-                          <ArrowRight className="ml-1 h-4 w-4" />
+                          <ArrowRight className="ml-1 size-4" />
                         </Link>
                       </Button>
                     )}

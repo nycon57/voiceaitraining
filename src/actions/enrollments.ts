@@ -1,7 +1,7 @@
 'use server'
 
 import { assertHuman } from '@/lib/botid'
-import { withOrgGuard } from '@/lib/auth'
+import { withOrgGuard, requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -76,6 +76,7 @@ function computeEnrollmentStatus(completedAt: string | null, progressPercentage:
  * @throws Error if enrollment validation fails or duplicate exists
  */
 export async function enrollUser(data: EnrollInput) {
+  await requireAuth()
   await assertHuman()
 
   const validatedData = enrollSchema.parse(data)
@@ -181,7 +182,8 @@ export async function enrollUser(data: EnrollInput) {
  * @returns Success status
  * @throws Error if enrollment not found or permission denied
  */
-export async function unenrollUser(enrollmentId: string) {
+async function unenrollUser(enrollmentId: string) {
+  await requireAuth()
   await assertHuman()
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -228,15 +230,10 @@ export async function unenrollUser(enrollmentId: string) {
  * @throws Error if permission denied (non-admin viewing other user's enrollments)
  */
 export async function getUserEnrollments(userId?: string): Promise<EnrichedEnrollment[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetUserId = userId || user.id
 
-    console.log('[DEBUG] getUserEnrollments - Query parameters:', {
-      currentUser: user.id,
-      currentUserRole: user.role,
-      targetUserId,
-      orgId,
-    })
 
     // Check permission to view other user's enrollments
     if (targetUserId !== user.id && !['admin', 'manager', 'hr'].includes(user.role || '')) {
@@ -244,13 +241,6 @@ export async function getUserEnrollments(userId?: string): Promise<EnrichedEnrol
       throw new Error('Permission denied')
     }
 
-    console.log('[DEBUG] getUserEnrollments - Executing Supabase query:', {
-      table: 'user_enrollments',
-      filters: {
-        org_id: orgId,
-        clerk_user_id: targetUserId,
-      },
-    })
 
     // Get enrollments with related data
     const { data: enrollments, error } = await supabase
@@ -286,7 +276,6 @@ export async function getUserEnrollments(userId?: string): Promise<EnrichedEnrol
       throw new Error(`Failed to get enrollments: ${error.message}`)
     }
 
-    console.log('[DEBUG] getUserEnrollments - Query succeeded, found', enrollments?.length || 0, 'enrollments')
 
     // Enrich with attempt statistics
     const enrichedEnrollments: EnrichedEnrollment[] = await Promise.all(
@@ -375,7 +364,8 @@ export async function getUserEnrollments(userId?: string): Promise<EnrichedEnrol
  * @returns Updated enrollment
  * @throws Error if enrollment not found or permission denied
  */
-export async function updateEnrollmentProgress(enrollmentId: string, progress: number) {
+async function updateEnrollmentProgress(enrollmentId: string, progress: number) {
+  await requireAuth()
   await assertHuman()
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -430,7 +420,8 @@ export async function updateEnrollmentProgress(enrollmentId: string, progress: n
  * @returns Updated enrollment
  * @throws Error if enrollment not found or permission denied
  */
-export async function markEnrollmentComplete(enrollmentId: string) {
+async function markEnrollmentComplete(enrollmentId: string) {
+  await requireAuth()
   await assertHuman()
 
   return withOrgGuard(async (user, orgId, supabase) => {

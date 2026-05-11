@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { SearchIcon } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m as motion, AnimatePresence } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 import {
@@ -35,7 +35,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        'bg-popover/95 text-popover-foreground backdrop-blur-sm flex h-full w-full flex-col overflow-hidden rounded-md border shadow-lg transition-all duration-200',
+        'bg-popover/95 text-popover-foreground backdrop-blur-sm flex size-full flex-col overflow-hidden rounded-md border shadow-lg transition-all duration-200',
         className
       )}
       {...props}

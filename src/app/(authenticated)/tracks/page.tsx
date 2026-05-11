@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Training Tracks | SpeakStride',
+}
+
 import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Header } from "@/components/layout/header"
@@ -146,13 +152,13 @@ function getDifficultyBadgeVariant(difficulty: string) {
 function getScenarioIcon(status: string) {
   switch (status) {
     case 'completed':
-      return <CheckCircle2 className="h-5 w-5 text-success" />
+      return <CheckCircle2 className="size-5 text-success" />
     case 'current':
-      return <Circle className="h-5 w-5 text-primary fill-primary" />
+      return <Circle className="size-5 text-primary fill-primary" />
     case 'locked':
-      return <Lock className="h-5 w-5 text-muted-foreground" />
+      return <Lock className="size-5 text-muted-foreground" />
     default:
-      return <Circle className="h-5 w-5 text-muted-foreground" />
+      return <Circle className="size-5 text-muted-foreground" />
   }
 }
 
@@ -168,14 +174,13 @@ export default async function TracksPage() {
   const enrolledTracks = mockTracks.filter(t => t.enrolled).length
   const completedTracks = mockTracks.filter(t => t.enrolled && t.progress === 100).length
   const avgCompletionTime = '2.1 weeks'
-
   return (
     <>
       <Header />
       <div className="space-y-6 p-4 md:p-6">
         {/* Page Header */}
         <div className="flex flex-col gap-2">
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Training Tracks</h1>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">Training Tracks</h1>
           <p className="text-muted-foreground">
             Browse structured learning paths and track your progress through comprehensive training curricula
           </p>
@@ -183,41 +188,41 @@ export default async function TracksPage() {
 
         {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card animated={false} className="border-l-4 border-l-chart-1">
+          <Card animated={false} className="border border-l-chart-1">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Total Tracks</CardDescription>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <BookOpen className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{totalTracks}</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card animated={false} className="border-l-4 border-l-chart-2">
+          <Card animated={false} className="border border-l-chart-2">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Enrolled</CardDescription>
-                <Target className="h-4 w-4 text-muted-foreground" />
+                <Target className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{enrolledTracks}</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card animated={false} className="border-l-4 border-l-success">
+          <Card animated={false} className="border border-l-success">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Completed</CardDescription>
-                <Award className="h-4 w-4 text-muted-foreground" />
+                <Award className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{completedTracks}</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card animated={false} className="border-l-4 border-l-info">
+          <Card animated={false} className="border border-l-info">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Avg Completion</CardDescription>
-                <Clock className="h-4 w-4 text-muted-foreground" />
+                <Clock className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-lg font-headline">{avgCompletionTime}</CardTitle>
             </CardHeader>
@@ -240,14 +245,12 @@ export default async function TracksPage() {
             {mockTracks.filter(t => t.featured).length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-warning fill-warning" />
+                  <Star className="size-5 text-warning fill-warning" />
                   <h2 className="font-headline text-xl font-semibold">Featured Tracks</h2>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
-                  {mockTracks.filter(t => t.featured).map(track => (
-                    <TrackCard key={track.id} track={track} featured />
-                  ))}
+                  <TrackCardList filter="featured" featured />
                 </div>
               </div>
             )}
@@ -257,50 +260,38 @@ export default async function TracksPage() {
               <h2 className="font-headline text-xl font-semibold">All Training Tracks</h2>
 
               <div className="grid gap-6 lg:grid-cols-2">
-                {mockTracks.filter(t => !t.featured).map(track => (
-                  <TrackCard key={track.id} track={track} />
-                ))}
+                <TrackCardList filter="standard" />
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="in-progress" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {mockTracks.filter(t => t.enrolled && t.progress > 0 && t.progress < 100).map(track => (
-                <TrackCard key={track.id} track={track} />
-              ))}
+              <TrackCardList filter="in-progress" />
             </div>
           </TabsContent>
 
           <TabsContent value="completed" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {mockTracks.filter(t => t.enrolled && t.progress === 100).map(track => (
-                <TrackCard key={track.id} track={track} />
-              ))}
+              <TrackCardList filter="completed" />
             </div>
           </TabsContent>
 
           <TabsContent value="recommended" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {mockTracks.filter(t => t.rating >= 4.7).map(track => (
-                <TrackCard key={track.id} track={track} />
-              ))}
+              <TrackCardList filter="recommended" />
             </div>
           </TabsContent>
 
           <TabsContent value="loan-officers" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {mockTracks.filter(t => t.industry === 'loan-officers').map(track => (
-                <TrackCard key={track.id} track={track} />
-              ))}
+              <TrackCardList filter="loan-officers" />
             </div>
           </TabsContent>
 
           <TabsContent value="sales" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              {mockTracks.filter(t => t.industry === 'sales').map(track => (
-                <TrackCard key={track.id} track={track} />
-              ))}
+              <TrackCardList filter="sales" />
             </div>
           </TabsContent>
         </Tabs>
@@ -312,6 +303,37 @@ export default async function TracksPage() {
 interface TrackCardProps {
   track: typeof mockTracks[0]
   featured?: boolean
+}
+
+type TrackFilter = 'featured' | 'standard' | 'in-progress' | 'completed' | 'recommended' | 'loan-officers' | 'sales'
+
+function matchesTrackFilter(track: (typeof mockTracks)[number], filter: TrackFilter) {
+  switch (filter) {
+    case 'featured':
+      return track.featured
+    case 'standard':
+      return !track.featured
+    case 'in-progress':
+      return track.enrolled && track.progress > 0 && track.progress < 100
+    case 'completed':
+      return track.enrolled && track.progress === 100
+    case 'recommended':
+      return track.rating >= 4.7
+    case 'loan-officers':
+      return track.industry === 'loan-officers'
+    case 'sales':
+      return track.industry === 'sales'
+  }
+}
+
+function TrackCardList({ filter, featured = false }: { filter: TrackFilter; featured?: boolean }) {
+  const cards = []
+  for (const track of mockTracks) {
+    if (matchesTrackFilter(track, filter)) {
+      cards.push(<TrackCard key={track.id} track={track} featured={featured} />)
+    }
+  }
+  return <>{cards}</>
 }
 
 function TrackCard({ track, featured = false }: TrackCardProps) {
@@ -336,7 +358,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
               </Badge>
               {featured && (
                 <Badge variant="brand" size="sm">
-                  <Star className="h-3 w-3 mr-1" />
+                  <Star className="size-3 mr-1" />
                   Featured
                 </Badge>
               )}
@@ -355,7 +377,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
           </div>
           <div className="flex-shrink-0">
             <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-muted/50">
-              <Briefcase className="h-6 w-6 text-muted-foreground mb-1" />
+              <Briefcase className="size-6 text-muted-foreground mb-1" />
               <span className="text-xs font-medium">{track.scenarioCount}</span>
               <span className="text-xs text-muted-foreground">scenarios</span>
             </div>
@@ -381,15 +403,15 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
         {/* Track Metadata */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
+            <Clock className="size-4" />
             <span>{track.estimatedDuration}</span>
           </div>
           <div className="flex items-center gap-1">
-            <UsersIcon className="h-4 w-4" />
+            <UsersIcon className="size-4" />
             <span>{track.completions} completions</span>
           </div>
           <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 fill-warning text-warning" />
+            <Star className="size-4 fill-warning text-warning" />
             <span>{track.rating}</span>
           </div>
         </div>
@@ -425,7 +447,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
           {track.enrolled ? (
             <Button className="flex-1" size="lg">
               {track.progress === 0 ? 'Start Track' : 'Continue'}
-              <ChevronRight className="ml-2 h-4 w-4" />
+              <ChevronRight className="ml-2 size-4" />
             </Button>
           ) : (
             <Button className="flex-1" size="lg" variant="default">
@@ -450,7 +472,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
                   </Badge>
                   {featured && (
                     <Badge variant="brand" size="sm">
-                      <Star className="h-3 w-3 mr-1" />
+                      <Star className="size-3 mr-1" />
                       Featured
                     </Badge>
                   )}
@@ -482,7 +504,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
                     <CardHeader className="pb-3">
                       <CardDescription>Rating</CardDescription>
                       <CardTitle className="text-xl font-headline flex items-center gap-1">
-                        <Star className="h-5 w-5 fill-warning text-warning" />
+                        <Star className="size-5 fill-warning text-warning" />
                         {track.rating}
                       </CardTitle>
                       <p className="text-xs text-muted-foreground">
@@ -515,7 +537,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
                   <Card animated={false}>
                     <CardHeader>
                       <CardTitle className="font-headline text-sm flex items-center gap-2">
-                        <Lock className="h-4 w-4" />
+                        <Lock className="size-4" />
                         Prerequisites Required
                       </CardTitle>
                       <CardDescription>
@@ -557,7 +579,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
                                     </p>
                                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                                       <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
+                                        <Clock className="size-3" />
                                         {scenario.estimatedMinutes} min
                                       </span>
                                       {scenario.status === 'completed' && (
@@ -575,7 +597,7 @@ function TrackCard({ track, featured = false }: TrackCardProps) {
                                   {scenario.status !== 'locked' && (
                                     <Button size="sm" variant="ghost">
                                       Start
-                                      <ChevronRight className="ml-1 h-3 w-3" />
+                                      <ChevronRight className="ml-1 size-3" />
                                     </Button>
                                   )}
                                 </div>

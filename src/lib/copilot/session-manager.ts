@@ -58,7 +58,7 @@ export function createSession(
   return session
 }
 
-export function getSession(id: string): CopilotSession | undefined {
+function getSession(id: string): CopilotSession | undefined {
   return sessions.get(id)
 }
 
@@ -87,10 +87,10 @@ export function getActiveSessionCount(): number {
   return sessions.size
 }
 
-export function getSessionsByUser(userId: string): CopilotSession[] {
+function getSessionsByUser(userId: string): CopilotSession[] {
   return Array.from(sessions.values()).filter((s) => s.userId === userId)
 }
 
-export function getSessionsByOrg(orgId: string): CopilotSession[] {
+function getSessionsByOrg(orgId: string): CopilotSession[] {
   return Array.from(sessions.values()).filter((s) => s.orgId === orgId)
 }

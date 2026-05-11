@@ -55,7 +55,7 @@ export function AttemptHeader({ attempt, formatDuration = defaultFormatDuration 
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Trophy className="h-5 w-5" />
+              <Trophy className="size-5" />
               Overall Performance Score
             </CardTitle>
             <CardDescription>

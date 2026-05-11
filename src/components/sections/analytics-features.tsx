@@ -1,9 +1,16 @@
 "use client";
 
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Line, LineChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { BarChart3, TrendingUp, Users, Award, Target, Calendar } from "lucide-react";
+
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false })
+const Line = dynamic(() => import('recharts').then((mod) => mod.Line), { ssr: false })
+const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), { ssr: false })
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false })
 
 // Sample data for charts
 const performanceData = [
@@ -84,7 +91,7 @@ export default function AnalyticsFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Everything you need to{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               optimize performance
             </span>
           </h2>
@@ -96,7 +103,7 @@ export default function AnalyticsFeatures() {
         {/* Sample Analytics Dashboard */}
         <div className="mb-20">
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold mb-2">Sample Analytics Dashboard</h3>
+            <h3 className="text-2xl font-semibold mb-2">Sample Analytics Dashboard</h3>
             <p className="text-muted-foreground">See the kind of insights you'll get right out of the box</p>
           </div>
 
@@ -109,28 +116,26 @@ export default function AnalyticsFeatures() {
               </CardHeader>
               <CardContent>
                 <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="month" className="text-xs" />
-                      <YAxis className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line
-                        type="monotone"
-                        dataKey="teamScore"
-                        stroke="var(--color-teamScore)"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="individualScore"
-                        stroke="var(--color-individualScore)"
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="month" className="text-xs" />
+                    <YAxis className="text-xs" />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line
+                      type="monotone"
+                      dataKey="teamScore"
+                      stroke="var(--color-teamScore)"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="individualScore"
+                      stroke="var(--color-individualScore)"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -146,7 +151,7 @@ export default function AnalyticsFeatures() {
                   {leaderboardData.slice(0, 5).map((rep, index) => (
                     <div key={rep.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        <div className={`size-6 rounded-full flex items-center justify-center text-xs font-bold ${
                           index === 0 ? 'bg-yellow-500 text-white' :
                           index === 1 ? 'bg-gray-400 text-white' :
                           index === 2 ? 'bg-orange-500 text-white' :
@@ -175,7 +180,7 @@ export default function AnalyticsFeatures() {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold text-primary">
                     485%
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">Training ROI</div>
@@ -187,7 +192,7 @@ export default function AnalyticsFeatures() {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold text-primary">
                     92%
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">Team Average</div>
@@ -199,7 +204,7 @@ export default function AnalyticsFeatures() {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold text-primary">
                     23%
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">Avg Improvement</div>
@@ -211,7 +216,7 @@ export default function AnalyticsFeatures() {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold text-primary">
                     100%
                   </div>
                   <div className="text-sm text-muted-foreground mt-1">Participation</div>
@@ -227,12 +232,12 @@ export default function AnalyticsFeatures() {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={index} className="relative overflow-hidden border transition-all duration-300 hover:shadow-lg hover:border-chart-2/50">
+              <Card key={JSON.stringify(feature)} className="relative overflow-hidden border transition-all duration-300 hover:shadow-lg hover:border-chart-2/50">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3"></div>
                 <CardHeader>
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
-                      <Icon className="h-6 w-6 text-white" />
+                    <div className="size-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                      <Icon className="size-6 text-white" />
                     </div>
                     <div>
                       <CardTitle className="text-lg">{feature.title}</CardTitle>
@@ -253,24 +258,24 @@ export default function AnalyticsFeatures() {
         {/* Bottom CTA Section */}
         <div className="mt-20 text-center">
           <div className="rounded-2xl bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10 p-8 md:p-12 border">
-            <h3 className="text-2xl font-bold mb-4">Ready to see your analytics in action?</h3>
+            <h3 className="text-2xl font-semibold mb-4">Ready to see your analytics in action?</h3>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
               Get instant visibility into your team's performance with dashboards that update in real-time.
-              No more manual reporting, no more guesswork—just clear insights that drive results.
+              No more manual reporting, no more guesswork:just clear insights that drive results.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
+              <Link
                 href="/request-demo"
                 className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
               >
                 See Analytics Demo
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/request-demo"
                 className="border border-chart-2/50 text-chart-2 px-8 py-3 rounded-lg font-semibold hover:bg-chart-1/5 transition-colors"
               >
                 Talk to Sales
-              </a>
+              </Link>
             </div>
           </div>
         </div>

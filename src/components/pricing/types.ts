@@ -1,27 +1,6 @@
 import { type LucideIcon } from 'lucide-react';
 
 /**
- * Plan tier types
- */
-export type PlanType = 'basic' | 'business' | 'enterprise';
-
-/**
- * Feature value - can be boolean (included/not included) or string (description)
- */
-export interface FeatureItem {
-  name: string;
-  value: string | boolean;
-}
-
-/**
- * Grouped features by category
- */
-export interface PlanFeatures {
-  training: FeatureItem[];
-  analytics: FeatureItem[];
-}
-
-/**
  * Complete plan definition
  */
 export interface Plan {
@@ -76,14 +55,6 @@ export interface Plan {
    * Feature lists grouped by category
    */
   features: PlanFeatures;
-}
-
-/**
- * Feature category configuration
- */
-export interface CategoryConfig {
-  name: string;
-  icon: LucideIcon;
 }
 
 /**

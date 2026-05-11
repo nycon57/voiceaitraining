@@ -4,13 +4,7 @@ export { TrainingFilters } from './training-filters'
 export { ScenarioCard } from './scenario-card'
 export { TrackCard } from './track-card'
 export { EmptyLibraryState } from './empty-library-state'
-export { TrainingHero } from './training-hero'
-export { ActivityHistoryTable } from './activity-history-table'
-
-export type { TrainingStatsCardsProps } from './training-stats-cards'
-export type { MyCoursesProps, CourseEnrollment } from './my-courses'
-export type { TrainingFiltersProps, TrainingFiltersState } from './training-filters'
-export type { ScenarioCardProps, ScenarioCardData } from './scenario-card'
-export type { TrackCardProps, TrackCardData } from './track-card'
-export type { EmptyLibraryStateProps } from './empty-library-state'
-export type { ActivityHistoryRow } from './activity-history-table'
+export type { CourseEnrollment } from './my-courses';
+export type { TrainingFiltersState } from './training-filters';
+export type { ScenarioCardData } from './scenario-card';
+export type { TrackCardData } from './track-card';

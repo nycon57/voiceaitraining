@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link'
 import { Stethoscope, DollarSign, Shield, Users, TrendingUp, FileText } from "lucide-react";
 
 const healthcareFeatures = [
@@ -49,7 +50,7 @@ export default function HealthcareFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Master{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Healthcare-Specific
             </span>{" "}
             Sales Scenarios
@@ -67,7 +68,7 @@ export default function HealthcareFeatures() {
             const Icon = feature.icon;
             return (
               <div
-                key={index}
+                key={JSON.stringify(feature)}
                 className="group relative rounded-2xl border border-border bg-card p-6 transition-all hover:border-chart-2/50 hover:shadow-lg dark:hover:border-chart-2/50"
               >
                 {/* Gradient background on hover */}
@@ -75,8 +76,8 @@ export default function HealthcareFeatures() {
 
                 <div className="relative">
                   {/* Icon */}
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
-                    <Icon className="h-6 w-6 text-white" />
+                  <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
+                    <Icon className="size-6 text-white" />
                   </div>
 
                   {/* Content */}
@@ -91,7 +92,7 @@ export default function HealthcareFeatures() {
                     <ul className="space-y-1">
                       {feature.benefits.map((benefit, benefitIndex) => (
                         <li key={benefitIndex} className="flex items-center text-sm text-muted-foreground">
-                          <div className="mr-2 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3" />
+                          <div className="mr-2 size-1.5 rounded-full bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3" />
                           {benefit}
                         </li>
                       ))}
@@ -106,18 +107,18 @@ export default function HealthcareFeatures() {
         {/* Bottom CTA */}
         <div className="mt-16 text-center">
           <div className="rounded-2xl border border-border bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 p-8 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10">
-            <h3 className="mb-4 text-2xl font-bold">Ready to Transform Your Healthcare Sales Team?</h3>
+            <h3 className="mb-4 text-2xl font-semibold">Ready to Transform Your Healthcare Sales Team?</h3>
             <p className="mb-6 text-muted-foreground max-w-2xl mx-auto">
               Join healthcare companies that trust AI voice training to build clinical credibility,
               shorten sales cycles, and close more deals with confident, knowledgeable sales teams.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a
+              <Link
                 href="/request-demo"
                 className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 px-6 py-3 font-medium text-white transition-colors hover:opacity-90"
               >
                 Start Healthcare Training
-              </a>
+              </Link>
               <span className="text-sm text-muted-foreground">
                 Join 200+ healthcare companies
               </span>

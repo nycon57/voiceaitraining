@@ -33,7 +33,7 @@ export default function VoiceSimulationSolution() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             AI Prospects That{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Never Get Tired
             </span>
             , Never Judge
@@ -49,9 +49,9 @@ export default function VoiceSimulationSolution() {
           {benefits.map((item, index) => {
             const Icon = item.icon;
             return (
-              <div key={index} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
-                <div className="mx-0 h-12 w-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
-                  <Icon className="h-6 w-6 text-white" />
+              <div key={JSON.stringify(item)} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
+                <div className="mx-0 size-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
+                  <Icon className="size-6 text-white" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-semibold text-foreground sm:text-base">
@@ -70,10 +70,10 @@ export default function VoiceSimulationSolution() {
         <div className="bg-muted rounded-2xl p-8 md:p-12 border">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-              <h3 className="text-2xl font-bold mb-6">How Voice Simulation Creates Perfect Practice</h3>
+              <h3 className="text-2xl font-semibold mb-6">How Voice Simulation Creates Perfect Practice</h3>
               <div className="space-y-6">
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">1</span>
                   </div>
                   <div>
@@ -83,7 +83,7 @@ export default function VoiceSimulationSolution() {
                 </div>
 
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">2</span>
                   </div>
                   <div>
@@ -93,7 +93,7 @@ export default function VoiceSimulationSolution() {
                 </div>
 
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">3</span>
                   </div>
                   <div>
@@ -103,7 +103,7 @@ export default function VoiceSimulationSolution() {
                 </div>
 
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">4</span>
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export default function VoiceSimulationSolution() {
               <div className="relative bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-2xl p-8 text-white">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <div className="size-3 bg-green-400 rounded-full animate-pulse"></div>
                     <span className="font-semibold">Live Voice Simulation Session</span>
                   </div>
 
@@ -152,7 +152,7 @@ export default function VoiceSimulationSolution() {
 
                   <div className="bg-green-400/20 border border-green-400/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-4 w-4 text-green-300" />
+                      <CheckCircle className="size-4 text-green-300" />
                       <span className="text-sm font-medium text-green-200">Excellent discovery question!</span>
                     </div>
                     <div className="text-xs opacity-90">

@@ -113,15 +113,15 @@ export function CallControls({
                 status === "error" && "border-destructive/50 text-destructive"
               )}
             >
-              <span className="relative flex h-2 w-2 mr-2">
+              <span className="relative flex size-2 mr-2">
                 {status === "active" && (
                   <>
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                    <span className="animate-ping absolute inline-flex size-full rounded-full bg-success opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-success"></span>
                   </>
                 )}
                 {status === "connecting" && (
-                  <Loader2 className="h-2 w-2 animate-spin" />
+                  <Loader2 className="size-2 animate-spin" />
                 )}
               </span>
               {formatDuration(duration)}
@@ -136,12 +136,12 @@ export function CallControls({
               variant={isMuted ? "destructive" : "secondary"}
               onClick={onToggleMute}
               disabled={!isCallActive}
-              className="h-14 w-14 rounded-full"
+              className="size-14 rounded-full"
             >
               {isMuted ? (
-                <MicOff className="h-6 w-6" />
+                <MicOff className="size-6" />
               ) : (
-                <Mic className="h-6 w-6" />
+                <Mic className="size-6" />
               )}
               <span className="sr-only">
                 {isMuted ? "Unmute" : "Mute"}
@@ -154,12 +154,12 @@ export function CallControls({
               variant="destructive"
               onClick={handleEndCallClick}
               disabled={!isCallActive || isEnding}
-              className="h-14 w-14 rounded-full bg-destructive hover:bg-destructive/90"
+              className="size-14 rounded-full bg-destructive hover:bg-destructive/90"
             >
               {isEnding ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
+                <Loader2 className="size-6 animate-spin" />
               ) : (
-                <PhoneOff className="h-6 w-6" />
+                <PhoneOff className="size-6" />
               )}
               <span className="sr-only">End Call</span>
             </Button>
@@ -171,12 +171,12 @@ export function CallControls({
                   size="lg"
                   variant="secondary"
                   disabled={!isCallActive}
-                  className="h-14 w-14 rounded-full"
+                  className="size-14 rounded-full"
                 >
                   {volume === 0 ? (
-                    <VolumeX className="h-6 w-6" />
+                    <VolumeX className="size-6" />
                   ) : (
-                    <Volume2 className="h-6 w-6" />
+                    <Volume2 className="size-6" />
                   )}
                   <span className="sr-only">Volume</span>
                 </Button>
@@ -206,9 +206,9 @@ export function CallControls({
             size="lg"
             variant="ghost"
             disabled
-            className="h-14 w-14 rounded-full"
+            className="size-14 rounded-full"
           >
-            <Settings className="h-5 w-5" />
+            <Settings className="size-5" />
             <span className="sr-only">Settings</span>
           </Button>
         </div>
@@ -223,7 +223,7 @@ export function CallControls({
               disabled={!isCallActive || isEnding}
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <XCircle className="mr-2 h-4 w-4" />
+              <XCircle className="mr-2 size-4" />
               Cancel Attempt
             </Button>
           </div>

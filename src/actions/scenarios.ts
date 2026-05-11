@@ -1,7 +1,7 @@
 'use server'
 
 import { assertHuman } from '@/lib/botid'
-import { withOrgGuard, withRoleGuard } from '@/lib/auth'
+import { withOrgGuard, withRoleGuard, requireAuth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import type { ScenarioPersona, ScenarioRubric, ScenarioBranching } from '@/types/scenario'
@@ -19,6 +19,7 @@ const createScenarioSchema = z.object({
 const updateScenarioSchema = createScenarioSchema.partial()
 
 export async function createScenario(formData: FormData) {
+  await requireAuth()
   await assertHuman()
 
   const data = createScenarioSchema.parse({
@@ -53,6 +54,7 @@ export async function createScenario(formData: FormData) {
 }
 
 export async function updateScenario(scenarioId: string, formData: FormData) {
+  await requireAuth()
   await assertHuman()
 
   const data = updateScenarioSchema.parse({
@@ -85,6 +87,7 @@ export async function updateScenario(scenarioId: string, formData: FormData) {
 }
 
 export async function getScenarios() {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: scenarios, error } = await supabase
@@ -102,6 +105,7 @@ export async function getScenarios() {
 }
 
 export async function getScenario(scenarioId: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: scenario, error } = await supabase
@@ -120,6 +124,7 @@ export async function getScenario(scenarioId: string) {
 }
 
 export async function publishScenario(scenarioId: string) {
+  await requireAuth()
   await assertHuman()
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -143,6 +148,7 @@ export async function publishScenario(scenarioId: string) {
 }
 
 export async function archiveScenario(scenarioId: string) {
+  await requireAuth()
   await assertHuman()
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -166,6 +172,7 @@ export async function archiveScenario(scenarioId: string) {
 }
 
 export async function getLatestActiveScenarios(limit: number = 10) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: scenarios, error } = await supabase
@@ -185,13 +192,9 @@ export async function getLatestActiveScenarios(limit: number = 10) {
 }
 
 export async function getLatestActiveTracks(limit: number = 10) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
-    console.log('[DEBUG] getLatestActiveTracks - Query parameters:', {
-      orgId,
-      userId: user.id,
-      limit,
-    })
 
     const { data: tracks, error } = await supabase
       .from('tracks')
@@ -222,7 +225,6 @@ export async function getLatestActiveTracks(limit: number = 10) {
       throw new Error(`Failed to get latest tracks: ${error.message}`)
     }
 
-    console.log('[DEBUG] getLatestActiveTracks - Query succeeded, found', tracks?.length || 0, 'tracks')
 
     // Transform to include scenario count
     return tracks.map(track => ({
@@ -283,13 +285,9 @@ export interface EnrichedScenario {
  * @returns Array of enriched scenarios with statistics
  */
 export async function getPublishedScenarios(filters?: ScenarioFilters): Promise<EnrichedScenario[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
-    console.log('[DEBUG] getPublishedScenarios - Query parameters:', {
-      orgId,
-      userId: user.id,
-      filters,
-    })
 
     // Start building query - include universal scenarios and org scenarios
     let query = supabase
@@ -353,7 +351,6 @@ export async function getPublishedScenarios(filters?: ScenarioFilters): Promise<
       )
     }
 
-    console.log('[DEBUG] getPublishedScenarios - Executing query')
 
     const { data: scenarios, error } = await query
 
@@ -368,7 +365,6 @@ export async function getPublishedScenarios(filters?: ScenarioFilters): Promise<
       throw new Error(`Failed to get scenarios: ${error.message}`)
     }
 
-    console.log('[DEBUG] getPublishedScenarios - Query succeeded, found', scenarios?.length || 0, 'scenarios')
 
     // Enrich with statistics
     const enrichedScenarios: EnrichedScenario[] = await Promise.all(
@@ -445,7 +441,8 @@ export async function getPublishedScenarios(filters?: ScenarioFilters): Promise<
  * @returns Detailed scenario statistics
  * @throws Error if scenario not found
  */
-export async function getScenarioStats(scenarioId: string) {
+async function getScenarioStats(scenarioId: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Verify scenario exists
@@ -460,21 +457,23 @@ export async function getScenarioStats(scenarioId: string) {
       throw new Error('Scenario not found')
     }
 
-    // Get all completed attempts
-    const { data: attempts, count: completedCount } = await supabase
-      .from('scenario_attempts')
-      .select('score, duration_seconds, started_at, kpis', { count: 'exact' })
-      .eq('org_id', orgId)
-      .eq('scenario_id', scenarioId)
-      .eq('status', 'completed')
-      .order('started_at', { ascending: false })
-
-    // Get total attempt count (including incomplete)
-    const { count: totalAttempts } = await supabase
-      .from('scenario_attempts')
-      .select('*', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('scenario_id', scenarioId)
+    const [
+      { data: attempts, count: completedCount },
+      { count: totalAttempts },
+    ] = await Promise.all([
+      supabase
+        .from('scenario_attempts')
+        .select('score, duration_seconds, started_at, kpis', { count: 'exact' })
+        .eq('org_id', orgId)
+        .eq('scenario_id', scenarioId)
+        .eq('status', 'completed')
+        .order('started_at', { ascending: false }),
+      supabase
+        .from('scenario_attempts')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('scenario_id', scenarioId),
+    ])
 
     // Calculate statistics
     const avgScore = attempts && attempts.length > 0
@@ -581,6 +580,7 @@ export async function getScenarioStats(scenarioId: string) {
  * @returns Array of unique categories
  */
 export async function getScenarioCategories(): Promise<string[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: scenarios, error } = await supabase
@@ -594,7 +594,9 @@ export async function getScenarioCategories(): Promise<string[]> {
       throw new Error(`Failed to get categories: ${error.message}`)
     }
 
-    const categories = [...new Set(scenarios.map((s) => s.category).filter(Boolean))] as string[]
+    const categories = [
+      ...new Set(scenarios.flatMap((s) => (s.category ? [s.category] : []))),
+    ]
     return categories.sort()
   })
 }
@@ -605,6 +607,7 @@ export async function getScenarioCategories(): Promise<string[]> {
  * @returns Array of unique industries
  */
 export async function getScenarioIndustries(): Promise<string[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: scenarios, error } = await supabase
@@ -618,7 +621,9 @@ export async function getScenarioIndustries(): Promise<string[]> {
       throw new Error(`Failed to get industries: ${error.message}`)
     }
 
-    const industries = [...new Set(scenarios.map((s) => s.industry).filter(Boolean))] as string[]
+    const industries = [
+      ...new Set(scenarios.flatMap((s) => (s.industry ? [s.industry] : []))),
+    ]
     return industries.sort()
   })
 }
@@ -631,6 +636,7 @@ export async function getScenarioIndustries(): Promise<string[]> {
  * @returns Array of related scenarios
  */
 export async function getRelatedScenarios(scenarioId: string, limit: number = 4): Promise<EnrichedScenario[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     // Get the current scenario
     const { data: currentScenario, error: currentError } = await supabase
@@ -702,6 +708,7 @@ export async function getRelatedScenarios(scenarioId: string, limit: number = 4)
  * @returns Array of tracks containing this scenario
  */
 export async function getTracksForScenario(scenarioId: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const { data: trackScenarios, error } = await supabase
       .from('track_scenarios')
@@ -734,18 +741,17 @@ export async function getTracksForScenario(scenarioId: string) {
       (trackScenarios || []).map(async (ts: any) => {
         const track = ts.tracks
 
-        // Get scenario count for this track
-        const { count: scenarioCount } = await supabase
-          .from('track_scenarios')
-          .select('*', { count: 'exact', head: true })
-          .eq('track_id', track.id)
-
-        // Get enrollment count
-        const { count: enrollmentCount } = await supabase
-          .from('enrollments')
-          .select('*', { count: 'exact', head: true })
-          .eq('org_id', orgId)
-          .eq('track_id', track.id)
+        const [{ count: scenarioCount }, { count: enrollmentCount }] = await Promise.all([
+          supabase
+            .from('track_scenarios')
+            .select('*', { count: 'exact', head: true })
+            .eq('track_id', track.id),
+          supabase
+            .from('enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('org_id', orgId)
+            .eq('track_id', track.id),
+        ])
 
         return {
           id: track.id,
@@ -776,6 +782,7 @@ export async function getTracksForScenario(scenarioId: string) {
  * @throws Error if scenario not found or permission denied
  */
 export async function getUserScenarioStats(scenarioId: string, clerkUserId?: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetClerkUserId = clerkUserId || user.id
 
@@ -796,23 +803,25 @@ export async function getUserScenarioStats(scenarioId: string, clerkUserId?: str
       throw new Error('Scenario not found')
     }
 
-    // Get user's completed attempts
-    const { data: completedAttempts, count: completedCount } = await supabase
-      .from('scenario_attempts')
-      .select('score, duration_seconds, started_at', { count: 'exact' })
-      .eq('org_id', orgId)
-      .eq('scenario_id', scenarioId)
-      .eq('clerk_user_id', targetClerkUserId)
-      .eq('status', 'completed')
-      .order('started_at', { ascending: false })
-
-    // Get total attempt count (including incomplete)
-    const { count: totalAttempts } = await supabase
-      .from('scenario_attempts')
-      .select('*', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('scenario_id', scenarioId)
-      .eq('clerk_user_id', targetClerkUserId)
+    const [
+      { data: completedAttempts, count: completedCount },
+      { count: totalAttempts },
+    ] = await Promise.all([
+      supabase
+        .from('scenario_attempts')
+        .select('score, duration_seconds, started_at', { count: 'exact' })
+        .eq('org_id', orgId)
+        .eq('scenario_id', scenarioId)
+        .eq('clerk_user_id', targetClerkUserId)
+        .eq('status', 'completed')
+        .order('started_at', { ascending: false }),
+      supabase
+        .from('scenario_attempts')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('scenario_id', scenarioId)
+        .eq('clerk_user_id', targetClerkUserId),
+    ])
 
     // Calculate statistics
     const avgScore = completedAttempts && completedAttempts.length > 0

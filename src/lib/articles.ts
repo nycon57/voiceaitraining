@@ -58,7 +58,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   return data
 }
 
-export async function searchArticles(
+async function searchArticles(
   searchQuery: string,
   limit: number = 20
 ): Promise<ArticleSearchResult[]> {
@@ -75,7 +75,7 @@ export async function searchArticles(
   return data || []
 }
 
-export async function getPopularArticles(
+async function getPopularArticles(
   limit: number = 10,
   daysBack: number = 30
 ): Promise<PopularArticle[]> {
@@ -179,7 +179,7 @@ export async function incrementArticleView(
   }
 }
 
-export async function getAllTags(): Promise<string[]> {
+async function getAllTags(): Promise<string[]> {
   const { data, error } = await supabase
     .from('articles')
     .select('tags')
@@ -190,10 +190,8 @@ export async function getAllTags(): Promise<string[]> {
     return []
   }
 
-  const allTags = data
-    .flatMap(article => article.tags || [])
-    .filter((tag, index, array) => array.indexOf(tag) === index)
-    .sort()
+  const allTags = [...new Set(data.flatMap(article => article.tags || []))]
+    .toSorted()
 
   return allTags
 }

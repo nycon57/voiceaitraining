@@ -59,7 +59,7 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ onClose, onCountChange }: NotificationCenterProps) {
-  const router = useRouter()
+  const { push } = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [markingAll, startMarkingAll] = useTransition()
@@ -115,68 +115,6 @@ export function NotificationCenter({ onClose, onCountChange }: NotificationCente
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  function renderContent() {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="size-5 animate-spin text-muted-foreground" />
-        </div>
-      )
-    }
-
-    if (notifications.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
-          <Bell className="size-8 opacity-40" />
-          <p className="text-sm">No notifications yet</p>
-        </div>
-      )
-    }
-
-    return (
-      <div className="flex flex-col">
-        {notifications.map((notification) => {
-          const Icon = getNotificationIcon(notification.type)
-          return (
-            <button
-              key={notification.id}
-              onClick={() => handleClick(notification)}
-              className={cn(
-                'flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50',
-                !notification.read && 'bg-accent/20',
-              )}
-            >
-              <div className="mt-0.5 shrink-0">
-                <Icon className="size-4 text-muted-foreground" />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <div className="flex items-start justify-between gap-2">
-                  <span
-                    className={cn(
-                      'text-sm leading-tight',
-                      !notification.read ? 'font-medium' : 'text-muted-foreground',
-                    )}
-                  >
-                    {notification.title}
-                  </span>
-                  {!notification.read && (
-                    <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                  )}
-                </div>
-                <span className="line-clamp-2 text-xs text-muted-foreground">
-                  {notification.body}
-                </span>
-                <span className="text-[11px] text-muted-foreground/60">
-                  {formatRelativeTime(notification.created_at)}
-                </span>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between border-b px-4 py-3">
@@ -200,8 +138,82 @@ export function NotificationCenter({ onClose, onCountChange }: NotificationCente
       </div>
 
       <ScrollArea className="max-h-[400px]">
-        {renderContent()}
+        <NotificationContent
+          loading={loading}
+          notifications={notifications}
+          onNotificationClick={handleClick}
+        />
       </ScrollArea>
+    </div>
+  )
+}
+
+function NotificationContent({
+  loading,
+  notifications,
+  onNotificationClick,
+}: {
+  loading: boolean
+  notifications: Notification[]
+  onNotificationClick: (notification: Notification) => void
+}) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (notifications.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
+        <Bell className="size-8 opacity-40" />
+        <p className="text-sm">No notifications yet</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col">
+      {notifications.map((notification) => {
+        const Icon = getNotificationIcon(notification.type)
+        return (
+          <button
+            key={notification.id}
+            onClick={() => onNotificationClick(notification)}
+            className={cn(
+              'flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50',
+              !notification.read && 'bg-accent/20',
+            )}
+          >
+            <div className="mt-0.5 shrink-0">
+              <Icon className="size-4 text-muted-foreground" />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <div className="flex items-start justify-between gap-2">
+                <span
+                  className={cn(
+                    'text-sm leading-tight',
+                    !notification.read ? 'font-medium' : 'text-muted-foreground',
+                  )}
+                >
+                  {notification.title}
+                </span>
+                {!notification.read && (
+                  <span className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
+                )}
+              </div>
+              <span className="line-clamp-2 text-xs text-muted-foreground">
+                {notification.body}
+              </span>
+              <span className="text-[11px] text-muted-foreground/60">
+                {formatRelativeTime(notification.created_at)}
+              </span>
+            </div>
+          </button>
+        )
+      })}
     </div>
   )
 }

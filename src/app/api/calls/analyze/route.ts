@@ -372,16 +372,16 @@ function buildCriticalIssues(analysis: any, rubricScore: any): any[] {
   })
 
   // Severe fumbles
-  analysis.fumbled_responses
-    .filter((f: any) => f.severity === 'severe')
-    .forEach((f: any) => {
+  analysis.fumbled_responses.forEach((f: any) => {
+    if (f.severity !== 'severe') return
+
       issues.push({
         type: 'fumble',
         severity: 'critical',
         timestamp: f.timestamp,
         description: `${f.fumble_type}: "${f.text.substring(0, 80)}..."`,
       })
-    })
+  })
 
   // Critical rubric failures
   rubricScore.critical_failures.forEach((failure: string) => {

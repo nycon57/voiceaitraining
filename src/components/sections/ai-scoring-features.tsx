@@ -55,7 +55,7 @@ export default function AIScoringFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Six Core Metrics That{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Drive Sales Success
             </span>
           </h2>
@@ -70,18 +70,18 @@ export default function AIScoringFeatures() {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <div key={index} className="group relative overflow-hidden rounded-2xl border bg-card p-8 shadow-sm transition-all hover:shadow-lg">
+              <div key={JSON.stringify(feature)} className="group relative overflow-hidden rounded-2xl border bg-card p-8 shadow-sm transition-all hover:shadow-lg">
                 {/* Background gradient on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 transition-opacity duration-300 group-hover:opacity-5`}></div>
 
                 <div className="relative">
                   {/* Icon */}
-                  <div className={`mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${feature.gradient}`}>
-                    <Icon className="h-6 w-6 text-white" />
+                  <div className={`mb-6 inline-flex size-12 items-center justify-center rounded-lg bg-gradient-to-br ${feature.gradient}`}>
+                    <Icon className="size-6 text-white" />
                   </div>
 
                   {/* Content */}
-                  <h3 className="mb-4 text-xl font-bold">{feature.title}</h3>
+                  <h3 className="mb-4 text-xl font-semibold">{feature.title}</h3>
                   <p className="mb-6 text-muted-foreground">{feature.description}</p>
 
                   {/* Metrics */}
@@ -90,7 +90,7 @@ export default function AIScoringFeatures() {
                     <ul className="space-y-2">
                       {feature.metrics.map((metric, metricIndex) => (
                         <li key={metricIndex} className="flex items-center gap-2 text-sm">
-                          <div className={`h-1.5 w-1.5 rounded-full bg-gradient-to-r ${feature.gradient}`}></div>
+                          <div className={`size-1.5 rounded-full bg-gradient-to-r ${feature.gradient}`}></div>
                           <span>{metric}</span>
                         </li>
                       ))}
@@ -105,9 +105,9 @@ export default function AIScoringFeatures() {
         {/* Bottom CTA Section */}
         <div className="mt-20 text-center">
           <div className="rounded-2xl border bg-gradient-to-br from-chart-1/5 to-chart-2/5 dark:from-chart-1/10 dark:to-chart-2/10 p-8 md:p-12">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4">
               All Metrics Work Together for{" "}
-              <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+              <span className="text-primary">
                 Complete Performance Insights
               </span>
             </h3>
@@ -118,19 +118,19 @@ export default function AIScoringFeatures() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/50 dark:bg-black/20 rounded-lg p-6 border">
-                <div className="text-3xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent mb-2">95%</div>
+                <div className="text-3xl font-bold mb-2 text-primary">95%</div>
                 <div className="text-sm font-semibold mb-1">Scoring Accuracy</div>
                 <div className="text-xs text-muted-foreground">Consistent across all calls</div>
               </div>
 
               <div className="bg-white/50 dark:bg-black/20 rounded-lg p-6 border">
-                <div className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">3x</div>
+                <div className="text-3xl font-bold mb-2 text-primary">3x</div>
                 <div className="text-sm font-semibold mb-1">Faster Improvement</div>
                 <div className="text-xs text-muted-foreground">Compared to traditional coaching</div>
               </div>
 
               <div className="bg-white/50 dark:bg-black/20 rounded-lg p-6 border">
-                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-2">100%</div>
+                <div className="text-3xl font-bold mb-2 text-primary">100%</div>
                 <div className="text-sm font-semibold mb-1">Objective Analysis</div>
                 <div className="text-xs text-muted-foreground">No bias, just data</div>
               </div>

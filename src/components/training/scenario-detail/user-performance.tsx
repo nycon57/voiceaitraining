@@ -26,7 +26,7 @@ export function UserPerformance({
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
+          <BarChart3 className="size-5" />
           Your Performance
         </CardTitle>
         <CardDescription>Track your progress on this scenario</CardDescription>

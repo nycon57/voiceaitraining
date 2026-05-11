@@ -172,7 +172,7 @@ export function HROverview({ user }: HROverviewProps) {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="space-y-2">
-        <h2 className="font-headline text-3xl font-bold tracking-tight">
+        <h2 className="font-headline text-3xl font-semibold tracking-tight">
           HR & <span className="text-gradient">Compliance</span>
         </h2>
         <p className="text-muted-foreground">
@@ -240,11 +240,11 @@ export function HROverview({ user }: HROverviewProps) {
 
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                       <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
+                        <Users className="size-3" />
                         {dept.compliantUsers}/{dept.totalUsers} users
                       </div>
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="size-3" />
                         Updated: {dept.lastUpdated}
                       </div>
                     </div>
@@ -255,7 +255,7 @@ export function HROverview({ user }: HROverviewProps) {
                   <div className="ml-4">
                     <Button size="sm" variant="outline" asChild>
                       <Link href={`/hr/compliance?department=${dept.department.toLowerCase()}`}>
-                        <Eye className="h-4 w-4" />
+                        <Eye className="size-4" />
                       </Link>
                     </Button>
                   </div>
@@ -286,25 +286,25 @@ export function HROverview({ user }: HROverviewProps) {
             <CardContent className="space-y-3">
               <Button className="w-full justify-start" asChild>
                 <Link href="/hr/reports/generate">
-                  <Download className="h-4 w-4 mr-2" />
+                  <Download className="size-4 mr-2" />
                   Generate Compliance Report
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link href="/hr/audit">
-                  <FileText className="h-4 w-4 mr-2" />
+                  <FileText className="size-4 mr-2" />
                   Schedule Audit
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link href="/hr/certifications">
-                  <Award className="h-4 w-4 mr-2" />
+                  <Award className="size-4 mr-2" />
                   Manage Certifications
                 </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link href="/team">
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="size-4 mr-2" />
                   User Directory
                 </Link>
               </Button>
@@ -345,8 +345,8 @@ export function HROverview({ user }: HROverviewProps) {
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
-                    <Award className="h-5 w-5 text-success" />
+                  <div className="size-10 rounded-full bg-success/20 flex items-center justify-center">
+                    <Award className="size-5 text-success" />
                   </div>
                   <div>
                     <h4 className="font-medium">{cert.userName}</h4>
@@ -368,7 +368,7 @@ export function HROverview({ user }: HROverviewProps) {
                     <div className="text-xs text-muted-foreground">Valid Until</div>
                   </div>
                   <Badge className="bg-success text-success-foreground">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="size-3 mr-1" />
                     Certified
                   </Badge>
                 </div>

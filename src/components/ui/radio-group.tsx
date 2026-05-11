@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { CircleIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
@@ -105,9 +105,9 @@ function RadioGroupItem({
       >
         {animated ? (
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
+            exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <CircleIcon className={cn('fill-current absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2', indicatorSize[size || 'md'])} />
@@ -170,4 +170,4 @@ function RadioGroupCard({
   );
 }
 
-export { RadioGroup, RadioGroupItem, RadioGroupCard };
+export { RadioGroup, RadioGroupItem };

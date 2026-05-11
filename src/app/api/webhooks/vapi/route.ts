@@ -69,15 +69,17 @@ function transformTranscript(messages?: Array<{
 }>) {
   if (!messages) return []
 
-  return messages
-    .filter((msg) => msg.role === 'assistant' || msg.role === 'user')
-    .map((msg, index) => ({
-      id: `${msg.secondsFromStart || index}-${msg.role}`,
-      role: msg.role as 'user' | 'assistant',
-      text: msg.message,
-      timestamp: (msg.secondsFromStart || 0) * 1000, // Convert to ms
-      isFinal: true,
-    }))
+  return messages.flatMap((msg, index) =>
+    msg.role === 'assistant' || msg.role === 'user'
+      ? [{
+          id: `${msg.secondsFromStart || index}-${msg.role}`,
+          role: msg.role as 'user' | 'assistant',
+          text: msg.message,
+          timestamp: (msg.secondsFromStart || 0) * 1000, // Convert to ms
+          isFinal: true,
+        }]
+      : [],
+  )
 }
 
 export async function POST(req: NextRequest) {
@@ -184,6 +186,7 @@ export async function POST(req: NextRequest) {
     // Trigger scoring in background (async, don't await)
     fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/attempts/${attempt.id}/score`, {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
     }).catch((err) => {
       console.error('Failed to trigger scoring:', err)

@@ -87,33 +87,6 @@ export const SUBSCRIPTION_PLANS = {
 
 export type SubscriptionPlan = keyof typeof SUBSCRIPTION_PLANS
 
-export interface StripeCustomer {
-  id: string
-  email: string
-  name: string
-  metadata: {
-    orgId: string
-    userId: string
-  }
-}
-
-export interface StripeSubscription {
-  id: string
-  status: Stripe.Subscription.Status
-  current_period_start: number
-  current_period_end: number
-  cancel_at_period_end: boolean
-  items: {
-    price: {
-      id: string
-      recurring: {
-        interval: string
-      }
-      unit_amount: number
-    }
-  }[]
-}
-
 export async function createStripeCustomer(
   email: string,
   name: string,
@@ -175,7 +148,7 @@ export async function createBillingPortalSession(
   })
 }
 
-export async function getSubscription(
+async function getSubscription(
   subscriptionId: string
 ): Promise<Stripe.Subscription | null> {
   try {
@@ -188,7 +161,7 @@ export async function getSubscription(
   }
 }
 
-export async function cancelSubscription(
+async function cancelSubscription(
   subscriptionId: string,
   cancelAtPeriodEnd = true
 ): Promise<Stripe.Subscription> {
@@ -197,7 +170,7 @@ export async function cancelSubscription(
   })
 }
 
-export async function reactivateSubscription(
+async function reactivateSubscription(
   subscriptionId: string
 ): Promise<Stripe.Subscription> {
   return await stripe.subscriptions.update(subscriptionId, {
@@ -205,7 +178,7 @@ export async function reactivateSubscription(
   })
 }
 
-export async function updateSubscription(
+async function updateSubscription(
   subscriptionId: string,
   newPriceId: string
 ): Promise<Stripe.Subscription> {
@@ -256,7 +229,7 @@ export async function getActiveSubscriptionForOrg(orgId: string): Promise<Stripe
   }
 }
 
-export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
+function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
   for (const [planKey, plan] of Object.entries(SUBSCRIPTION_PLANS)) {
     if (plan.priceId === priceId) {
       return planKey as SubscriptionPlan
@@ -265,33 +238,33 @@ export function getPlanFromPriceId(priceId: string): SubscriptionPlan | null {
   return null
 }
 
-export function formatPrice(amount: number, currency = 'usd'): string {
-  return new Intl.NumberFormat('en-US', {
+function formatPrice(amount: number, currency = 'usd'): string {
+  return amount.toLocaleString('en-US', {
     style: 'currency',
     currency: currency.toUpperCase(),
-  }).format(amount)
+  })
 }
 
-export function isSubscriptionActive(subscription: Stripe.Subscription): boolean {
+function isSubscriptionActive(subscription: Stripe.Subscription): boolean {
   return subscription.status === 'active' || subscription.status === 'trialing'
 }
 
-export function isSubscriptionCanceled(subscription: Stripe.Subscription): boolean {
+function isSubscriptionCanceled(subscription: Stripe.Subscription): boolean {
   return subscription.status === 'canceled' || subscription.cancel_at_period_end
 }
 
-export function getSubscriptionPeriodEnd(subscription: Stripe.Subscription): Date {
+function getSubscriptionPeriodEnd(subscription: Stripe.Subscription): Date {
   // @ts-expect-error - Stripe types may vary by version
   return new Date((subscription.current_period_end ?? subscription.currentPeriodEnd) * 1000)
 }
 
-export function getSubscriptionPeriodStart(subscription: Stripe.Subscription): Date {
+function getSubscriptionPeriodStart(subscription: Stripe.Subscription): Date {
   // @ts-expect-error - Stripe types may vary by version
   return new Date((subscription.current_period_start ?? subscription.currentPeriodStart) * 1000)
 }
 
 // Usage tracking helpers
-export async function recordUsage(
+async function recordUsage(
   subscriptionItemId: string,
   quantity: number,
   timestamp?: number
@@ -302,7 +275,7 @@ export async function recordUsage(
   return Promise.resolve({ quantity, timestamp })
 }
 
-export async function getUsageRecords(
+async function getUsageRecords(
   subscriptionItemId: string,
   startingAfter?: string
 ): Promise<any[]> {
@@ -313,7 +286,7 @@ export async function getUsageRecords(
 }
 
 // Webhook helpers
-export function constructEventFromPayload(
+function constructEventFromPayload(
   payload: string | Buffer,
   signature: string,
   secret: string
@@ -321,6 +294,6 @@ export function constructEventFromPayload(
   return stripe.webhooks.constructEvent(payload, signature, secret)
 }
 
-export function isTestMode(): boolean {
+function isTestMode(): boolean {
   return process.env.STRIPE_SECRET_KEY?.includes('_test_') ?? true
 }

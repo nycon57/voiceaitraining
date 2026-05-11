@@ -87,9 +87,8 @@ export const embedAttemptMemory = inngest.createFunction(
 
     const toEmbed = items.slice(0, MAX_EMBEDDINGS)
 
-    for (let i = 0; i < toEmbed.length; i++) {
-      const item = toEmbed[i]
-      await step.run(`embed-${i}`, async () => {
+    await Promise.all(toEmbed.map((item, i) =>
+      step.run(`embed-${i}`, async () => {
         await storeEmbedding({
           orgId,
           userId,
@@ -98,8 +97,8 @@ export const embedAttemptMemory = inngest.createFunction(
           sourceId: attemptId,
           metadata: item.metadata,
         })
-      })
-    }
+      }),
+    ))
 
     return { embedded: toEmbed.length, segments: segments.length }
   },
@@ -123,7 +122,7 @@ function extractSignificantSegments(segments: TranscriptSegment[]): SignificantS
     const seg = segments[i]
     const next = segments[i + 1] as TranscriptSegment | undefined
 
-    if (seg.speaker === 'agent' && seg.text.includes('?')) {
+    if (seg.speaker === 'agent' && /\?/.test(seg.text)) {
       if (!next || next.speaker !== 'trainee') {
         results.push({
           type: 'unanswered_question',

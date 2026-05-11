@@ -40,8 +40,7 @@ export const detectInactiveUsers = inngest.createFunction(
         { orgId: string; userId: string; lastAttemptAt: Date }
       >()
 
-      let offset = 0
-      while (true) {
+      async function collectLatestAttempts(offset: number): Promise<void> {
         const { data, error } = await supabase
           .from('scenario_attempts')
           .select('org_id, clerk_user_id, started_at')
@@ -52,7 +51,7 @@ export const detectInactiveUsers = inngest.createFunction(
           throw new Error(`Failed to query scenario_attempts: ${error.message}`)
         }
 
-        if (!data || data.length === 0) break
+        if (!data || data.length === 0) return
 
         for (const row of data) {
           if (!row.clerk_user_id) continue
@@ -70,9 +69,11 @@ export const detectInactiveUsers = inngest.createFunction(
           }
         }
 
-        if (data.length < PAGE_SIZE) break
-        offset += PAGE_SIZE
+        if (data.length < PAGE_SIZE) return
+        await collectLatestAttempts(offset + PAGE_SIZE)
       }
+
+      await collectLatestAttempts(0)
 
       // Keep only users past the inactivity threshold
       const now = new Date()

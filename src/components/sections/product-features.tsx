@@ -8,7 +8,7 @@ import {
   Folder,
   Share,
 } from 'lucide-react';
-import { motion, useInView } from 'motion/react';
+import { m as motion, useInView } from 'motion/react';
 import { useRef } from 'react';
 import {
   FaApple,
@@ -32,21 +32,21 @@ import {
   FaTwitter,
   FaWandSparkles,
 } from 'react-icons/fa6';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import dynamic from 'next/dynamic';
 
 import { NumberTicker } from '@/components/magicui/number-ticker';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
 import { cn } from '@/lib/utils';
+
+const Area = dynamic(() => import('recharts').then((mod) => mod.Area), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then((mod) => mod.AreaChart), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
+const Line = dynamic(() => import('recharts').then((mod) => mod.Line), { ssr: false });
+const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
 
 // Feature card data
 const FEATURE_CARDS = [
@@ -84,11 +84,11 @@ export default function ProductFeatures() {
       {/* Header */}
       <div className="mx-auto max-w-4xl">
         <h2 className="font-headline text-4xxl leading-tight tracking-tight md:text-5xl">
-          Details Don&apos;t Mean Clarity — Until They Do
+          Details Don&apos;t Mean Clarity : Until They Do
         </h2>
         <p className="text-muted-foreground mt-3 text-lg leading-snug">
           Most automators hide the details. Plasma shows you the right
-          things — logs, durations, errors, and system info — at the right time.
+          things : logs, durations, errors, and system info : at the right time.
         </p>
       </div>
 
@@ -105,7 +105,7 @@ export default function ProductFeatures() {
                 `!h-auto flex-col-reverse justify-between gap-6 lg:col-span-3 lg:flex-row-reverse lg:items-center [&_.card-header]:lg:max-w-50`,
             )}
           >
-            {renderCardContent(index)}
+            <FeatureCardContent index={index} />
           </FeatureCard>
         ))}
       </div>
@@ -113,8 +113,7 @@ export default function ProductFeatures() {
   );
 }
 
-// Render content for each card based on index
-function renderCardContent(index: number) {
+function FeatureCardContent({ index }: { index: number }) {
   switch (index) {
     case 0:
       return <Card1 />;
@@ -152,7 +151,7 @@ function FeatureCard({
     >
       <CardContent className="relative p-0">{children}</CardContent>
       <CardHeader className="card-header p-0">
-        <h3 className="font-headline text-accent-foreground text-xl font-bold">{title}</h3>
+        <h3 className="font-headline text-accent-foreground text-xl font-semibold">{title}</h3>
         <p className="text-muted-foreground text-lg leading-snug">
           {description}
         </p>
@@ -198,7 +197,7 @@ function Card1() {
         {/* Performance bars */}
         <div className="space-y-2.5">
           {performanceData.map((item, index) => (
-            <div key={index} className="relative h-2">
+            <div key={JSON.stringify(item)} className="relative h-2">
               {/* Animated gradient progress bar */}
               <motion.div
                 className={`from-chart-1 to-chart-3 absolute top-0 h-2 origin-left rounded-xs bg-gradient-to-r`}
@@ -258,7 +257,7 @@ function Card2() {
               color: 'var(--chart-2)',
             },
           }}
-          className="h-full w-full"
+          className="size-full"
         >
           <LineChart data={chartData} margin={{ left: -24 }}>
             <CartesianGrid
@@ -298,7 +297,7 @@ function Card2() {
       {/* Header */}
       <div ref={ref} className="mx-auto w-fit">
         <motion.div
-          className="bg-accent relative z-10 mb-4 flex w-fit items-center gap-2 rounded-sm border-s-2 border-t-2 px-3 py-1.5 text-xs"
+          className="bg-accent relative z-10 mb-4 flex w-fit items-center gap-2 rounded-sm border border-t-2 px-3 py-1.5 text-xs"
           initial={{ opacity: 0, y: -10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -339,7 +338,7 @@ function Card2() {
             const isAIAdjust = option.label === 'AI Adjust';
             return (
               <motion.div
-                key={index}
+                key={JSON.stringify(option)}
                 className={cn(
                   'flex cursor-pointer items-center gap-3 rounded-sm px-2 py-1.5 text-xs transition-colors',
                   isAIAdjust
@@ -534,7 +533,7 @@ function Card5() {
             }}
           >
             <Folder className="fill-destructive text-destructive size-3" />
-            <h3 className="font-headline text-[0.625rem] font-bold">File Watcher</h3>
+            <h3 className="font-headline text-[0.625rem] font-semibold">File Watcher</h3>
           </motion.div>
 
           {/* Description with check icon */}

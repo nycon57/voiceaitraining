@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -146,8 +146,13 @@ function PopoverHeader({
 function PopoverTitle({
   className,
   isHeadline = true,
+  children,
   ...props
 }: React.ComponentProps<'h3'> & { isHeadline?: boolean }) {
+  if (!children) {
+    return null
+  }
+
   return (
     <h3
       className={cn(
@@ -156,7 +161,9 @@ function PopoverTitle({
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </h3>
   );
 }
 
@@ -191,9 +198,5 @@ export {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverAnchor,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverDescription,
-  PopoverFooter,
+
 };

@@ -27,7 +27,7 @@ import type { Scenario, VapiBaseAgent, VapiOverrides } from '@/types/scenario'
  * - VAPI_AGENT_FRIENDLY=asst_...
  * - VAPI_AGENT_NEUTRAL=asst_...
  */
-export const VAPI_BASE_AGENTS: Record<VapiBaseAgent, string> = {
+const VAPI_BASE_AGENTS: Record<VapiBaseAgent, string> = {
   professional: process.env.VAPI_AGENT_PROFESSIONAL || process.env.VAPI_DEFAULT_ASSISTANT_ID || '',
   difficult: process.env.VAPI_AGENT_DIFFICULT || process.env.VAPI_DEFAULT_ASSISTANT_ID || '',
   friendly: process.env.VAPI_AGENT_FRIENDLY || process.env.VAPI_DEFAULT_ASSISTANT_ID || '',
@@ -42,7 +42,7 @@ export const VAPI_BASE_AGENTS: Record<VapiBaseAgent, string> = {
  * ElevenLabs voice ID mappings for different emotional tones
  * These can be overridden per-scenario via vapi_overrides.voice_emotion
  */
-export const VOICE_CONFIGS = {
+const VOICE_CONFIGS = {
   neutral: { provider: '11labs', voiceId: 'sarah' },
   warm: { provider: '11labs', voiceId: 'bella' },
   stern: { provider: '11labs', voiceId: 'antoni' },
@@ -52,7 +52,7 @@ export const VOICE_CONFIGS = {
 /**
  * Default voice for each base agent type
  */
-export const DEFAULT_AGENT_VOICES: Record<VapiBaseAgent, keyof typeof VOICE_CONFIGS> = {
+const DEFAULT_AGENT_VOICES: Record<VapiBaseAgent, keyof typeof VOICE_CONFIGS> = {
   professional: 'neutral',
   difficult: 'stern',
   friendly: 'warm',
@@ -67,7 +67,7 @@ export const DEFAULT_AGENT_VOICES: Record<VapiBaseAgent, keyof typeof VOICE_CONF
  * Default temperature settings based on difficulty level
  * Higher temperature = more creative/unpredictable responses
  */
-export const DIFFICULTY_TEMPERATURES = {
+const DIFFICULTY_TEMPERATURES = {
   easy: 0.6,    // More predictable, easier to handle
   medium: 0.7,  // Balanced
   hard: 0.85,   // More unpredictable, challenging
@@ -122,7 +122,7 @@ export async function getScenarioAssistant(
  * Build the system prompt with scenario-specific context
  * This is injected as a transient override at call-time
  */
-export function buildSystemPrompt(scenario: Scenario): string {
+function buildSystemPrompt(scenario: Scenario): string {
   const persona = scenario.persona
   const difficulty = scenario.difficulty || 'medium'
 
@@ -292,7 +292,7 @@ export function buildAssistantOverrides(scenario: Scenario): {
  * Validate that all required base agent environment variables are set
  * Call this at app startup to catch configuration issues early
  */
-export function validateVapiAgentConfig(): {
+function validateVapiAgentConfig(): {
   isValid: boolean
   missingAgents: VapiBaseAgent[]
 } {
@@ -313,7 +313,7 @@ export function validateVapiAgentConfig(): {
 /**
  * Get a human-readable description of a base agent type
  */
-export function getAgentDescription(agent: VapiBaseAgent): string {
+function getAgentDescription(agent: VapiBaseAgent): string {
   const descriptions: Record<VapiBaseAgent, string> = {
     professional: 'Polite, thoughtful business professional. Asks relevant questions and listens carefully.',
     difficult: 'Skeptical and demanding customer. Challenges claims and requires convincing.',
@@ -323,10 +323,3 @@ export function getAgentDescription(agent: VapiBaseAgent): string {
 
   return descriptions[agent]
 }
-
-// ============================================================================
-// Export Types for External Use
-// ============================================================================
-
-export type VoiceEmotion = keyof typeof VOICE_CONFIGS
-export type VapiAssistantConfig = ReturnType<typeof buildAssistantOverrides>

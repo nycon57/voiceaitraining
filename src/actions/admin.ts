@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { clerkClient } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUser, requireRole } from '@/lib/auth'
+import { getCurrentUser, requireRole, requireAuth } from '@/lib/auth'
 
 const inviteUserSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -22,15 +22,15 @@ const updateUserRoleSchema = z.object({
 })
 
 export async function inviteUserToOrganization(formData: FormData) {
-  await assertHuman()
-
-  const user = await getCurrentUser()
+  const [, , user] = await Promise.all([
+    requireAuth(),
+    assertHuman(),
+    getCurrentUser(),
+    requireRole(['admin', 'manager']),
+  ])
   if (!user?.orgId) {
     throw new Error('No organization context')
   }
-
-  // Require admin or manager role
-  await requireRole(['admin', 'manager'])
 
   const data = inviteUserSchema.parse({
     email: formData.get('email'),
@@ -87,14 +87,15 @@ export async function inviteUserToOrganization(formData: FormData) {
 }
 
 export async function bulkInviteUsers(formData: FormData) {
-  await assertHuman()
-
-  const user = await getCurrentUser()
+  const [, , user] = await Promise.all([
+    requireAuth(),
+    assertHuman(),
+    getCurrentUser(),
+    requireRole(['admin', 'manager']),
+  ])
   if (!user?.orgId) {
     throw new Error('No organization context')
   }
-
-  await requireRole(['admin', 'manager'])
 
   const csvData = formData.get('csvData') as string
   if (!csvData) {
@@ -132,16 +133,13 @@ export async function bulkInviteUsers(formData: FormData) {
     }
   })
 
-  const results = []
-  const errors = []
-
-  for (const userData of users) {
+  const [client, supabase] = await Promise.all([clerkClient(), createClient()])
+  const inviteResults = await Promise.all(users.map(async (userData) => {
     try {
       const clerkRole = userData.role === 'admin' ? 'org:admin' :
                        userData.role === 'manager' ? 'org:manager' :
                        userData.role === 'hr' ? 'org:hr' : 'org:member'
 
-      const client = await clerkClient()
       const invitation = await client.organizations.createOrganizationInvitation({
         organizationId: user.orgId,
         emailAddress: userData.email,
@@ -156,7 +154,6 @@ export async function bulkInviteUsers(formData: FormData) {
       })
 
       // Log invitation
-      const supabase = await createClient()
       await supabase
         .from('user_invitations')
         .insert({
@@ -171,25 +168,29 @@ export async function bulkInviteUsers(formData: FormData) {
           status: 'pending',
         })
 
-      results.push({ email: userData.email, success: true, invitationId: invitation.id })
+      return { type: 'result' as const, value: { email: userData.email, success: true, invitationId: invitation.id } }
     } catch (error) {
-      errors.push({ email: userData.email, error: error instanceof Error ? error.message : 'Unknown error' })
+      return { type: 'error' as const, value: { email: userData.email, error: error instanceof Error ? error.message : 'Unknown error' } }
     }
-  }
+  }))
+
+  const results = inviteResults.flatMap((result) => result.type === 'result' ? [result.value] : [])
+  const errors = inviteResults.flatMap((result) => result.type === 'error' ? [result.value] : [])
 
   revalidatePath('/admin/users', 'page')
   return { results, errors, total: users.length }
 }
 
 export async function updateUserRole(formData: FormData) {
-  await assertHuman()
-
-  const user = await getCurrentUser()
+  const [, , user] = await Promise.all([
+    requireAuth(),
+    assertHuman(),
+    getCurrentUser(),
+    requireRole(['admin']),
+  ])
   if (!user?.orgId) {
     throw new Error('No organization context')
   }
-
-  await requireRole(['admin'])
 
   const data = updateUserRoleSchema.parse({
     userId: formData.get('userId'),
@@ -221,14 +222,15 @@ export async function updateUserRole(formData: FormData) {
 }
 
 export async function removeUserFromOrganization(formData: FormData) {
-  await assertHuman()
-
-  const user = await getCurrentUser()
+  const [, , user] = await Promise.all([
+    requireAuth(),
+    assertHuman(),
+    getCurrentUser(),
+    requireRole(['admin']),
+  ])
   if (!user?.orgId) {
     throw new Error('No organization context')
   }
-
-  await requireRole(['admin'])
 
   const userId = formData.get('userId') as string
   if (!userId) {
@@ -259,14 +261,15 @@ export async function removeUserFromOrganization(formData: FormData) {
 }
 
 export async function revokeInvitation(formData: FormData) {
-  await assertHuman()
-
-  const user = await getCurrentUser()
+  const [, , user] = await Promise.all([
+    requireAuth(),
+    assertHuman(),
+    getCurrentUser(),
+    requireRole(['admin', 'manager']),
+  ])
   if (!user?.orgId) {
     throw new Error('No organization context')
   }
-
-  await requireRole(['admin', 'manager'])
 
   const invitationId = formData.get('invitationId') as string
   if (!invitationId) {
@@ -275,22 +278,21 @@ export async function revokeInvitation(formData: FormData) {
 
   try {
     // Revoke invitation in Clerk
-    const client = await clerkClient()
-    await client.organizations.revokeOrganizationInvitation({
-      organizationId: user.orgId,
-      invitationId: invitationId,
-      requestingUserId: user.id,
-    })
-
-    // Update status in our database
-    const supabase = await createClient()
-    await supabase
-      .from('user_invitations')
-      .update({
-        status: 'revoked',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('clerk_invitation_id', invitationId)
+    const [client, supabase] = await Promise.all([clerkClient(), createClient()])
+    await Promise.all([
+      client.organizations.revokeOrganizationInvitation({
+        organizationId: user.orgId,
+        invitationId: invitationId,
+        requestingUserId: user.id,
+      }),
+      supabase
+        .from('user_invitations')
+        .update({
+          status: 'revoked',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('clerk_invitation_id', invitationId),
+    ])
 
     revalidatePath('/admin/users', 'page')
     return { success: true }
@@ -301,6 +303,7 @@ export async function revokeInvitation(formData: FormData) {
 }
 
 export async function getOrganizationUsers() {
+  await requireAuth()
   const user = await getCurrentUser()
   if (!user?.orgId) {
     throw new Error('No organization context')

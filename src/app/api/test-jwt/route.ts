@@ -2,8 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const { userId, orgId } = await auth()
-  const { getToken } = await auth()
+  const { userId, orgId, getToken } = await auth()
 
   const clerkToken = await getToken({ template: "supabase" })
 

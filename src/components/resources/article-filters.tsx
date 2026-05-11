@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
+import { m as motion, AnimatePresence } from 'framer-motion'
 import { Search, Filter, X, ChevronDown, Clock, TrendingUp, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -56,19 +56,19 @@ export function ArticleFilters({
 }: ArticleFiltersProps) {
   const [searchValue, setSearchValue] = useState(filters.search || '')
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
-  const [searchDebounce, setSearchDebounce] = useState<NodeJS.Timeout>()
+  const searchDebounce = useRef<NodeJS.Timeout | null>(null)
 
   // Debounce search input
   useEffect(() => {
-    if (searchDebounce) {
-      clearTimeout(searchDebounce)
+    if (searchDebounce.current) {
+      clearTimeout(searchDebounce.current)
     }
 
     const timeout = setTimeout(() => {
       onFiltersChange({ search: searchValue || undefined })
     }, 300)
 
-    setSearchDebounce(timeout)
+    searchDebounce.current = timeout
 
     return () => {
       if (timeout) clearTimeout(timeout)
@@ -108,12 +108,12 @@ export function ArticleFilters({
   const getSortIcon = (sortBy: string) => {
     switch (sortBy) {
       case 'popular':
-        return <TrendingUp className="w-4 h-4" />
+        return <TrendingUp className="size-4" />
       case 'reading_time':
-        return <Clock className="w-4 h-4" />
+        return <Clock className="size-4" />
       case 'recent':
       default:
-        return <Calendar className="w-4 h-4" />
+        return <Calendar className="size-4" />
     }
   }
 
@@ -123,7 +123,7 @@ export function ArticleFilters({
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search articles..."
             value={searchValue}
@@ -163,17 +163,17 @@ export function ArticleFilters({
               size="default"
               className="relative bg-background/60 backdrop-blur-sm border-border/40"
             >
-              <Filter className="w-4 h-4 mr-2" />
+              <Filter className="size-4 mr-2" />
               Filters
               {activeFiltersCount > 0 && (
                 <Badge
                   variant="secondary"
-                  className="ml-2 h-5 w-5 p-0 flex items-center justify-center bg-chart-2/10 text-chart-2 text-xs"
+                  className="ml-2 size-5 p-0 flex items-center justify-center bg-chart-2/10 text-chart-2 text-xs"
                 >
                   {activeFiltersCount}
                 </Badge>
               )}
-              <ChevronDown className="w-4 h-4 ml-2" />
+              <ChevronDown className="size-4 ml-2" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
@@ -237,7 +237,7 @@ export function ArticleFilters({
               <Badge variant="secondary" className="gap-1">
                 Search: "{filters.search}"
                 <X
-                  className="w-3 h-3 cursor-pointer hover:text-destructive"
+                  className="size-3 cursor-pointer hover:text-destructive"
                   onClick={() => {
                     setSearchValue('')
                     onFiltersChange({ search: undefined })
@@ -250,7 +250,7 @@ export function ArticleFilters({
               <Badge key={tag} variant="secondary" className="gap-1">
                 {tag}
                 <X
-                  className="w-3 h-3 cursor-pointer hover:text-destructive"
+                  className="size-3 cursor-pointer hover:text-destructive"
                   onClick={() => handleTagToggle(tag)}
                 />
               </Badge>

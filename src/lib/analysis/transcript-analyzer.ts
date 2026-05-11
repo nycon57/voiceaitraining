@@ -16,44 +16,6 @@ export interface TranscriptMessage {
   isFinal: boolean
 }
 
-export interface QuestionInstance {
-  question: string
-  timestamp: number
-  speaker: 'agent' | 'trainee'
-  answered: boolean
-  trainee_response?: string
-  response_timestamp?: number
-  response_quality?: 'complete' | 'partial' | 'deflection' | 'none'
-  response_time_ms?: number
-}
-
-export interface FumbleInstance {
-  text: string
-  timestamp: number
-  fumble_type: 'filler_repetition' | 'incomplete_sentence' | 'repeated_question' | 'uncertainty'
-  severity: 'minor' | 'moderate' | 'severe'
-  context: string
-}
-
-export interface ResponseQualityMetrics {
-  confidence_score: number // 0-100
-  professionalism_score: number // 0-100
-  clarity_score: number // 0-100
-  empathy_signals: string[]
-  confidence_markers: string[]
-  fumbles: FumbleInstance[]
-}
-
-export interface ConversationFlowMetrics {
-  acknowledgments: number
-  empathy_expressions: number
-  value_statements: number // "I can help", "Let me explain"
-  dead_air_instances: Array<{ start: number; duration_ms: number }>
-  interruptions: number
-  avg_response_time_ms: number
-  max_response_time_ms: number
-}
-
 export interface TranscriptAnalysis {
   questions_asked_by_agent: QuestionInstance[]
   questions_asked_by_trainee: QuestionInstance[]
@@ -112,9 +74,9 @@ function detectQuestions(
 ): QuestionInstance[] {
   const questions: QuestionInstance[] = []
 
-  transcript
-    .filter(m => m.role === role)
-    .forEach(message => {
+  transcript.forEach(message => {
+    if (message.role !== role) return
+
       // Simple question detection: contains '?' or starts with question words
       const questionPatterns = [
         /\?/,
@@ -131,7 +93,7 @@ function detectQuestions(
           answered: false, // Will be determined later
         })
       }
-    })
+  })
 
   return questions
 }
@@ -255,9 +217,9 @@ function detectFumbles(
 ): FumbleInstance[] {
   const fumbles: FumbleInstance[] = []
 
-  transcript
-    .filter(m => m.role === role)
-    .forEach((message, index) => {
+  transcript.forEach((message, index) => {
+    if (message.role !== role) return
+
       const text = message.text
       const lowerText = text.toLowerCase()
 
@@ -322,7 +284,7 @@ function detectFumbles(
           context: getContextAround(transcript, index),
         })
       }
-    })
+  })
 
   return fumbles
 }
@@ -472,12 +434,14 @@ function analyzeConversationFlow(
     : 0
 
   // Detect dead air (response time > 5 seconds)
-  const deadAirInstances = responseTimes
-    .map((time, i) => ({
-      start: transcript[i * 2].timestamp,
-      duration_ms: time,
-    }))
-    .filter(instance => instance.duration_ms > 5000)
+  const deadAirInstances = responseTimes.flatMap((time, i) =>
+    time > 5000
+      ? [{
+          start: transcript[i * 2].timestamp,
+          duration_ms: time,
+        }]
+      : [],
+  )
 
   return {
     acknowledgments,

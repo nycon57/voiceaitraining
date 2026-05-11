@@ -51,7 +51,7 @@ interface CommandMenuProps {
 
 export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
   const [open, setOpen] = React.useState(false)
-  const router = useRouter()
+  const { push } = useRouter()
 
   // Handle keyboard shortcuts
   React.useEffect(() => {
@@ -69,247 +69,11 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
   // Navigation helper
   const navigate = (url: string) => {
     setOpen(false)
-    router.push(url)
+    push(url)
   }
 
-  // Navigation items - available to all users
-  const navigationItems: CommandMenuItem[] = [
-    {
-      label: "Dashboard",
-      icon: Home,
-      onSelect: () => navigate("/dashboard"),
-      keywords: ["home", "overview"],
-    },
-    {
-      label: "Training Hub",
-      icon: Mic,
-      onSelect: () => navigate("/training"),
-      keywords: ["training", "practice", "learn"],
-    },
-  ]
-
-  // Trainee-specific items
-  const traineeItems: CommandMenuItem[] = [
-    {
-      label: "My Assignments (Coming Soon)",
-      icon: Target,
-      onSelect: () => navigate("/assignments"),
-      keywords: ["assignments", "tasks", "todo"],
-    },
-    {
-      label: "Training History (Coming Soon)",
-      icon: History,
-      onSelect: () => navigate("/training"),
-      keywords: ["history", "past", "attempts", "sessions"],
-    },
-    {
-      label: "Leaderboard (Coming Soon)",
-      icon: Trophy,
-      onSelect: () => navigate("/leaderboard"),
-      keywords: ["leaderboard", "ranking", "competition"],
-    },
-    {
-      label: "My Progress",
-      icon: TrendingUp,
-      onSelect: () => navigate("/analytics"),
-      keywords: ["progress", "reports", "analytics"],
-    },
-  ]
-
-  // Manager-specific items
-  const managerItems: CommandMenuItem[] = [
-    {
-      label: "Team Overview",
-      icon: Users,
-      onSelect: () => navigate("/team"),
-      keywords: ["team", "members", "employees"],
-    },
-    {
-      label: "New Assignment (Coming Soon)",
-      icon: UserCheck,
-      onSelect: () => navigate("/training"),
-      keywords: ["assign", "new", "create"],
-    },
-    {
-      label: "Manage Assignments (Coming Soon)",
-      icon: Clipboard,
-      onSelect: () => navigate("/assignments"),
-      keywords: ["assignments", "manage"],
-    },
-    {
-      label: "Team Reports",
-      icon: BarChart3,
-      onSelect: () => navigate("/analytics"),
-      keywords: ["reports", "analytics", "stats"],
-    },
-    {
-      label: "Scenarios",
-      icon: FileText,
-      onSelect: () => navigate("/training"),
-      keywords: ["scenarios", "content", "training"],
-    },
-    {
-      label: "Training Tracks",
-      icon: Briefcase,
-      onSelect: () => navigate("/training"),
-      keywords: ["tracks", "courses", "curriculum", "training"],
-    },
-  ]
-
-  // Admin-specific items
-  const adminItems: CommandMenuItem[] = [
-    {
-      label: "Training Library",
-      icon: BookOpen,
-      onSelect: () => navigate("/training"),
-      keywords: ["scenarios", "library", "content", "training", "tracks"],
-    },
-    {
-      label: "Create Scenario",
-      icon: Plus,
-      onSelect: () => navigate("/scenarios/new"),
-      keywords: ["create", "new", "scenario"],
-    },
-    {
-      label: "Training Tracks",
-      icon: Briefcase,
-      onSelect: () => navigate("/training"),
-      keywords: ["tracks", "courses", "training"],
-    },
-    {
-      label: "All Assignments (Coming Soon)",
-      icon: Clipboard,
-      onSelect: () => navigate("/assignments"),
-      keywords: ["assignments", "all"],
-    },
-    {
-      label: "Team Management",
-      icon: Users,
-      onSelect: () => navigate("/team"),
-      keywords: ["team", "users", "members"],
-    },
-    {
-      label: "Analytics",
-      icon: BarChart3,
-      onSelect: () => navigate("/analytics"),
-      keywords: ["analytics", "reports", "data"],
-    },
-    {
-      label: "Design System",
-      icon: Settings2,
-      onSelect: () => navigate("/admin/design-system"),
-      keywords: ["design", "system", "components", "ui"],
-    },
-    {
-      label: "Billing",
-      icon: CreditCard,
-      onSelect: () => navigate("/billing"),
-      keywords: ["billing", "payment", "subscription"],
-    },
-    {
-      label: "Webhooks",
-      icon: Webhook,
-      onSelect: () => navigate("/settings/webhooks"),
-      keywords: ["integrations", "webhooks", "api"],
-    },
-  ]
-
-  // HR-specific items
-  const hrItems: CommandMenuItem[] = [
-    {
-      label: "User Directory",
-      icon: Users,
-      onSelect: () => navigate("/admin/users"),
-      keywords: ["users", "directory", "employees", "team"],
-    },
-    {
-      label: "Analytics",
-      icon: BarChart3,
-      onSelect: () => navigate("/analytics"),
-      keywords: ["analytics", "reports", "data"],
-    },
-    {
-      label: "Training Completion (Coming Soon)",
-      icon: Shield,
-      onSelect: () => navigate("/analytics"),
-      keywords: ["compliance", "completion", "training"],
-    },
-    {
-      label: "Certifications (Coming Soon)",
-      icon: Shield,
-      onSelect: () => navigate("/dashboard"),
-      keywords: ["certifications", "certificates"],
-    },
-    {
-      label: "Audit Reports (Coming Soon)",
-      icon: FileText,
-      onSelect: () => navigate("/dashboard"),
-      keywords: ["audit", "reports", "compliance"],
-    },
-  ]
-
-  // Quick actions available to all users
-  const quickActions: CommandMenuItem[] = [
-    {
-      label: "Start Training",
-      icon: PlayCircle,
-      onSelect: () => navigate("/training"),
-      shortcut: "T",
-      keywords: ["start", "begin", "training"],
-    },
-    {
-      label: "View Recent Sessions (Coming Soon)",
-      icon: History,
-      onSelect: () => navigate("/training"),
-      shortcut: "H",
-      keywords: ["recent", "history", "sessions"],
-    },
-  ]
-
-  // Add role-specific quick actions
-  if (userRole === "admin" || userRole === "manager") {
-    quickActions.push({
-      label: "New Scenario",
-      icon: Plus,
-      onSelect: () => navigate("/scenarios/new"),
-      shortcut: "N",
-      keywords: ["new", "create", "scenario"],
-    })
-  }
-
-  // Settings items for all users
-  const settingsItems: CommandMenuItem[] = [
-    {
-      label: "Profile Settings (Coming Soon)",
-      icon: Settings,
-      onSelect: () => navigate("/settings/profile"),
-      keywords: ["profile", "settings", "account"],
-    },
-    {
-      label: "Preferences (Coming Soon)",
-      icon: Settings,
-      onSelect: () => navigate("/settings/preferences"),
-      keywords: ["preferences", "settings"],
-    },
-  ]
-
-  // Get role-specific items
-  const getRoleItems = () => {
-    switch (userRole) {
-      case "trainee":
-        return traineeItems
-      case "manager":
-        return managerItems
-      case "admin":
-        return adminItems
-      case "hr":
-        return hrItems
-      default:
-        return []
-    }
-  }
-
-  const roleItems = getRoleItems()
+  const { navigationItems, quickActions, roleItems, settingsItems } =
+    buildCommandMenuItems(userRole, navigate)
 
   return (
     <CommandDialog
@@ -332,7 +96,7 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
               onSelect={item.onSelect}
               keywords={item.keywords}
             >
-              {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+              {item.icon && <item.icon className="mr-2 size-4" />}
               <span>{item.label}</span>
               {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
             </CommandItem>
@@ -349,7 +113,7 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
               onSelect={item.onSelect}
               keywords={item.keywords}
             >
-              {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+              {item.icon && <item.icon className="mr-2 size-4" />}
               <span>{item.label}</span>
             </CommandItem>
           ))}
@@ -376,7 +140,7 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
                   onSelect={item.onSelect}
                   keywords={item.keywords}
                 >
-                  {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+                  {item.icon && <item.icon className="mr-2 size-4" />}
                   <span>{item.label}</span>
                 </CommandItem>
               ))}
@@ -393,7 +157,7 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
               onSelect={item.onSelect}
               keywords={item.keywords}
             >
-              {item.icon && <item.icon className="mr-2 h-4 w-4" />}
+              {item.icon && <item.icon className="mr-2 size-4" />}
               <span>{item.label}</span>
             </CommandItem>
           ))}
@@ -401,4 +165,79 @@ export function CommandMenu({ userRole = "trainee" }: CommandMenuProps) {
       </CommandList>
     </CommandDialog>
   )
+}
+
+function buildCommandMenuItems(
+  userRole: NonNullable<CommandMenuProps["userRole"]>,
+  navigate: (url: string) => void,
+) {
+  const navigationItems: CommandMenuItem[] = [
+    { label: "Dashboard", icon: Home, onSelect: () => navigate("/dashboard"), keywords: ["home", "overview"] },
+    { label: "Training Hub", icon: Mic, onSelect: () => navigate("/training"), keywords: ["training", "practice", "learn"] },
+  ]
+
+  const traineeItems: CommandMenuItem[] = [
+    { label: "My Assignments (Coming Soon)", icon: Target, onSelect: () => navigate("/assignments"), keywords: ["assignments", "tasks", "todo"] },
+    { label: "Training History (Coming Soon)", icon: History, onSelect: () => navigate("/training"), keywords: ["history", "past", "attempts", "sessions"] },
+    { label: "Leaderboard (Coming Soon)", icon: Trophy, onSelect: () => navigate("/leaderboard"), keywords: ["leaderboard", "ranking", "competition"] },
+    { label: "My Progress", icon: TrendingUp, onSelect: () => navigate("/analytics"), keywords: ["progress", "reports", "analytics"] },
+  ]
+
+  const managerItems: CommandMenuItem[] = [
+    { label: "Team Overview", icon: Users, onSelect: () => navigate("/team"), keywords: ["team", "members", "employees"] },
+    { label: "New Assignment (Coming Soon)", icon: UserCheck, onSelect: () => navigate("/training"), keywords: ["assign", "new", "create"] },
+    { label: "Manage Assignments (Coming Soon)", icon: Clipboard, onSelect: () => navigate("/assignments"), keywords: ["assignments", "manage"] },
+    { label: "Team Reports", icon: BarChart3, onSelect: () => navigate("/analytics"), keywords: ["reports", "analytics", "stats"] },
+    { label: "Scenarios", icon: FileText, onSelect: () => navigate("/training"), keywords: ["scenarios", "content", "training"] },
+    { label: "Training Tracks", icon: Briefcase, onSelect: () => navigate("/training"), keywords: ["tracks", "courses", "curriculum", "training"] },
+  ]
+
+  const adminItems: CommandMenuItem[] = [
+    { label: "Training Library", icon: BookOpen, onSelect: () => navigate("/training"), keywords: ["scenarios", "library", "content", "training", "tracks"] },
+    { label: "Create Scenario", icon: Plus, onSelect: () => navigate("/scenarios/new"), keywords: ["create", "new", "scenario"] },
+    { label: "Training Tracks", icon: Briefcase, onSelect: () => navigate("/training"), keywords: ["tracks", "courses", "training"] },
+    { label: "All Assignments (Coming Soon)", icon: Clipboard, onSelect: () => navigate("/assignments"), keywords: ["assignments", "all"] },
+    { label: "Team Management", icon: Users, onSelect: () => navigate("/team"), keywords: ["team", "users", "members"] },
+    { label: "Analytics", icon: BarChart3, onSelect: () => navigate("/analytics"), keywords: ["analytics", "reports", "data"] },
+    { label: "Design System", icon: Settings2, onSelect: () => navigate("/admin/design-system"), keywords: ["design", "system", "components", "ui"] },
+    { label: "Billing", icon: CreditCard, onSelect: () => navigate("/billing"), keywords: ["billing", "payment", "subscription"] },
+    { label: "Webhooks", icon: Webhook, onSelect: () => navigate("/settings/webhooks"), keywords: ["integrations", "webhooks", "api"] },
+  ]
+
+  const hrItems: CommandMenuItem[] = [
+    { label: "User Directory", icon: Users, onSelect: () => navigate("/admin/users"), keywords: ["users", "directory", "employees", "team"] },
+    { label: "Analytics", icon: BarChart3, onSelect: () => navigate("/analytics"), keywords: ["analytics", "reports", "data"] },
+    { label: "Training Completion (Coming Soon)", icon: Shield, onSelect: () => navigate("/analytics"), keywords: ["compliance", "completion", "training"] },
+    { label: "Certifications (Coming Soon)", icon: Shield, onSelect: () => navigate("/dashboard"), keywords: ["certifications", "certificates"] },
+    { label: "Audit Reports (Coming Soon)", icon: FileText, onSelect: () => navigate("/dashboard"), keywords: ["audit", "reports", "compliance"] },
+  ]
+
+  const quickActions: CommandMenuItem[] = [
+    { label: "Start Training", icon: PlayCircle, onSelect: () => navigate("/training"), shortcut: "T", keywords: ["start", "begin", "training"] },
+    { label: "View Recent Sessions (Coming Soon)", icon: History, onSelect: () => navigate("/training"), shortcut: "H", keywords: ["recent", "history", "sessions"] },
+  ]
+
+  if (userRole === "admin" || userRole === "manager") {
+    quickActions.push({
+      label: "New Scenario",
+      icon: Plus,
+      onSelect: () => navigate("/scenarios/new"),
+      shortcut: "N",
+      keywords: ["new", "create", "scenario"],
+    })
+  }
+
+  const settingsItems: CommandMenuItem[] = [
+    { label: "Profile Settings (Coming Soon)", icon: Settings, onSelect: () => navigate("/settings/profile"), keywords: ["profile", "settings", "account"] },
+    { label: "Preferences (Coming Soon)", icon: Settings, onSelect: () => navigate("/settings/preferences"), keywords: ["preferences", "settings"] },
+  ]
+
+  const roleItems = {
+    trainee: traineeItems,
+    manager: managerItems,
+    admin: adminItems,
+    hr: hrItems,
+  }[userRole]
+
+  return { navigationItems, quickActions, roleItems, settingsItems }
 }

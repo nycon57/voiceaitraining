@@ -124,7 +124,7 @@ function MobileFeatureComparison({
                   </SelectTrigger>
                   <SelectContent>
                     {plans.map((planItem, index) => (
-                      <SelectItem key={index} value={index.toString()}>
+                      <SelectItem key={JSON.stringify(planItem)} value={index.toString()}>
                         {planItem.name}
                       </SelectItem>
                     ))}

@@ -6,7 +6,7 @@ export default function DesignSystemPage() {
   return (
     <div className="space-y-8">
       <PageHeader />
-      <Suspense fallback={<div>Loading design system...</div>}>
+      <Suspense fallback={<div>Loading design system…</div>}>
         <DesignSystemDocs />
       </Suspense>
     </div>

@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'SpeakStride | SpeakStride',
+}
+
 import Hero from '@/components/sections/hero';
 import Features from '@/components/sections/features';
 import FeaturesTabsSection from '@/components/sections/features-tabs';

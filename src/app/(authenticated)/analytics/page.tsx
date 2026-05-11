@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Analytics | SpeakStride',
+}
+
 import { getCurrentUser } from '@/lib/auth'
 import { getDashboardMetrics, getPerformanceTrends, getScenarioInsights, getTeamMetrics } from '@/lib/analytics'
 import { OverviewCards } from '@/components/analytics/overview-cards'
@@ -16,9 +22,10 @@ interface AnalyticsPageProps {
 }
 
 export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
-  const { timeFrame = 'month' } = await searchParams
-
-  const user = await getCurrentUser()
+  const [{ timeFrame = 'month' }, user] = await Promise.all([
+    searchParams,
+    getCurrentUser(),
+  ])
   if (!user) {
     redirect('/sign-in')
   }
@@ -29,11 +36,11 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
         <div className="flex items-center">
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Analytics</h1>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">Analytics</h1>
         </div>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
+            <BarChart3 className="size-12 text-muted-foreground mb-4" />
             <h3 className="font-headline text-lg font-semibold mb-2">Access Restricted</h3>
             <p className="text-muted-foreground text-center">
               Analytics access is limited to managers, HR, and administrators.
@@ -91,7 +98,7 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">Analytics Dashboard</h1>
           <p className="text-muted-foreground">
             Performance insights and training metrics
           </p>
@@ -101,11 +108,11 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
             {getTimeFrameLabel(timeFrame)}
           </Badge>
           <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="size-4 mr-2" />
             Export
           </Button>
           <Button variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="size-4 mr-2" />
             Refresh
           </Button>
         </div>
@@ -142,19 +149,19 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
+            <BarChart3 className="size-4" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
+            <TrendingUp className="size-4" />
             Performance
           </TabsTrigger>
           <TabsTrigger value="scenarios" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
+            <Target className="size-4" />
             Scenarios
           </TabsTrigger>
           <TabsTrigger value="team" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+            <Users className="size-4" />
             Team
           </TabsTrigger>
         </TabsList>
@@ -202,7 +209,9 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
                     <span className="text-sm">Most Challenging</span>
                     <Badge variant="outline">
                       {scenarioInsights.length > 0 ?
-                        scenarioInsights.sort((a, b) => a.average_score - b.average_score)[0]?.scenario_title?.substring(0, 20) + '...' :
+                        scenarioInsights.reduce((lowest, scenario) =>
+                          scenario.average_score < lowest.average_score ? scenario : lowest,
+                        scenarioInsights[0]).scenario_title?.substring(0, 20) + '...' :
                         'No data'
                       }
                     </Badge>

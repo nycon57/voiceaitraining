@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 

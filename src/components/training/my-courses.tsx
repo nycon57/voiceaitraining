@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -47,16 +48,18 @@ export function MyCourses({ enrollments, onContinue }: MyCoursesProps) {
         >
           <CardHeader className="pb-3 space-y-3">
             {/* Thumbnail */}
-            <div className="aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-chart-1/20 via-chart-2/20 to-chart-3/20">
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-chart-1/20 via-chart-2/20 to-chart-3/20">
               {enrollment.thumbnailUrl ? (
-                <img
+                <Image
                   src={enrollment.thumbnailUrl}
                   alt={enrollment.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-200"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <BookOpen className="h-12 w-12 text-muted-foreground/50" />
+                <div className="size-full flex items-center justify-center">
+                  <BookOpen className="size-12 text-muted-foreground/50" />
                 </div>
               )}
             </div>
@@ -91,7 +94,7 @@ export function MyCourses({ enrollments, onContinue }: MyCoursesProps) {
               }}
             >
               Continue
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 size-4" />
             </Button>
           </CardContent>
         </Card>

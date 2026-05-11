@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Play, Clock, Target, Users, Trophy } from "lucide-react"
 import Link from "next/link"
+import { formatShortDate } from "@/lib/date-display"
 
 interface ScenarioSidebarProps {
   scenarioId: string
@@ -52,14 +53,14 @@ export function ScenarioSidebar({
               asChild
             >
               <Link href={`/play/${scenarioId}/call`}>
-                <Play className="h-5 w-5 mr-2" />
+                <Play className="size-5 mr-2" />
                 Start Training
               </Link>
             </Button>
             {totalAttempts > 0 && (
               <Button variant="outline" className="w-full" asChild>
                 <Link href={`/training/history?scenario=${scenarioId}`}>
-                  <Trophy className="h-4 w-4 mr-2" />
+                  <Trophy className="size-4 mr-2" />
                   View Past Attempts
                 </Link>
               </Button>
@@ -75,7 +76,7 @@ export function ScenarioSidebar({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="size-4 text-muted-foreground" />
             <div className="flex-1">
               <div className="text-sm font-medium">Duration</div>
               <div className="text-sm text-muted-foreground">
@@ -85,7 +86,7 @@ export function ScenarioSidebar({
           </div>
           <Separator />
           <div className="flex items-center gap-3">
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <Target className="size-4 text-muted-foreground" />
             <div className="flex-1">
               <div className="text-sm font-medium">Difficulty</div>
               <div className="text-sm text-muted-foreground capitalize">
@@ -97,7 +98,7 @@ export function ScenarioSidebar({
             <>
               <Separator />
               <div className="flex items-center gap-3">
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="size-4 text-muted-foreground" />
                 <div className="flex-1">
                   <div className="text-sm font-medium">You'll speak with</div>
                   <div className="text-sm text-muted-foreground">
@@ -156,12 +157,12 @@ export function ScenarioSidebar({
                   >
                     <div className="flex items-center gap-3">
                       <div className={`rounded-full p-2 ${bgColor}`}>
-                        <Trophy className={`h-4 w-4 ${textColor}`} />
+                        <Trophy className={`size-4 ${textColor}`} />
                       </div>
                       <div>
                         <div className={`font-bold ${textColor}`}>{score}%</div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(attempt.started_at).toLocaleDateString()}
+                        <div suppressHydrationWarning className="text-xs text-muted-foreground">
+                          {formatShortDate(attempt.started_at)}
                         </div>
                       </div>
                     </div>

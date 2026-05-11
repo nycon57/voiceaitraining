@@ -75,7 +75,7 @@ function ChannelToggle({ field, label, description, icon: Icon }: ChannelToggleP
     <FormItem className="flex items-center justify-between" animated={false}>
       <div className="space-y-0.5">
         <FormLabel className="text-base cursor-pointer flex items-center gap-2">
-          <Icon className="h-4 w-4" />
+          <Icon className="size-4" />
           {label}
         </FormLabel>
         <FormDescription animated={false}>
@@ -139,26 +139,22 @@ export function NotificationPreferences() {
     })
   }
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  return (
+  return isLoading ? (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    </div>
+  ) : (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Notification Channels */}
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Bell className="h-5 w-5" />
+              <Bell className="size-5" />
               Notification Channels
             </CardTitle>
             <CardDescription>
@@ -190,7 +186,7 @@ export function NotificationPreferences() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+              <Clock className="size-5" />
               Quiet Hours
             </CardTitle>
             <CardDescription>
@@ -266,7 +262,7 @@ export function NotificationPreferences() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Lightbulb className="h-5 w-5" />
+              <Lightbulb className="size-5" />
               Coaching & Digest
             </CardTitle>
             <CardDescription>
@@ -334,9 +330,9 @@ export function NotificationPreferences() {
             disabled={isPending || !form.formState.isDirty}
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="size-4 mr-2 animate-spin" />
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="size-4 mr-2" />
             )}
             {isPending ? 'Saving...' : 'Save preferences'}
           </Button>

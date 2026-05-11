@@ -10,7 +10,7 @@ export function registerAgent(agent: AgentDefinition): void {
 }
 
 /** Look up an agent by id. Returns undefined if not found. */
-export function getAgent(id: string): AgentDefinition | undefined {
+function getAgent(id: string): AgentDefinition | undefined {
   return agents.get(id)
 }
 
@@ -20,7 +20,7 @@ export function getAllAgentFunctions(): InngestFunction.Any[] {
 }
 
 /** Find all agents that subscribe to a given event name. */
-export function getAgentsByEvent(eventName: string): AgentDefinition[] {
+function getAgentsByEvent(eventName: string): AgentDefinition[] {
   return Array.from(agents.values()).filter((agent) =>
     agent.subscribesTo.includes(eventName)
   )

@@ -107,7 +107,7 @@ const Features = ({ className }: { className?: string }) => {
 
         <CarouselContent className="mx-auto mt-10 max-w-[3000px] cursor-grab">
           {ITEMS.map((card, idx) => (
-            <CarouselItem key={idx} className="min-w-70 basis-[16%] pl-6">
+            <CarouselItem key={JSON.stringify(card)} className="min-w-70 basis-[16%] pl-6">
               <div className="flex h-full flex-col">
                 <Card className="dark:via-muted/20 dark:to-muted/50 to-background via-card from-card h-43 bg-gradient-to-br dark:from-transparent">
                   <CardContent className="flex h-full items-center justify-center">
@@ -122,7 +122,7 @@ const Features = ({ className }: { className?: string }) => {
                 </Card>
 
                 {/* Text block outside of card */}
-                <h3 className="font-headline text-accent-foreground mt-3 mb-2 text-lg font-bold">
+                <h3 className="font-headline text-accent-foreground mt-3 mb-2 text-lg font-semibold">
                   {card.title}
                 </h3>
                 <p className="text-muted-foreground">{card.desc}</p>

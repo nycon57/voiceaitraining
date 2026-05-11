@@ -17,6 +17,9 @@ interface UsageMetricsProps {
 
 export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
   const currentPlan = plans[plan]
+  const comparisonPlans = Object.entries(plans).flatMap(([key, planData]) =>
+    key !== plan ? [[key, planData] as const] : [],
+  )
 
   const getUsageColor = (percentage: number) => {
     if (percentage >= 90) return 'text-destructive'
@@ -57,7 +60,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-headline text-2xl font-bold mb-2">Usage Overview</h2>
+        <h2 className="font-headline text-2xl font-semibold mb-2">Usage Overview</h2>
         <p className="text-muted-foreground">
           Monitor your current usage against your {currentPlan.name} plan limits
         </p>
@@ -78,7 +81,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Icon className="h-5 w-5" />
+                    <Icon className="size-5" />
                     <CardTitle className="text-lg">{metric.title}</CardTitle>
                   </div>
                   {isNearLimit && !isUnlimited && (
@@ -116,7 +119,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
 
                 {isOverLimit && (
                   <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                    <AlertTriangle className="h-4 w-4 text-destructive mt-0.5" />
+                    <AlertTriangle className="size-4 text-destructive mt-0.5" />
                     <div className="text-sm">
                       <div className="font-medium text-destructive">Usage Limit Exceeded</div>
                       <div className="text-destructive/90">
@@ -128,7 +131,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
 
                 {isNearLimit && !isOverLimit && !isUnlimited && (
                   <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/20 rounded-md">
-                    <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
+                    <AlertTriangle className="size-4 text-warning mt-0.5" />
                     <div className="text-sm">
                       <div className="font-medium text-warning">Approaching Limit</div>
                       <div className="text-warning/90">
@@ -147,7 +150,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
+            <TrendingUp className="size-5" />
             Plan Comparison
           </CardTitle>
           <CardDescription>
@@ -161,9 +164,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
                 <tr className="border-b">
                   <th className="text-left py-2">Feature</th>
                   <th className="text-center py-2">Current ({currentPlan.name})</th>
-                  {Object.entries(plans)
-                    .filter(([key]) => key !== plan)
-                    .map(([key, planData]) => (
+                  {comparisonPlans.map(([key, planData]) => (
                       <th key={key} className="text-center py-2">
                         {planData.name}
                       </th>
@@ -181,9 +182,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
                       </div>
                     </div>
                   </td>
-                  {Object.entries(plans)
-                    .filter(([key]) => key !== plan)
-                    .map(([key, planData]) => (
+                  {comparisonPlans.map(([key, planData]) => (
                       <td key={key} className="text-center py-3">
                         {planData.limits.users === -1 ? 'Unlimited' : planData.limits.users}
                       </td>
@@ -199,9 +198,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
                       </div>
                     </div>
                   </td>
-                  {Object.entries(plans)
-                    .filter(([key]) => key !== plan)
-                    .map(([key, planData]) => (
+                  {comparisonPlans.map(([key, planData]) => (
                       <td key={key} className="text-center py-3">
                         {planData.limits.sessions_per_month === -1 ? 'Unlimited' : planData.limits.sessions_per_month}
                       </td>
@@ -212,9 +209,7 @@ export function UsageMetrics({ usage, plan, plans }: UsageMetricsProps) {
                   <td className="text-center py-3 font-medium">
                     ${currentPlan.price}
                   </td>
-                  {Object.entries(plans)
-                    .filter(([key]) => key !== plan)
-                    .map(([key, planData]) => (
+                  {comparisonPlans.map(([key, planData]) => (
                       <td key={key} className="text-center py-3">
                         ${planData.price}
                       </td>

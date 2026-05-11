@@ -1,6 +1,6 @@
 'use server'
 
-import { withOrgGuard, withRoleGuard } from '@/lib/auth'
+import { withOrgGuard, withRoleGuard, requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import {
   stripe,
@@ -19,6 +19,7 @@ export async function createSubscriptionCheckout(
   planId: SubscriptionPlan,
   orgId: string
 ) {
+  await requireAuth()
   return withRoleGuard(['admin'], async (user, verifiedOrgId) => {
     if (orgId !== verifiedOrgId) {
       throw new Error('Organization ID mismatch')
@@ -85,6 +86,7 @@ export async function createSubscriptionCheckout(
 }
 
 export async function createBillingPortal(orgId: string) {
+  await requireAuth()
   return withRoleGuard(['admin'], async (user, verifiedOrgId) => {
     if (orgId !== verifiedOrgId) {
       throw new Error('Organization ID mismatch')
@@ -105,6 +107,7 @@ export async function createBillingPortal(orgId: string) {
 }
 
 export async function getBillingInfo(orgId?: string) {
+  await requireAuth()
   return withOrgGuard(async (user, verifiedOrgId) => {
     const targetOrgId = orgId || verifiedOrgId
 
@@ -134,16 +137,17 @@ export async function getBillingInfo(orgId?: string) {
     currentMonth.setDate(1)
     currentMonth.setHours(0, 0, 0, 0)
 
-    const { data: usageData } = await supabase
-      .from('scenario_attempts')
-      .select('id, started_at')
-      .eq('org_id', targetOrgId)
-      .gte('started_at', currentMonth.toISOString())
-
-    const { data: userData } = await supabase
-      .from('org_members')
-      .select('user_id')
-      .eq('org_id', targetOrgId)
+    const [{ data: usageData }, { data: userData }] = await Promise.all([
+      supabase
+        .from('scenario_attempts')
+        .select('id, started_at')
+        .eq('org_id', targetOrgId)
+        .gte('started_at', currentMonth.toISOString()),
+      supabase
+        .from('org_members')
+        .select('user_id')
+        .eq('org_id', targetOrgId),
+    ])
 
     const usage = {
       sessions_this_month: usageData?.length || 0,
@@ -180,7 +184,8 @@ export async function getBillingInfo(orgId?: string) {
   })
 }
 
-export async function updateOrgPlan(orgId: string, planId: SubscriptionPlan) {
+async function updateOrgPlan(orgId: string, planId: SubscriptionPlan) {
+  await requireAuth()
   return withRoleGuard(['admin'], async (user, verifiedOrgId) => {
     if (orgId !== verifiedOrgId) {
       throw new Error('Organization ID mismatch')
@@ -206,7 +211,7 @@ export async function updateOrgPlan(orgId: string, planId: SubscriptionPlan) {
   })
 }
 
-export async function checkUsageLimit(
+async function checkUsageLimit(
   orgId: string,
   type: 'sessions' | 'users' | 'scenarios'
 ): Promise<{
@@ -215,6 +220,7 @@ export async function checkUsageLimit(
   percentage: number
   exceeded: boolean
 }> {
+  await requireAuth()
   return withOrgGuard(async (user, verifiedOrgId) => {
     const targetOrgId = orgId || verifiedOrgId
     const supabase = await createClient()
@@ -293,6 +299,7 @@ export async function checkUsageLimit(
 }
 
 export async function getInvoices(orgId: string, limit = 10) {
+  await requireAuth()
   return withRoleGuard(['admin'], async (user, verifiedOrgId) => {
     if (orgId !== verifiedOrgId) {
       throw new Error('Organization ID mismatch')

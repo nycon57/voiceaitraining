@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatDueDate } from "@/lib/date-display"
 
 export interface ScenarioCardData {
   id: string
@@ -81,16 +83,18 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
     >
       <CardHeader className="pb-3 space-y-3">
         {/* Thumbnail */}
-        <div className="aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-chart-1/20 via-chart-2/20 to-chart-3/20">
+        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-chart-1/20 via-chart-2/20 to-chart-3/20">
           {scenario.thumbnailUrl ? (
-            <img
+            <Image
               src={scenario.thumbnailUrl}
               alt={scenario.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-200"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <BookOpen className="h-16 w-16 text-muted-foreground/50" />
+            <div className="size-full flex items-center justify-center">
+              <BookOpen className="size-16 text-muted-foreground/50" />
             </div>
           )}
         </div>
@@ -118,7 +122,7 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
         {/* Meta Information */}
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Clock className="h-4 w-4" />
+            <Clock className="size-4" />
             <span>
               {scenario.durationMin}-{scenario.durationMax} min
             </span>
@@ -130,16 +134,16 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
                 difficultyInfo.color
               )}
             >
-              <BarChart3 className="h-4 w-4" />
+              <BarChart3 className="size-4" />
               <span className="font-medium">{difficultyInfo.label}</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Briefcase className="h-4 w-4" />
+            <Briefcase className="size-4" />
             <span className="truncate">{scenario.industry}</span>
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Users className="h-4 w-4" />
+            <Users className="size-4" />
             <span>{scenario.attemptCount} attempts</span>
           </div>
         </div>
@@ -163,7 +167,7 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
         {/* Assignment Info */}
         {assignment && (
           <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-            <UserCheck className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <UserCheck className="size-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="text-xs font-medium">
                 Assigned{assignment.assignedBy ? ` by ${assignment.assignedBy}` : ''}
@@ -173,13 +177,9 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
                   "text-xs mt-0.5 flex items-center gap-1",
                   assignment.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"
                 )}>
-                  {assignment.isOverdue && <AlertCircle className="h-3 w-3" />}
-                  <Calendar className="h-3 w-3" />
-                  Due {new Date(assignment.dueAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: new Date(assignment.dueAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                  })}
+                  {assignment.isOverdue && <AlertCircle className="size-3" />}
+                  <Calendar suppressHydrationWarning className="size-3" />
+                  Due {formatDueDate(assignment.dueAt)}
                   {assignment.isOverdue && ' (Overdue)'}
                 </div>
               )}
@@ -232,7 +232,7 @@ export function ScenarioCard({ scenario, onEnroll, onContinue, showProgress = fa
               ? (progress === 0 ? 'Start Training' : 'Continue Training')
               : 'View Details'
             }
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 size-4" />
           </Button>
         </div>
       </CardContent>

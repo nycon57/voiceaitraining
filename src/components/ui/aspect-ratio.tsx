@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as AspectRatioPrimitive from '@radix-ui/react-aspect-ratio';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 

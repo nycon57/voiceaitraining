@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 // Domain event schemas
 
-export const attemptCompletedSchema = z.object({
+const attemptCompletedSchema = z.object({
   attemptId: z.string(),
   userId: z.string(),
   orgId: z.string(),
@@ -11,7 +11,7 @@ export const attemptCompletedSchema = z.object({
   vapiCallId: z.string(),
 })
 
-export const attemptScoredSchema = z.object({
+const attemptScoredSchema = z.object({
   attemptId: z.string(),
   userId: z.string(),
   orgId: z.string(),
@@ -22,7 +22,7 @@ export const attemptScoredSchema = z.object({
   criticalFailures: z.array(z.string()),
 })
 
-export const attemptFeedbackGeneratedSchema = z.object({
+const attemptFeedbackGeneratedSchema = z.object({
   attemptId: z.string(),
   userId: z.string(),
   orgId: z.string(),
@@ -30,7 +30,7 @@ export const attemptFeedbackGeneratedSchema = z.object({
   nextSteps: z.array(z.string()),
 })
 
-export const assignmentCreatedSchema = z.object({
+const assignmentCreatedSchema = z.object({
   assignmentId: z.string(),
   userId: z.string(),
   orgId: z.string(),
@@ -40,7 +40,7 @@ export const assignmentCreatedSchema = z.object({
   assignedBy: z.string(),
 })
 
-export const assignmentOverdueSchema = z.object({
+const assignmentOverdueSchema = z.object({
   assignmentId: z.string(),
   userId: z.string(),
   orgId: z.string(),
@@ -50,7 +50,7 @@ export const assignmentOverdueSchema = z.object({
 })
 
 /** PII-minimized: email is optional and should only be included when legally required. Prefer userId for identification. */
-export const userJoinedOrgSchema = z.object({
+const userJoinedOrgSchema = z.object({
   userId: z.string(),
   orgId: z.string(),
   role: z.string(),
@@ -58,14 +58,14 @@ export const userJoinedOrgSchema = z.object({
   name: z.string(),
 })
 
-export const userInactiveSchema = z.object({
+const userInactiveSchema = z.object({
   userId: z.string(),
   orgId: z.string(),
   lastAttemptAt: z.string(),
   daysSinceLastAttempt: z.number(),
 })
 
-export const coachRecommendationReadySchema = z.object({
+const coachRecommendationReadySchema = z.object({
   userId: z.string(),
   orgId: z.string(),
   recommendationType: z.string(),
@@ -73,7 +73,7 @@ export const coachRecommendationReadySchema = z.object({
   message: z.string(),
 })
 
-export const coachWeaknessUpdatedSchema = z.object({
+const coachWeaknessUpdatedSchema = z.object({
   userId: z.string(),
   orgId: z.string(),
   weaknesses: z.array(z.record(z.string(), z.unknown())),
@@ -81,7 +81,7 @@ export const coachWeaknessUpdatedSchema = z.object({
   trajectory: z.string(),
 })
 
-export const recordingUploadedSchema = z.object({
+const recordingUploadedSchema = z.object({
   orgId: z.string(),
   fileUrl: z.string(),
   uploadedBy: z.string(),
@@ -129,20 +129,6 @@ export type UserInactivePayload = z.infer<typeof userInactiveSchema>
 export type CoachRecommendationReadyPayload = z.infer<typeof coachRecommendationReadySchema>
 export type CoachWeaknessUpdatedPayload = z.infer<typeof coachWeaknessUpdatedSchema>
 export type RecordingUploadedPayload = z.infer<typeof recordingUploadedSchema>
-
-// Discriminated union of all domain events
-
-export type DomainEvent =
-  | { name: typeof EVENT_NAMES.ATTEMPT_COMPLETED; data: AttemptCompletedPayload }
-  | { name: typeof EVENT_NAMES.ATTEMPT_SCORED; data: AttemptScoredPayload }
-  | { name: typeof EVENT_NAMES.ATTEMPT_FEEDBACK_GENERATED; data: AttemptFeedbackGeneratedPayload }
-  | { name: typeof EVENT_NAMES.ASSIGNMENT_CREATED; data: AssignmentCreatedPayload }
-  | { name: typeof EVENT_NAMES.ASSIGNMENT_OVERDUE; data: AssignmentOverduePayload }
-  | { name: typeof EVENT_NAMES.USER_JOINED_ORG; data: UserJoinedOrgPayload }
-  | { name: typeof EVENT_NAMES.USER_INACTIVE; data: UserInactivePayload }
-  | { name: typeof EVENT_NAMES.COACH_RECOMMENDATION_READY; data: CoachRecommendationReadyPayload }
-  | { name: typeof EVENT_NAMES.COACH_WEAKNESS_UPDATED; data: CoachWeaknessUpdatedPayload }
-  | { name: typeof EVENT_NAMES.RECORDING_UPLOADED; data: RecordingUploadedPayload }
 
 /** Event name → payload type lookup. */
 export type EventPayloadMap = {

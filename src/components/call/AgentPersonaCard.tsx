@@ -42,7 +42,7 @@ export function AgentPersonaCard({
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardContent className="p-6">
-        <div className="flex flex-col items-center text-center space-y-4">
+        <div className="flex flex-col items-center text-center gap-4">
           {/* Avatar with Speaking Indicator */}
           <div className="relative">
             <div
@@ -53,7 +53,7 @@ export function AgentPersonaCard({
                   : "bg-transparent"
               )}
             />
-            <Avatar className="h-24 w-24 border-4 border-background relative z-10">
+            <Avatar className="size-24 border-4 border-background relative z-10">
               <AvatarImage src={persona.image_url} alt={persona.name} />
               <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-primary/20 to-primary/10">
                 {initials}
@@ -61,8 +61,8 @@ export function AgentPersonaCard({
             </Avatar>
             {isSpeaking && (
               <div className="absolute -bottom-1 -right-1 z-20">
-                <div className="h-6 w-6 bg-primary rounded-full flex items-center justify-center">
-                  <div className="h-4 w-4 bg-white rounded-full animate-pulse" />
+                <div className="size-6 bg-primary rounded-full flex items-center justify-center">
+                  <div className="size-4 bg-white rounded-full animate-pulse" />
                 </div>
               </div>
             )}
@@ -70,9 +70,9 @@ export function AgentPersonaCard({
 
           {/* Name and Role */}
           <div className="space-y-1">
-            <h3 className="font-headline text-xl font-bold">{persona.name}</h3>
+            <h3 className="font-headline text-xl font-semibold">{persona.name}</h3>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Briefcase className="h-3.5 w-3.5" />
+              <Briefcase className="size-3.5" />
               <span>{persona.role}</span>
             </div>
           </div>
@@ -83,7 +83,7 @@ export function AgentPersonaCard({
               variant="outline"
               className={cn("border", difficultyColors[persona.difficulty])}
             >
-              <TrendingUp className="h-3 w-3 mr-1" />
+              <TrendingUp className="size-3 mr-1" />
               {persona.difficulty.charAt(0).toUpperCase() + persona.difficulty.slice(1)}
             </Badge>
           )}
@@ -109,7 +109,7 @@ export function AgentPersonaCard({
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {persona.personality.map((trait, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                      <Badge key={JSON.stringify(trait)} variant="secondary" className="text-xs">
                         {trait}
                       </Badge>
                     ))}
@@ -123,11 +123,11 @@ export function AgentPersonaCard({
           {isSpeaking && (
             <div className="w-full">
               <div className="flex items-center justify-center gap-2 text-xs font-medium text-primary">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                <span className="relative flex size-2">
+                  <span className="animate-ping absolute inline-flex size-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
                 </span>
-                Speaking...
+                Speaking…
               </div>
             </div>
           )}

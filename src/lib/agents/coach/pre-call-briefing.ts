@@ -5,13 +5,6 @@ import { getTopWeaknesses } from '@/lib/memory/user-memory'
 import type { ScenarioDifficulty, ScenarioRubric } from '@/types/scenario'
 import type { WeaknessEntry } from '@/lib/memory/user-memory'
 
-export interface PreviousAttemptSummary {
-  attemptId: string
-  score: number | null
-  startedAt: string
-  durationSeconds: number | null
-}
-
 export interface PreCallBriefing {
   focusAreas: string[]
   scenarioTips: string[]
@@ -155,9 +148,13 @@ function buildFocusAreas(
   }
 
   // Fill remaining slots with generic tips if we don't have enough
+  const existingAreas = new Set(areas)
   for (const fallback of DEFAULT_FOCUS_AREAS) {
     if (areas.length >= MAX_FOCUS_AREAS) break
-    if (!areas.includes(fallback)) areas.push(fallback)
+    if (!existingAreas.has(fallback)) {
+      areas.push(fallback)
+      existingAreas.add(fallback)
+    }
   }
 
   return areas

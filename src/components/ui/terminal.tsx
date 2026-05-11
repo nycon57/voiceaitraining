@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useInView } from 'motion/react';
+import { m as motion, useInView } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { FaEllipsisVertical } from 'react-icons/fa6';
 
@@ -172,7 +172,7 @@ export function Terminal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <FaEllipsisVertical className="h-3 w-3" />
+                <FaEllipsisVertical className="size-3" />
               </motion.button>
             </PopoverTrigger>
             <PopoverContent
@@ -199,7 +199,7 @@ export function Terminal({
       <div className="h-80 overflow-hidden bg-muted pt-2 text-xs">
         {logEntries.map((entry, index) => (
           <div
-            key={index}
+            key={JSON.stringify(entry)}
             className="grid min-h-[1.5rem] grid-cols-[6rem_1fr_1rem] items-start gap-3 px-4 py-1"
           >
             <div className="flex items-center whitespace-nowrap">

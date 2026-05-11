@@ -59,7 +59,12 @@ async function authenticateToken(token: string): Promise<TokenClaims | null> {
 function getAllowedOrigins(): string[] {
   const raw = process.env.COPILOT_ALLOWED_ORIGINS
   if (!raw) return []
-  return raw.split(',').map((o) => o.trim().toLowerCase()).filter(Boolean)
+  return raw
+    .split(',')
+    .flatMap((origin) => {
+      const normalized = origin.trim().toLowerCase()
+      return normalized ? [normalized] : []
+    })
 }
 
 // ============================================================================

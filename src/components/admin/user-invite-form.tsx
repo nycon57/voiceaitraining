@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,40 +14,38 @@ import { UserPlus, Upload, AlertCircle, CheckCircle } from 'lucide-react'
 import { inviteUserToOrganization, bulkInviteUsers } from '@/actions/admin'
 
 export function UserInviteForm() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, startInviteTransition] = useTransition()
   const [result, setResult] = useState<any>(null)
   const [csvData, setCsvData] = useState('')
 
   const handleSingleInvite = async (formData: FormData) => {
-    setIsLoading(true)
-    setResult(null)
+    startInviteTransition(async () => {
+      setResult(null)
 
-    try {
-      const result = await inviteUserToOrganization(formData)
-      setResult({ success: true, message: 'Invitation sent successfully!' })
-    } catch (error: any) {
-      setResult({ success: false, message: error.message })
-    } finally {
-      setIsLoading(false)
-    }
+      try {
+        await inviteUserToOrganization(formData)
+        setResult({ success: true, message: 'Invitation sent successfully!' })
+      } catch (error: any) {
+        setResult({ success: false, message: error.message })
+      }
+    })
   }
 
   const handleBulkInvite = async (formData: FormData) => {
-    setIsLoading(true)
-    setResult(null)
+    startInviteTransition(async () => {
+      setResult(null)
 
-    try {
-      const result = await bulkInviteUsers(formData)
-      setResult({
-        success: true,
-        message: `Processed ${result.total} invitations`,
-        details: result,
-      })
-    } catch (error: any) {
-      setResult({ success: false, message: error.message })
-    } finally {
-      setIsLoading(false)
-    }
+      try {
+        const result = await bulkInviteUsers(formData)
+        setResult({
+          success: true,
+          message: `Processed ${result.total} invitations`,
+          details: result,
+        })
+      } catch (error: any) {
+        setResult({ success: false, message: error.message })
+      }
+    })
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +63,7 @@ export function UserInviteForm() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5" />
+          <UserPlus className="size-5" />
           Invite Users
         </CardTitle>
         <CardDescription>
@@ -165,7 +163,7 @@ export function UserInviteForm() {
                 <input type="hidden" name="csvData" value={csvData} />
 
                 <Button type="submit" disabled={isLoading || !csvData} className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="size-4 mr-2" />
                   {isLoading ? 'Processing...' : 'Import Users'}
                 </Button>
               </form>
@@ -177,9 +175,9 @@ export function UserInviteForm() {
           <Alert className={`mt-4 ${result.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
             <div className="flex items-center gap-2">
               {result.success ? (
-                <CheckCircle className="h-4 w-4 text-green-600" />
+                <CheckCircle className="size-4 text-green-600" />
               ) : (
-                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertCircle className="size-4 text-red-600" />
               )}
               <AlertDescription className={result.success ? 'text-green-800' : 'text-red-800'}>
                 {result.message}
@@ -201,8 +199,8 @@ export function UserInviteForm() {
                   <div className="text-xs text-red-700">
                     <p className="font-medium">Errors:</p>
                     <ul className="list-disc pl-4">
-                      {result.details.errors.map((error: any, i: number) => (
-                        <li key={i}>{error.email}: {error.error}</li>
+                      {result.details.errors.map((error: any) => (
+                        <li key={`${error.email}-${error.error}`}>{error.email}: {error.error}</li>
                       ))}
                     </ul>
                   </div>

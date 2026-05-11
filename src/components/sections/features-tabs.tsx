@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, m as motion } from 'motion/react';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -36,7 +36,7 @@ const FeaturesTabsSection = () => {
         width: 380,
         height: 525,
       },
-      className: 'w-full h-full flex justify-center items-center p-14 lg:p-0',
+      className: 'size-full flex justify-center items-center p-14 lg:p-0',
     },
     {
       id: 'scenarios',
@@ -52,6 +52,7 @@ const FeaturesTabsSection = () => {
         'self-end justify-self-end justify-end items-end flex md:mt-15 md:ps-15 mt-10 ps-10 w-full',
     },
   ];
+  const activeTabData = TABS_DATA.find((tab) => tab.id === activeTab);
 
   return (
     <section className="section-padding container grid max-w-screen-xl lg:grid-cols-2 lg:gap-18">
@@ -133,7 +134,7 @@ const FeaturesTabsSection = () => {
                   {activeTab === tab.id && (
                     <Card className="to-muted/30 via-muted/20 mt-3 h-96 w-full overflow-hidden rounded-sm bg-gradient-to-t from-transparent p-0 sm:h-132 lg:hidden">
                       <CardContent
-                        className={cn('relative flex h-full w-full p-0')}
+                        className={cn('relative flex size-full p-0')}
                       >
                         <motion.div
                           key={tab.id}
@@ -175,11 +176,11 @@ const FeaturesTabsSection = () => {
 
       {/* Right: Image on Gradient - Desktop Only */}
       <Card className="to-muted/30 via-muted/20 hidden h-142 flex-1 overflow-hidden rounded-xl bg-gradient-to-t from-transparent p-0 lg:flex lg:max-xl:justify-end">
-        <CardContent className="relative h-full w-full p-0">
+        <CardContent className="relative size-full p-0">
           <AnimatePresence mode="sync">
-            {TABS_DATA.filter((tab) => tab.id === activeTab).map((tab) => (
+            {activeTabData && (
               <motion.div
-                key={tab.id}
+                key={activeTabData.id}
                 initial={{ opacity: 0, scale: 0.97, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -189,18 +190,18 @@ const FeaturesTabsSection = () => {
                   opacity: { duration: 0.35 },
                   scale: { duration: 0.5 },
                 }}
-                className={cn(tab.className, 'shrink-0')}
+                className={cn(activeTabData.className, 'shrink-0')}
               >
                 <Image
-                  src={tab.image.src}
-                  alt={tab.title}
-                  width={tab.image.width}
-                  height={tab.image.height}
+                  src={activeTabData.image.src}
+                  alt={activeTabData.title}
+                  width={activeTabData.image.width}
+                  height={activeTabData.image.height}
                   className="object-contain invert dark:invert-0"
                   priority
                 />
               </motion.div>
-            ))}
+            )}
           </AnimatePresence>
         </CardContent>
       </Card>

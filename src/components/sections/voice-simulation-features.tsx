@@ -93,7 +93,7 @@ export default function VoiceSimulationFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             The Technology Behind{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Perfect Practice
             </span>
           </h2>
@@ -108,12 +108,12 @@ export default function VoiceSimulationFeatures() {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <div key={index} className="group relative">
+              <div key={JSON.stringify(feature)} className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all duration-300 group-hover:border-chart-2/30 group-hover:shadow-lg">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="p-3 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-2/20 border border-chart-2/20">
-                      <Icon className="h-6 w-6 text-chart-2 dark:text-chart-2" />
+                      <Icon className="size-6 text-chart-2 dark:text-chart-2" />
                     </div>
                   </div>
 
@@ -128,7 +128,7 @@ export default function VoiceSimulationFeatures() {
                   <ul className="space-y-2">
                     {feature.benefits.map((benefit, benefitIndex) => (
                       <li key={benefitIndex} className="flex items-start gap-2 text-xs text-muted-foreground">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 mt-2 flex-shrink-0"></div>
+                        <div className="size-1.5 rounded-full bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 mt-2 flex-shrink-0"></div>
                         <span>{benefit}</span>
                       </li>
                     ))}

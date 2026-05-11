@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Mic,
   Target,
@@ -66,7 +67,7 @@ export default function VoiceAIFeatureShowcase() {
           </div>
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Everything You Need to{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Transform Your Sales Team
             </span>
           </h2>
@@ -81,11 +82,11 @@ export default function VoiceAIFeatureShowcase() {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={index} className="relative group hover:shadow-lg transition-all duration-300 border-border/50 backdrop-blur-sm">
+              <Card key={JSON.stringify(feature)} className="relative group hover:shadow-lg transition-all duration-300 border-border/50 backdrop-blur-sm">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
-                      <Icon className="h-6 w-6 text-white" />
+                    <div className="size-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                      <Icon className="size-6 text-white" />
                     </div>
                     {feature.isCore && (
                       <Badge
@@ -97,7 +98,7 @@ export default function VoiceAIFeatureShowcase() {
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-xl font-bold font-headline">
+                  <h3 className="text-xl font-semibold font-headline">
                     {feature.title}
                   </h3>
                 </CardHeader>
@@ -117,7 +118,7 @@ export default function VoiceAIFeatureShowcase() {
         {/* Bottom CTA */}
         <div className="text-center mt-16">
           <div className="bg-muted/50 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-border/50">
-            <h3 className="text-2xl font-bold mb-4 font-headline">
+            <h3 className="text-2xl font-semibold mb-4 font-headline">
               Ready to see these features in action?
             </h3>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -126,15 +127,15 @@ export default function VoiceAIFeatureShowcase() {
             </p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="size-2 bg-green-500 rounded-full"></div>
                 No setup required
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="size-2 bg-green-500 rounded-full"></div>
                 14-day free trial
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="size-2 bg-green-500 rounded-full"></div>
                 Cancel anytime
               </div>
             </div>
@@ -254,9 +255,11 @@ const FeatureShowcase = ({
 
                   {/* Image side */}
                   <div className="w-full max-w-lg">
-                    <img
+                    <Image
                       src={image.src}
                       alt={image.alt}
+                      width={672}
+                      height={420}
                       className="max-h-[420px] w-full rounded-lg object-cover"
                     />
                   </div>
@@ -266,7 +269,7 @@ const FeatureShowcase = ({
                 {features && features.length > 1 && (
                   <div className="mt-24 grid grid-cols-1 justify-between gap-12 sm:grid-cols-2 md:grid-cols-4">
                     {features.slice(1).map((feature, index) => (
-                      <div key={index}>
+                      <div key={JSON.stringify(feature)}>
                         <h6 className="text-lg mb-3 font-semibold">{feature.title}</h6>
                         <p className="text-sm text-muted-foreground">
                           {feature.description}
@@ -294,13 +297,13 @@ const FeatureShowcase = ({
                     : '';
 
                   return (
-                    <div key={index} className="text-center">
+                    <div key={JSON.stringify(feature)} className="text-center">
                       {Icon && (
                         <div className={cn(
-                          "mx-auto flex h-16 w-16 items-center justify-center rounded-full",
+                          "mx-auto flex size-16 items-center justify-center rounded-full",
                           iconColorClass
                         )}>
-                          <Icon className="h-8 w-8" />
+                          <Icon className="size-8" />
                         </div>
                       )}
                       <h3 className={cn(
@@ -324,7 +327,7 @@ const FeatureShowcase = ({
         {statsSection && (
           <div className="mt-16 rounded-lg border bg-background p-8 md:p-12">
             <div className="text-center">
-              <h3 className="font-headline text-2xl font-bold md:text-3xl">
+              <h3 className="font-headline text-2xl font-semibold md:text-3xl">
                 {statsSection.title}
               </h3>
               <div className="mt-8 grid gap-6 md:grid-cols-3">
@@ -338,7 +341,7 @@ const FeatureShowcase = ({
                     : '';
 
                   return (
-                    <div key={index} className="space-y-2">
+                    <div key={JSON.stringify(stat)} className="space-y-2">
                       <div className={cn(
                         "text-3xl font-bold",
                         valueColorClass
@@ -365,4 +368,4 @@ const FeatureShowcase = ({
   );
 };
 
-export { FeatureShowcase, VoiceAIFeatureShowcase };
+;

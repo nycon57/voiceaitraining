@@ -47,7 +47,7 @@ export function AlertCard({
 
   return (
     <Card className={cn(className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      <CardHeader className="flex flex-row items-center justify-between gap-0">
         <div>
           <CardTitle className="font-headline">{title}</CardTitle>
           {description && (
@@ -56,7 +56,7 @@ export function AlertCard({
             </CardDescription>
           )}
         </div>
-        {TitleIcon && <TitleIcon className="h-5 w-5 text-warning" />}
+        {TitleIcon && <TitleIcon className="size-5 text-warning" />}
       </CardHeader>
       <CardContent>
         {displayedAlerts.length === 0 ? (
@@ -77,7 +77,7 @@ export function AlertCard({
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Icon className="h-4 w-4" />
+                    <Icon className="size-4" />
                     <span className="text-sm font-medium">{alert.title}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">
@@ -111,7 +111,7 @@ export function AlertCard({
 /**
  * Single alert banner without card wrapper
  */
-export function AlertBanner({
+function AlertBanner({
   alert,
   className
 }: {
@@ -129,7 +129,7 @@ export function AlertBanner({
       )}
     >
       <div className="flex items-start gap-3">
-        <Icon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+        <Icon className="size-5 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           <h4 className="text-sm font-medium mb-1">{alert.title}</h4>
           <p className="text-xs text-muted-foreground">{alert.description}</p>

@@ -33,7 +33,7 @@ export function RelatedContent({ parentTracks, relatedScenarios }: RelatedConten
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Layers className="h-5 w-5" />
+              <Layers className="size-5" />
               Part of These Tracks
             </CardTitle>
           </CardHeader>
@@ -47,7 +47,7 @@ export function RelatedContent({ parentTracks, relatedScenarios }: RelatedConten
                 >
                   <div className="flex items-start gap-3 flex-1">
                     <div className="rounded-lg bg-chart-4/10 p-2">
-                      <Layers className="h-5 w-5 text-chart-4" />
+                      <Layers className="size-5 text-chart-4" />
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold mb-1 group-hover:text-primary transition-colors">
@@ -67,7 +67,7 @@ export function RelatedContent({ parentTracks, relatedScenarios }: RelatedConten
                       </div>
                     </div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 ml-2" />
+                  <ArrowRight className="size-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 ml-2" />
                 </Link>
               ))}
             </div>
@@ -80,7 +80,7 @@ export function RelatedContent({ parentTracks, relatedScenarios }: RelatedConten
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
+              <BookOpen className="size-5" />
               Related Scenarios
             </CardTitle>
           </CardHeader>
@@ -126,7 +126,7 @@ export function RelatedContent({ parentTracks, relatedScenarios }: RelatedConten
                         </div>
                         <Button variant="ghost" size="sm" className="h-auto p-0">
                           View
-                          <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                          <ArrowRight className="ml-1 size-3 group-hover:translate-x-1 transition-transform" />
                         </Button>
                       </div>
                     </div>

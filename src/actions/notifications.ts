@@ -1,7 +1,7 @@
 'use server'
 
 import { assertHuman } from '@/lib/botid'
-import { withOrgGuard } from '@/lib/auth'
+import { withOrgGuard, requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
 function isValidTimezone(tz: string): boolean {
@@ -42,18 +42,21 @@ export interface NotificationPreferences extends NotificationPreferencesInput {
 
 const PREFS_SELECT = 'id, channel_email, channel_push, channel_in_app, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, digest_frequency, coach_nudges' as const
 
-const DEFAULT_PREFERENCES: Omit<NotificationPreferences, 'id'> = {
-  channel_email: true,
-  channel_push: true,
-  channel_in_app: true,
-  quiet_hours_start: null,
-  quiet_hours_end: null,
-  quiet_hours_timezone: 'UTC',
-  digest_frequency: 'daily',
-  coach_nudges: true,
+function getDefaultPreferences(): Omit<NotificationPreferences, 'id'> {
+  return {
+    channel_email: true,
+    channel_push: true,
+    channel_in_app: true,
+    quiet_hours_start: null,
+    quiet_hours_end: null,
+    quiet_hours_timezone: 'UTC',
+    digest_frequency: 'daily',
+    coach_nudges: true,
+  }
 }
 
 export async function getNotificationPreferences(): Promise<NotificationPreferences> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const { data, error } = await supabase
       .from('notification_preferences')
@@ -67,7 +70,7 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
     }
 
     if (!data) {
-      return { id: null, ...DEFAULT_PREFERENCES }
+      return { id: null, ...getDefaultPreferences() }
     }
 
     return data
@@ -77,6 +80,7 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
 export async function updateNotificationPreferences(
   prefs: NotificationPreferencesInput
 ): Promise<NotificationPreferences> {
+  await requireAuth()
   await assertHuman()
 
   const validated = notificationPreferencesSchema.parse(prefs)
@@ -128,6 +132,7 @@ export async function getNotifications(
   limit: number = 20,
   offset: number = 0,
 ): Promise<Notification[]> {
+  await requireAuth()
   const validated = paginationSchema.parse({ limit, offset })
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -148,6 +153,7 @@ export async function getNotifications(
 }
 
 export async function getUnreadCount(): Promise<number> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const { count, error } = await supabase
       .from('notifications')
@@ -167,6 +173,7 @@ export async function getUnreadCount(): Promise<number> {
 const markAsReadSchema = z.string().uuid()
 
 export async function markAsRead(id: string): Promise<void> {
+  await requireAuth()
   await assertHuman()
   const validId = markAsReadSchema.parse(id)
 
@@ -185,6 +192,7 @@ export async function markAsRead(id: string): Promise<void> {
 }
 
 export async function markAllAsRead(): Promise<void> {
+  await requireAuth()
   await assertHuman()
 
   return withOrgGuard(async (user, orgId, supabase) => {

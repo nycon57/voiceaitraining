@@ -33,7 +33,7 @@ export default function AIScoringSolution() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             AI that analyzes{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               every word, pause, and technique
             </span>
           </h2>
@@ -48,9 +48,9 @@ export default function AIScoringSolution() {
           {transformations.map((item, index) => {
             const Icon = item.icon;
             return (
-              <div key={index} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
-                <div className="mx-0 h-12 w-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
-                  <Icon className="h-6 w-6 text-white" />
+              <div key={JSON.stringify(item)} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
+                <div className="mx-0 size-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
+                  <Icon className="size-6 text-white" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-semibold text-foreground sm:text-base">
@@ -69,10 +69,10 @@ export default function AIScoringSolution() {
         <div className="bg-muted rounded-2xl p-8 md:p-12 border">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-              <h3 className="text-2xl font-bold mb-6">How AI Scoring Transforms Performance Reviews</h3>
+              <h3 className="text-2xl font-semibold mb-6">How AI Scoring Transforms Performance Reviews</h3>
               <div className="space-y-6">
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">1</span>
                   </div>
                   <div>
@@ -82,7 +82,7 @@ export default function AIScoringSolution() {
                 </div>
 
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">2</span>
                   </div>
                   <div>
@@ -92,7 +92,7 @@ export default function AIScoringSolution() {
                 </div>
 
                 <div className="flex gap-6">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
+                  <div className="flex-shrink-0 size-8 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center">
                     <span className="text-white text-sm font-bold">3</span>
                   </div>
                   <div>
@@ -108,7 +108,7 @@ export default function AIScoringSolution() {
               <div className="relative bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-2xl p-8 text-white">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-6 w-6 text-green-300" />
+                    <CheckCircle className="size-6 text-green-300" />
                     <span className="font-semibold">AI Scoring Complete</span>
                   </div>
 

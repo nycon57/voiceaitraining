@@ -1,7 +1,7 @@
 'use client';
 
 import { BadgeCheck, Building2, Folder, Sparkles, Users } from 'lucide-react';
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import React, { useRef } from 'react';
 
 import { AnimatedBeam } from '@/components/magicui/animated-beam';
@@ -169,7 +169,7 @@ export default function AIAutomation() {
                           className={`size-3 lg:size-3.5 ${card.iconColor}`}
                         />
                       )}
-                      <h3 className="font-headline text-xs font-bold lg:text-sm">
+                      <h3 className="font-headline text-xs font-semibold lg:text-sm">
                         {card.title}
                       </h3>
                     </div>
@@ -260,7 +260,7 @@ export default function AIAutomation() {
         <p className="text-muted-foreground">Our numbers say it all:</p>
         <div className="mt-6 grid grid-cols-3 justify-between gap-6">
           {stats.map((stat, index) => (
-            <div key={index} className="space-y-1">
+            <div key={JSON.stringify(stat)} className="space-y-1">
               <div className="text-2xl font-bold md:text-3xl">
                 <NumberTicker
                   value={stat.value}

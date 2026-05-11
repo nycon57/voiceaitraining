@@ -8,15 +8,15 @@ const PathSelector = () => {
   return (
     <section className="overflow-hidden py-32">
       <div className="relative container">
-        <div className="pointer-events-none absolute inset-0 -top-20 -z-10 mx-auto hidden h-[500px] w-[500px] bg-[radial-gradient(var(--color-gray-400)_1px,transparent_1px)] [mask-image:radial-gradient(circle_at_center,white_250px,transparent_250px)] [background-size:6px_6px] opacity-25 lg:block"></div>
+        <div className="pointer-events-none absolute inset-0 -top-20 -z-10 mx-auto hidden size-[500px] bg-[radial-gradient(var(--color-gray-400)_1px,transparent_1px)] [mask-image:radial-gradient(circle_at_center,white_250px,transparent_250px)] [background-size:6px_6px] opacity-25 lg:block"></div>
 
         {/* Individual Section */}
         <div className="relative flex flex-col justify-between gap-16 lg:flex-row">
           <div className="pointer-events-none absolute inset-0 hidden bg-linear-to-t from-background via-transparent to-transparent lg:block"></div>
 
           <div className="w-full max-w-96 shrink-0 justify-between">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 text-primary ring-2 ring-primary/10">
-              <User className="h-6 w-6" />
+            <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 text-primary ring-2 ring-primary/10">
+              <User className="size-6" />
             </div>
             <h2 className="mt-6 mb-3 text-3xl font-medium lg:text-4xl">
               For Individuals
@@ -39,8 +39,8 @@ const PathSelector = () => {
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center p-8">
-                  <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-                    <Sparkles className="h-10 w-10" />
+                  <div className="inline-flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                    <Sparkles className="size-10" />
                   </div>
                   <p className="text-lg font-medium">Individual Dashboard Preview</p>
                   <p className="text-sm text-muted-foreground mt-2">Your personal training command center</p>
@@ -52,7 +52,7 @@ const PathSelector = () => {
 
         <div className="relative mt-8 grid md:grid-cols-3">
           <div className="flex flex-col gap-y-6 px-2 py-10 md:p-6 lg:p-8">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <Sparkles className="size-6 text-primary" />
             <div>
               <h3 className="text-lg font-medium">AI-Powered Scenarios</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -61,7 +61,7 @@ const PathSelector = () => {
             </div>
           </div>
           <div className="flex flex-col gap-y-6 px-2 py-10 md:p-6 lg:p-8">
-            <Target className="h-6 w-6 text-primary" />
+            <Target className="size-6 text-primary" />
             <div>
               <h3 className="text-lg font-medium">Instant Feedback</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -70,7 +70,7 @@ const PathSelector = () => {
             </div>
           </div>
           <div className="flex flex-col gap-y-6 px-2 py-10 md:p-6 lg:p-8">
-            <TrendingUp className="h-6 w-6 text-primary" />
+            <TrendingUp className="size-6 text-primary" />
             <div>
               <h3 className="text-lg font-medium">Track Your Growth</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -99,8 +99,8 @@ const PathSelector = () => {
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center p-8">
-                  <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-                    <BarChart3 className="h-10 w-10" />
+                  <div className="inline-flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                    <BarChart3 className="size-10" />
                   </div>
                   <p className="text-lg font-medium">Team Dashboard Preview</p>
                   <p className="text-sm text-muted-foreground mt-2">Complete visibility into team performance</p>
@@ -110,8 +110,8 @@ const PathSelector = () => {
           </div>
 
           <div className="w-full max-w-96 shrink-0 justify-between">
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 text-primary ring-2 ring-primary/10">
-              <Users className="h-6 w-6" />
+            <div className="mb-4 inline-flex size-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 text-primary ring-2 ring-primary/10">
+              <Users className="size-6" />
             </div>
             <h2 className="mt-6 mb-3 text-3xl font-medium lg:text-4xl">
               For Teams
@@ -132,7 +132,7 @@ const PathSelector = () => {
 
         <div className="relative mt-8 grid md:grid-cols-3">
           <div className="flex flex-col gap-y-6 px-2 py-10 md:p-6 lg:p-8">
-            <BarChart3 className="h-6 w-6 text-primary" />
+            <BarChart3 className="size-6 text-primary" />
             <div>
               <h3 className="text-lg font-medium">Team Analytics</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -141,7 +141,7 @@ const PathSelector = () => {
             </div>
           </div>
           <div className="flex flex-col gap-y-6 px-2 py-10 md:p-6 lg:p-8">
-            <Target className="h-6 w-6 text-primary" />
+            <Target className="size-6 text-primary" />
             <div>
               <h3 className="text-lg font-medium">Assignment Management</h3>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -150,7 +150,7 @@ const PathSelector = () => {
             </div>
           </div>
           <div className="flex flex-col gap-y-6 px-2 py-10 md:p-6 lg:p-8">
-            <Users className="h-6 w-6 text-primary" />
+            <Users className="size-6 text-primary" />
             <div>
               <h3 className="text-lg font-medium">Scalable Training</h3>
               <p className="mt-1 text-sm text-muted-foreground">

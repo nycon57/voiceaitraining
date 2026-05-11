@@ -59,7 +59,7 @@ export function getDifficultyColor(difficulty: string): string {
  * @param seconds - Duration in seconds
  * @returns Formatted duration string
  */
-export function formatDuration(seconds: number): string {
+function formatDuration(seconds: number): string {
   if (seconds < 60) {
     return `${seconds}s`
   }
@@ -86,7 +86,7 @@ export function formatDuration(seconds: number): string {
  * @param value - Numeric percentage value
  * @returns Formatted percentage string with + or - sign
  */
-export function formatPercentageChange(value: number): string {
+function formatPercentageChange(value: number): string {
   const sign = value >= 0 ? '+' : ''
   return `${sign}${value.toFixed(1)}%`
 }
@@ -142,7 +142,7 @@ export function getAlertColors(severity: 'info' | 'success' | 'warning' | 'error
  * @param progress - Progress percentage (0-100)
  * @returns Tailwind color class for progress bar
  */
-export function getProgressColor(progress: number): string {
+function getProgressColor(progress: number): string {
   if (progress >= 100) return 'bg-success'
   if (progress >= 75) return 'bg-primary'
   if (progress >= 50) return 'bg-warning'
@@ -154,7 +154,7 @@ export function getProgressColor(progress: number): string {
  * @param num - Number to format
  * @returns Formatted number string
  */
-export function formatCompactNumber(num: number): string {
+function formatCompactNumber(num: number): string {
   if (num < 1000) return num.toString()
   if (num < 1000000) return `${(num / 1000).toFixed(1)}K`
   if (num < 1000000000) return `${(num / 1000000).toFixed(1)}M`
@@ -166,7 +166,7 @@ export function formatCompactNumber(num: number): string {
  * @param date - Date to compare
  * @returns Relative time string (e.g., "2 hours ago")
  */
-export function getRelativeTime(date: Date): string {
+function getRelativeTime(date: Date): string {
   const now = new Date()
   const diff = now.getTime() - date.getTime()
   const seconds = Math.floor(diff / 1000)

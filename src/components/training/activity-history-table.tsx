@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useReducer } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { formatDistanceToNow } from "date-fns"
+import { formatRelativeDate } from "@/lib/date-display"
 
 export interface ActivityHistoryRow {
   id: string
@@ -49,6 +49,53 @@ export interface ActivityHistoryRow {
 
 interface ActivityHistoryTableProps {
   activities: ActivityHistoryRow[]
+}
+
+type ActivitySortField = "date" | "score" | "duration"
+type ActivitySortDirection = "asc" | "desc"
+
+type ActivityHistoryState = {
+  searchQuery: string
+  statusFilter: string
+  typeFilter: string
+  sortField: ActivitySortField
+  sortDirection: ActivitySortDirection
+}
+
+type ActivityHistoryAction =
+  | { type: "search"; searchQuery: string }
+  | { type: "status"; statusFilter: string }
+  | { type: "type"; typeFilter: string }
+  | { type: "sort"; sortField: ActivitySortField }
+
+const initialActivityHistoryState: ActivityHistoryState = {
+  searchQuery: "",
+  statusFilter: "all",
+  typeFilter: "all",
+  sortField: "date",
+  sortDirection: "desc",
+}
+
+function activityHistoryReducer(
+  state: ActivityHistoryState,
+  action: ActivityHistoryAction,
+): ActivityHistoryState {
+  switch (action.type) {
+    case "search":
+      return { ...state, searchQuery: action.searchQuery }
+    case "status":
+      return { ...state, statusFilter: action.statusFilter }
+    case "type":
+      return { ...state, typeFilter: action.typeFilter }
+    case "sort":
+      if (state.sortField === action.sortField) {
+        return {
+          ...state,
+          sortDirection: state.sortDirection === "asc" ? "desc" : "asc",
+        }
+      }
+      return { ...state, sortField: action.sortField, sortDirection: "desc" }
+  }
 }
 
 const statusConfig = {
@@ -84,11 +131,13 @@ const typeConfig = {
 }
 
 export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
-  const [sortField, setSortField] = useState<"date" | "score" | "duration">("date")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
+  const [{
+    searchQuery,
+    statusFilter,
+    typeFilter,
+    sortField,
+    sortDirection,
+  }, dispatch] = useReducer(activityHistoryReducer, initialActivityHistoryState)
 
   // Filter activities
   const filteredActivities = activities.filter((activity) => {
@@ -102,7 +151,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
   })
 
   // Sort activities
-  const sortedActivities = [...filteredActivities].sort((a, b) => {
+  const sortedActivities = filteredActivities.toSorted((a, b) => {
     let comparison = 0
 
     switch (sortField) {
@@ -120,13 +169,8 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
     return sortDirection === "asc" ? comparison : -comparison
   })
 
-  const toggleSort = (field: typeof sortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortDirection("desc")
-    }
+  const toggleSort = (field: ActivitySortField) => {
+    dispatch({ type: "sort", sortField: field })
   }
 
   const formatDuration = (seconds: number) => {
@@ -161,7 +205,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
     <Card animated={false}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5" />
+          <History className="size-5" />
           Activity History
         </CardTitle>
         <CardDescription>
@@ -172,17 +216,17 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
         {/* Filters */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search training..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => dispatch({ type: "search", searchQuery: e.target.value })}
               className="pl-9"
             />
           </div>
 
           <div className="flex gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value) => dispatch({ type: "status", statusFilter: value })}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -194,7 +238,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
               </SelectContent>
             </Select>
 
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={(value) => dispatch({ type: "type", typeFilter: value })}>
               <SelectTrigger className="w-[130px]">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -217,19 +261,19 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                 <TableHead className="cursor-pointer" onClick={() => toggleSort("date")}>
                   <div className="flex items-center gap-1">
                     Date
-                    <ArrowUpDown className="h-3 w-3" />
+                    <ArrowUpDown className="size-3" />
                   </div>
                 </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => toggleSort("duration")}>
                   <div className="flex items-center gap-1">
                     Duration
-                    <ArrowUpDown className="h-3 w-3" />
+                    <ArrowUpDown className="size-3" />
                   </div>
                 </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => toggleSort("score")}>
                   <div className="flex items-center gap-1">
                     Score
-                    <ArrowUpDown className="h-3 w-3" />
+                    <ArrowUpDown className="size-3" />
                   </div>
                 </TableHead>
                 <TableHead>Status</TableHead>
@@ -241,7 +285,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <AlertCircle className="h-8 w-8" />
+                      <AlertCircle className="size-8" />
                       <p>No activities match your filters</p>
                     </div>
                   </TableCell>
@@ -262,10 +306,8 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                           {typeConfig[activity.type].label}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(activity.startedAt), {
-                          addSuffix: true,
-                        })}
+                      <TableCell suppressHydrationWarning className="text-sm text-muted-foreground">
+                        {formatRelativeDate(activity.startedAt)}
                       </TableCell>
                       <TableCell className="text-sm tabular-nums">
                         {formatDuration(activity.duration)}
@@ -273,7 +315,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                       <TableCell>
                         {activity.score !== undefined ? (
                           <div className="flex items-center gap-1">
-                            <Trophy className="h-4 w-4 text-muted-foreground" />
+                            <Trophy className="size-4 text-muted-foreground" />
                             <span
                               className={cn(
                                 "font-semibold tabular-nums",
@@ -284,13 +326,13 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                             </span>
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">—</span>
+                          <span className="text-muted-foreground">:</span>
                         )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <StatusIcon
-                            className={cn("h-4 w-4", statusConfig[activity.status].color)}
+                            className={cn("size-4", statusConfig[activity.status].color)}
                           />
                           <span className="text-sm">
                             {statusConfig[activity.status].label}
@@ -306,7 +348,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                               window.location.href = `/attempts/${activity.id}`
                             }}
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="size-4" />
                           </Button>
                           {activity.status === "completed" && (
                             <Button
@@ -316,7 +358,7 @@ export function ActivityHistoryTable({ activities }: ActivityHistoryTableProps) 
                                 window.location.href = `/play/${activity.scenarioId}/call`
                               }}
                             >
-                              <RotateCcw className="h-4 w-4" />
+                              <RotateCcw className="size-4" />
                             </Button>
                           )}
                         </div>

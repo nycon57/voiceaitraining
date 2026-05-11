@@ -24,9 +24,7 @@ export const sendDailyDigest = inngest.createFunction(
 
       const cutoff = new Date(Date.now() - ACTIVE_WINDOW_DAYS * MS_PER_DAY).toISOString()
       const seen = new Map<string, ActiveTrainee>()
-      let offset = 0
-
-      while (true) {
+      async function collectActiveTrainees(offset: number): Promise<void> {
         const { data, error } = await supabase
           .from('scenario_attempts')
           .select('org_id, clerk_user_id')
@@ -38,7 +36,7 @@ export const sendDailyDigest = inngest.createFunction(
           throw new Error(`Failed to query active trainees: ${error.message}`)
         }
 
-        if (!data || data.length === 0) break
+        if (!data || data.length === 0) return
 
         for (const row of data) {
           if (!row.clerk_user_id) continue
@@ -48,17 +46,16 @@ export const sendDailyDigest = inngest.createFunction(
           }
         }
 
-        if (data.length < PAGE_SIZE) break
-        offset += PAGE_SIZE
+        if (data.length < PAGE_SIZE) return
+        await collectActiveTrainees(offset + PAGE_SIZE)
       }
+
+      await collectActiveTrainees(0)
 
       return Array.from(seen.values())
     })
 
-    let digestCount = 0
-    let failures = 0
-
-    for (const trainee of activeTrainees) {
+    const digestResults = await Promise.all(activeTrainees.map(async (trainee) => {
       try {
         const digest = await step.run(
           `generate-digest-${trainee.orgId}-${trainee.userId}`,
@@ -67,52 +64,56 @@ export const sendDailyDigest = inngest.createFunction(
           },
         )
 
-        await step.run(
-          `log-digest-${trainee.orgId}-${trainee.userId}`,
-          async () => {
-            await logAgentActivity({
-              orgId: trainee.orgId,
-              userId: trainee.userId,
-              agentId: AGENT_ID,
-              eventType: 'daily_digest',
-              action: 'generate_daily_digest',
-              details: {
-                attempts: digest.summary.attempts,
-                avgScore: digest.summary.avgScore,
-                trend: digest.summary.trend,
-                noRecentActivity: digest.noRecentActivity,
-                streak: digest.streak,
-              },
-            })
-          },
-        )
+        await Promise.all([
+          step.run(
+            `log-digest-${trainee.orgId}-${trainee.userId}`,
+            async () => {
+              await logAgentActivity({
+                orgId: trainee.orgId,
+                userId: trainee.userId,
+                agentId: AGENT_ID,
+                eventType: 'daily_digest',
+                action: 'generate_daily_digest',
+                details: {
+                  attempts: digest.summary.attempts,
+                  avgScore: digest.summary.avgScore,
+                  trend: digest.summary.trend,
+                  noRecentActivity: digest.noRecentActivity,
+                  streak: digest.streak,
+                },
+              })
+            },
+          ),
+          step.run(
+            `emit-digest-${trainee.orgId}-${trainee.userId}`,
+            async () => {
+              const payload: CoachRecommendationReadyPayload = {
+                userId: trainee.userId,
+                orgId: trainee.orgId,
+                recommendationType: 'daily_digest',
+                message: formatDigestMessage(digest),
+              }
 
-        await step.run(
-          `emit-digest-${trainee.orgId}-${trainee.userId}`,
-          async () => {
-            const payload: CoachRecommendationReadyPayload = {
-              userId: trainee.userId,
-              orgId: trainee.orgId,
-              recommendationType: 'daily_digest',
-              message: formatDigestMessage(digest),
-            }
+              await inngest.send({
+                name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
+                data: payload,
+              })
+            },
+          ),
+        ])
 
-            await inngest.send({
-              name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
-              data: payload,
-            })
-          },
-        )
-
-        digestCount++
+        return { success: true }
       } catch (error) {
         console.error(
           `[coach-agent] Failed to generate digest for user ${trainee.userId} in org ${trainee.orgId}:`,
           error instanceof Error ? error.message : error,
         )
-        failures++
+        return { success: false }
       }
-    }
+    }))
+
+    const digestCount = digestResults.filter((result) => result.success).length
+    const failures = digestResults.length - digestCount
 
     return { activeTrainees: activeTrainees.length, digestsSent: digestCount, failures }
   },

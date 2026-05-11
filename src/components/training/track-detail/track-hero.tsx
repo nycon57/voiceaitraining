@@ -28,7 +28,7 @@ export function TrackHero({ track }: TrackHeroProps) {
       <div>
         <div className="flex items-center gap-3 mb-3 flex-wrap">
           <Badge variant="default" className="bg-chart-4">
-            <Layers className="h-3 w-3 mr-1" />
+            <Layers className="size-3 mr-1" />
             TRACK
           </Badge>
           <Badge variant="outline">
@@ -45,7 +45,7 @@ export function TrackHero({ track }: TrackHeroProps) {
             </Badge>
           )}
         </div>
-        <h1 className="font-headline text-4xl font-bold tracking-tight mb-3">
+        <h1 className="font-headline text-4xl font-semibold tracking-tight mb-3">
           {track.title}
         </h1>
         <p className="text-lg text-muted-foreground">
@@ -59,7 +59,7 @@ export function TrackHero({ track }: TrackHeroProps) {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-blue-100 dark:bg-blue-950 p-3">
-                <BookOpen className="h-5 w-5 text-blue-600" />
+                <BookOpen className="size-5 text-blue-600" />
               </div>
               <div>
                 <div className="font-headline text-2xl font-bold">
@@ -77,7 +77,7 @@ export function TrackHero({ track }: TrackHeroProps) {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-purple-100 dark:bg-purple-950 p-3">
-                <Users className="h-5 w-5 text-purple-600" />
+                <Users className="size-5 text-purple-600" />
               </div>
               <div>
                 <div className="font-headline text-2xl font-bold">
@@ -93,7 +93,7 @@ export function TrackHero({ track }: TrackHeroProps) {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-green-100 dark:bg-green-950 p-3">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+                <TrendingUp className="size-5 text-green-600" />
               </div>
               <div>
                 <div className="font-headline text-2xl font-bold">

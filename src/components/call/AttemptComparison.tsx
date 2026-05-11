@@ -31,9 +31,11 @@ interface AttemptComparisonProps {
   className?: string
 }
 
+const emptyPreviousAttempts: AttemptStats[] = []
+
 export function AttemptComparison({
   currentAttempt,
-  previousAttempts = [],
+  previousAttempts = emptyPreviousAttempts,
   averageScore,
   bestScore,
   className,
@@ -52,9 +54,9 @@ export function AttemptComparison({
 
   const getTrendIcon = () => {
     if (!hasHistory) return null
-    if (improvement > 5) return <TrendingUp className="h-4 w-4 text-success" />
-    if (improvement < -5) return <TrendingDown className="h-4 w-4 text-destructive" />
-    return <Minus className="h-4 w-4 text-muted-foreground" />
+    if (improvement > 5) return <TrendingUp className="size-4 text-success" />
+    if (improvement < -5) return <TrendingDown className="size-4 text-destructive" />
+    return <Minus className="size-4 text-muted-foreground" />
   }
 
   const getTrendColor = () => {
@@ -68,7 +70,7 @@ export function AttemptComparison({
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5" />
+          <Trophy className="size-5" />
           Your Progress
         </CardTitle>
       </CardHeader>
@@ -83,7 +85,7 @@ export function AttemptComparison({
           </div>
           {currentAttempt.isBest && (
             <Badge variant="outline" className="border-success/50 text-success">
-              <Trophy className="h-3 w-3 mr-1" />
+              <Trophy className="size-3 mr-1" />
               Best Score!
             </Badge>
           )}
@@ -130,7 +132,7 @@ export function AttemptComparison({
           {averageScore !== undefined && hasHistory && (
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Target className="h-3 w-3" />
+                <Target className="size-3" />
                 Your Average
               </p>
               <p className="text-lg font-bold">{averageScore.toFixed(1)}%</p>
@@ -141,7 +143,7 @@ export function AttemptComparison({
           {bestScore !== undefined && (
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Trophy className="h-3 w-3" />
+                <Trophy className="size-3" />
                 Personal Best
               </p>
               <p className="text-lg font-bold text-success">{bestScore}%</p>
@@ -152,7 +154,7 @@ export function AttemptComparison({
           {hasHistory && (
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+                <Clock className="size-3" />
                 Total Attempts
               </p>
               <p className="text-lg font-bold">{currentAttempt.attemptNumber}</p>
@@ -170,7 +172,7 @@ export function AttemptComparison({
                 const height = (attempt.score / 100) * 100
                 return (
                   <div
-                    key={index}
+                    key={JSON.stringify(attempt)}
                     className="flex-1 flex flex-col items-center gap-1"
                   >
                     <div

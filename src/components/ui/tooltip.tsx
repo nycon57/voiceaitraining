@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 

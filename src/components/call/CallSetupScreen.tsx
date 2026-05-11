@@ -97,7 +97,7 @@ export function CallSetupScreen({
     <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
-        <h1 className="font-headline text-3xl font-bold tracking-tight">
+        <h1 className="font-headline text-3xl font-semibold tracking-tight">
           {scenario.title}
         </h1>
         {scenario.description && (
@@ -122,7 +122,7 @@ export function CallSetupScreen({
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Mic className="h-5 w-5" />
+                <Mic className="size-5" />
                 Microphone Check
               </CardTitle>
             </CardHeader>
@@ -130,13 +130,13 @@ export function CallSetupScreen({
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-3">
                   {isCheckingMic ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <Loader2 className="size-5 animate-spin text-primary" />
                   ) : micPermissionGranted ? (
-                    <CheckCircle2 className="h-5 w-5 text-success" />
+                    <CheckCircle2 className="size-5 text-success" />
                   ) : micError ? (
-                    <XCircle className="h-5 w-5 text-destructive" />
+                    <XCircle className="size-5 text-destructive" />
                   ) : (
-                    <AlertCircle className="h-5 w-5 text-warning" />
+                    <AlertCircle className="size-5 text-warning" />
                   )}
                   <div>
                     <p className="font-medium text-sm">
@@ -169,7 +169,7 @@ export function CallSetupScreen({
               {!micPermissionGranted && micError && (
                 <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 space-y-3">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="size-5 text-destructive flex-shrink-0 mt-0.5" />
                     <div className="flex-1 space-y-2">
                       <p className="text-sm font-medium text-destructive">
                         {micError}
@@ -190,7 +190,7 @@ export function CallSetupScreen({
                     onClick={handleMicCheck}
                     className="w-full"
                   >
-                    <Mic className="mr-2 h-4 w-4" />
+                    <Mic className="mr-2 size-4" />
                     Try Again
                   </Button>
                 </div>
@@ -217,14 +217,14 @@ export function CallSetupScreen({
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                  <Target className="size-5" />
                   Call Objectives
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {scenario.goals.map((goal, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
+                    <li key={JSON.stringify(goal)} className="flex items-start gap-2 text-sm">
                       <Badge variant="outline" className="mt-0.5 flex-shrink-0">
                         {index + 1}
                       </Badge>
@@ -241,15 +241,15 @@ export function CallSetupScreen({
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <ListChecks className="h-5 w-5" />
+                  <ListChecks className="size-5" />
                   What You'll Practice
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {scenario.learning_objectives.map((objective, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <li key={JSON.stringify(objective)} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="size-4 text-primary mt-0.5 flex-shrink-0" />
                       <span className="text-muted-foreground">{objective}</span>
                     </li>
                   ))}
@@ -269,12 +269,12 @@ export function CallSetupScreen({
               >
                 {isConnecting ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Connecting...
+                    <Loader2 className="mr-2 size-5 animate-spin" />
+                    Connecting…
                   </>
                 ) : (
                   <>
-                    <Mic className="mr-2 h-5 w-5" />
+                    <Mic className="mr-2 size-5" />
                     Start Training Call
                   </>
                 )}
@@ -287,7 +287,7 @@ export function CallSetupScreen({
                   onClick={onStartWarmup}
                   disabled={!canStartCall}
                 >
-                  <Flame className="mr-2 h-4 w-4" />
+                  <Flame className="mr-2 size-4" />
                   Quick Warmup (2 min)
                 </Button>
               )}
@@ -304,7 +304,7 @@ export function CallSetupScreen({
           <Card className="bg-primary/10 border-primary/30">
             <CardContent className="p-5">
               <div className="flex gap-3">
-                <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <AlertCircle className="size-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="space-y-2.5">
                   <p className="font-semibold text-foreground">Pro Tips</p>
                   <ul className="list-disc list-inside space-y-1.5 text-sm text-foreground/90">

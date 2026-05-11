@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -33,7 +33,7 @@ const progressVariants = cva(
 )
 
 const indicatorVariants = cva(
-  "h-full w-full flex-1 transition-all duration-500 ease-out relative overflow-hidden",
+  "size-full flex-1 transition-all duration-500 ease-out relative overflow-hidden",
   {
     variants: {
       variant: {
@@ -68,18 +68,7 @@ function Progress({
     animated?: boolean
     showLabel?: boolean
   }) {
-  const [displayValue, setDisplayValue] = React.useState(0)
-
-  React.useEffect(() => {
-    if (animated && value !== undefined) {
-      const timer = setTimeout(() => {
-        setDisplayValue(value)
-      }, 100)
-      return () => clearTimeout(timer)
-    } else if (value !== undefined) {
-      setDisplayValue(value)
-    }
-  }, [value, animated])
+  const displayValue = value ?? 0
 
   return (
     <div className="space-y-2">

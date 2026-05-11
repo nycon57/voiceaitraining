@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useReducer } from "react"
 import {
   Dialog,
   DialogContent,
@@ -29,19 +29,44 @@ interface AttemptDetailModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+type AttemptDetailState = {
+  attempt: any
+  loading: boolean
+}
+
+type AttemptDetailAction =
+  | { type: "loading" }
+  | { type: "loaded"; attempt: any }
+  | { type: "reset" }
+
+function attemptDetailReducer(
+  state: AttemptDetailState,
+  action: AttemptDetailAction,
+): AttemptDetailState {
+  switch (action.type) {
+    case "loading":
+      return { ...state, loading: true }
+    case "loaded":
+      return { attempt: action.attempt, loading: false }
+    case "reset":
+      return { attempt: null, loading: false }
+  }
+}
+
 export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDetailModalProps) {
-  const [attempt, setAttempt] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+  const [{ attempt, loading }, dispatch] = useReducer(attemptDetailReducer, {
+    attempt: null,
+    loading: false,
+  })
 
   useEffect(() => {
     if (attemptId && open) {
-      setLoading(true)
+      dispatch({ type: "loading" })
       getAttempt(attemptId)
-        .then((data) => setAttempt(data))
+        .then((data) => dispatch({ type: "loaded", attempt: data }))
         .catch((error) => console.error('Failed to load attempt:', error))
-        .finally(() => setLoading(false))
     } else {
-      setAttempt(null)
+      dispatch({ type: "reset" })
     }
   }, [attemptId, open])
 
@@ -57,36 +82,36 @@ export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDet
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-headline">Attempt Details</DialogTitle>
-          <DialogDescription>
+          <DialogDescription suppressHydrationWarning>
             {attempt && new Date(attempt.started_at).toLocaleString()}
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <Tabs defaultValue="transcript" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="transcript">
-                <FileText className="h-4 w-4 mr-2" />
+                <FileText className="size-4 mr-2" />
                 Transcript
               </TabsTrigger>
               <TabsTrigger value="audio">
-                <PlayCircle className="h-4 w-4 mr-2" />
+                <PlayCircle className="size-4 mr-2" />
                 Audio
               </TabsTrigger>
               <TabsTrigger value="analytics">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <BarChart3 className="size-4 mr-2" />
                 Analytics
               </TabsTrigger>
               <TabsTrigger value="kpis">
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="size-4 mr-2" />
                 KPIs
               </TabsTrigger>
               <TabsTrigger value="feedback">
-                <Lightbulb className="h-4 w-4 mr-2" />
+                <Lightbulb className="size-4 mr-2" />
                 Feedback
               </TabsTrigger>
             </TabsList>
@@ -102,7 +127,7 @@ export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDet
                     <div className="space-y-3">
                       {transcript.messages.map((msg: any, idx: number) => (
                         <div
-                          key={idx}
+                          key={`${msg.role}-${msg.timestamp ?? idx}-${msg.content ?? ''}`}
                           className={`p-3 rounded-lg ${
                             msg.role === 'user'
                               ? 'bg-primary/10 ml-8'
@@ -220,9 +245,9 @@ export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDet
                     <div key={key} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-2">
                         {value.passed ? (
-                          <CheckCircle2 className="h-4 w-4 text-chart-2" />
+                          <CheckCircle2 className="size-4 text-chart-2" />
                         ) : (
-                          <XCircle className="h-4 w-4 text-destructive" />
+                          <XCircle className="size-4 text-destructive" />
                         )}
                         <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
                       </div>
@@ -258,12 +283,12 @@ export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDet
                   {feedback?.strengths && feedback.strengths.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-chart-2" />
+                        <CheckCircle2 className="size-4 text-chart-2" />
                         Strengths
                       </h4>
                       <ul className="space-y-2">
-                        {feedback.strengths.map((strength: any, idx: number) => (
-                          <li key={idx} className="text-sm">
+                        {feedback.strengths.map((strength: any) => (
+                          <li key={`${strength.area}-${strength.description}`} className="text-sm">
                             <span className="font-medium">{strength.area}:</span>{' '}
                             <span className="text-muted-foreground">{strength.description}</span>
                           </li>
@@ -275,12 +300,12 @@ export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDet
                   {feedback?.improvements && feedback.improvements.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                        <Lightbulb className="h-4 w-4 text-warning" />
+                        <Lightbulb className="size-4 text-warning" />
                         Areas for Improvement
                       </h4>
                       <ul className="space-y-3">
-                        {feedback.improvements.map((improvement: any, idx: number) => (
-                          <li key={idx} className="text-sm">
+                        {feedback.improvements.map((improvement: any) => (
+                          <li key={`${improvement.area}-${improvement.description}`} className="text-sm">
                             <div className="font-medium">{improvement.area}</div>
                             <div className="text-muted-foreground">{improvement.description}</div>
                             {improvement.suggestion && (
@@ -298,8 +323,8 @@ export function AttemptDetailModal({ attemptId, open, onOpenChange }: AttemptDet
                     <div>
                       <h4 className="text-sm font-semibold mb-2">Next Steps</h4>
                       <ul className="space-y-1">
-                        {feedback.next_steps.map((step: string, idx: number) => (
-                          <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                        {feedback.next_steps.map((step: string) => (
+                          <li key={step} className="text-sm text-muted-foreground flex items-start gap-2">
                             <span className="text-primary">•</span>
                             <span>{step}</span>
                           </li>

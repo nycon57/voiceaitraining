@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Request a Demo | SpeakStride',
+}
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +15,7 @@ export default function RequestDemoPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Request a Demo</h1>
+        <h1 className="text-4xl font-semibold mb-4">Request a Demo</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           See how our enterprise AI sales training platform can transform your sales team's performance.
           Schedule a personalized demo with our team.
@@ -20,7 +26,7 @@ export default function RequestDemoPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
+              <Building2 className="size-5" />
               Enterprise-Grade Platform
             </CardTitle>
             <CardDescription>
@@ -40,7 +46,7 @@ export default function RequestDemoPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <Users className="size-5" />
               Team Management
             </CardTitle>
             <CardDescription>
@@ -134,7 +140,7 @@ export default function RequestDemoPage() {
             </div>
 
             <Button type="submit" className="w-full" size="lg">
-              <Zap className="h-4 w-4 mr-2" />
+              <Zap className="size-4 mr-2" />
               Request Demo
             </Button>
           </form>

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatDueDate } from "@/lib/date-display"
 
 export interface TrackCardData {
   id: string
@@ -69,16 +71,18 @@ export function TrackCard({ track, enrollment, onEnroll, onContinue, showProgres
     >
       <CardHeader className="pb-3 space-y-3">
         {/* Thumbnail */}
-        <div className="aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-chart-3/20 via-chart-4/20 to-chart-1/20">
+        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-chart-3/20 via-chart-4/20 to-chart-1/20">
           {track.thumbnailUrl ? (
-            <img
+            <Image
               src={track.thumbnailUrl}
               alt={track.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-200"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Layers className="h-16 w-16 text-muted-foreground/50" />
+            <div className="size-full flex items-center justify-center">
+              <Layers className="size-16 text-muted-foreground/50" />
             </div>
           )}
         </div>
@@ -106,7 +110,7 @@ export function TrackCard({ track, enrollment, onEnroll, onContinue, showProgres
         {/* Meta Information */}
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Clock className="h-4 w-4" />
+            <Clock className="size-4" />
             <span>
               {hoursMin === hoursMax
                 ? `${hoursMin}h`
@@ -114,7 +118,7 @@ export function TrackCard({ track, enrollment, onEnroll, onContinue, showProgres
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Users className="h-4 w-4" />
+            <Users className="size-4" />
             <span>{track.enrolledCount} enrolled</span>
           </div>
         </div>
@@ -145,7 +149,7 @@ export function TrackCard({ track, enrollment, onEnroll, onContinue, showProgres
         {/* Assignment Info */}
         {assignment && (
           <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50 border border-border/50">
-            <UserCheck className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <UserCheck className="size-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="text-xs font-medium">
                 Assigned{assignment.assignedBy ? ` by ${assignment.assignedBy}` : ''}
@@ -155,13 +159,9 @@ export function TrackCard({ track, enrollment, onEnroll, onContinue, showProgres
                   "text-xs mt-0.5 flex items-center gap-1",
                   assignment.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"
                 )}>
-                  {assignment.isOverdue && <AlertCircle className="h-3 w-3" />}
-                  <Calendar className="h-3 w-3" />
-                  Due {new Date(assignment.dueAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: new Date(assignment.dueAt).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                  })}
+                  {assignment.isOverdue && <AlertCircle className="size-3" />}
+                  <Calendar suppressHydrationWarning className="size-3" />
+                  Due {formatDueDate(assignment.dueAt)}
                   {assignment.isOverdue && ' (Overdue)'}
                 </div>
               )}
@@ -203,7 +203,7 @@ export function TrackCard({ track, enrollment, onEnroll, onContinue, showProgres
               ? (progress === 0 ? 'Start Track' : 'Continue Track')
               : 'View Details'
             }
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 size-4" />
           </Button>
         </div>
       </CardContent>

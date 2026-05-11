@@ -1,11 +1,4 @@
-/**
- * Shared types for chart components
- */
 
-export interface BaseChartData {
-  date?: string | Date;
-  label?: string;
-}
 
 export interface PerformanceTrendData extends BaseChartData {
   date: string | Date;
@@ -29,9 +22,4 @@ export interface BaseChartProps {
   description?: string;
   isLoading?: boolean;
   className?: string;
-}
-
-export interface ChartEmptyStateProps {
-  message?: string;
-  icon?: React.ReactNode;
 }

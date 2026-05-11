@@ -129,7 +129,7 @@ export const managerWeeklyAnalysis = inngest.createFunction(
     let totalNotifications = 0
     const failedOrgs: string[] = []
 
-    for (const orgId of orgIds) {
+    const orgResults = await Promise.all(orgIds.map(async (orgId) => {
       try {
         const analysis = await step.run(`analyze-${orgId}`, () =>
           analyzeTeamPerformance(orgId),
@@ -139,23 +139,22 @@ export const managerWeeklyAnalysis = inngest.createFunction(
           generateManagerInsights(analysis),
         )
 
-        if (insights.length === 0) continue
-        totalInsights += insights.length
+        if (insights.length === 0) {
+          return { insights: 0, notifications: 0, failedOrg: null as string | null }
+        }
 
         const sent = await step.run(`notify-${orgId}`, async () => {
           const managers = await findOrgManagers(orgId)
           if (managers.length === 0) return 0
 
-          let notified = 0
-
-          for (const manager of managers) {
+          const managerResults = await Promise.all(managers.map(async (manager) => {
             const filtered = manager.lowPriorityAlerts
               ? insights
               : insights.filter((i) => i.priority !== 'low')
 
-            if (filtered.length === 0) continue
+            if (filtered.length === 0) return 0
 
-            for (const insight of filtered) {
+            const insightResults = await Promise.all(filtered.map(async (insight) => {
               try {
                 await sendNotification({
                   userId: manager.userId,
@@ -172,27 +171,36 @@ export const managerWeeklyAnalysis = inngest.createFunction(
                     priority: insight.priority,
                   },
                 })
-                notified++
+                return 1
               } catch (err) {
                 console.error(
                   `[manager-weekly] Failed to notify manager ${manager.userId}:`,
                   formatError(err),
                 )
+                return 0
               }
-            }
-          }
+            }))
 
-          return notified
+            return insightResults.reduce((sum, value) => sum + value, 0)
+          }))
+
+          return managerResults.reduce((sum, value) => sum + value, 0)
         })
 
-        totalNotifications += sent
+        return { insights: insights.length, notifications: sent, failedOrg: null as string | null }
       } catch (err) {
         console.error(
           `[manager-weekly] Failed to process org ${orgId}:`,
           formatError(err),
         )
-        failedOrgs.push(orgId)
+        return { insights: 0, notifications: 0, failedOrg: orgId }
       }
+    }))
+
+    for (const result of orgResults) {
+      totalInsights += result.insights
+      totalNotifications += result.notifications
+      if (result.failedOrg) failedOrgs.push(result.failedOrg)
     }
 
     return {

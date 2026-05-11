@@ -144,7 +144,7 @@ const ReviewCard = ({
         <blockquote className="font-headline text-sm leading-snug">
           {body.split(/(@speakstride)/g).map((part, index) =>
             part === '@speakstride' ? (
-              <span key={index} className="text-chart-1">
+              <span key={JSON.stringify(part)} className="text-chart-1">
                 {part}
               </span>
             ) : (

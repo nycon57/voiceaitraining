@@ -47,10 +47,10 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
   }
 
   const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
+    return (amount / 100).toLocaleString('en-US', {
       style: 'currency',
       currency: currency.toUpperCase(),
-    }).format(amount / 100) // Stripe amounts are in cents
+    }) // Stripe amounts are in cents
   }
 
   const formatDate = (date: Date) => {
@@ -66,7 +66,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5" />
+            <Receipt className="size-5" />
             Invoice History
           </CardTitle>
           <CardDescription>
@@ -75,7 +75,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
         </CardHeader>
         <CardContent>
           <div className="text-center py-12">
-            <Receipt className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <Receipt className="size-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="font-headline text-lg font-semibold mb-2">No invoices yet</h3>
             <p className="text-muted-foreground">
               Your invoice history will appear here once you have an active subscription.
@@ -90,7 +90,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Receipt className="h-5 w-5" />
+          <Receipt className="size-5" />
           Invoice History
         </CardTitle>
         <CardDescription>
@@ -157,7 +157,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
                         size="sm"
                         onClick={() => window.open(invoice.pdf_url!, '_blank')}
                       >
-                        <Download className="h-4 w-4 mr-1" />
+                        <Download className="size-4 mr-1" />
                         PDF
                       </Button>
                     )}
@@ -167,7 +167,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
                         size="sm"
                         onClick={() => window.open(invoice.hosted_url!, '_blank')}
                       >
-                        <ExternalLink className="h-4 w-4 mr-1" />
+                        <ExternalLink className="size-4 mr-1" />
                         View
                       </Button>
                     )}
@@ -210,7 +210,7 @@ export function InvoiceHistory({ invoices }: InvoiceHistoryProps) {
         {/* Help Text */}
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <div className="flex items-start gap-2">
-            <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
+            <FileText className="size-4 text-blue-600 mt-0.5" />
             <div className="text-sm">
               <div className="font-medium text-blue-800 mb-1">Invoice Help</div>
               <div className="text-blue-700 space-y-1">

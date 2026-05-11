@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { GripVerticalIcon } from 'lucide-react';
 import * as ResizablePrimitive from 'react-resizable-panels';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -38,12 +38,12 @@ function ResizablePanelGroup({
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3 }}
-        className="h-full w-full"
+        className="size-full"
       >
         <ResizablePrimitive.PanelGroup
           data-slot="resizable-panel-group"
           className={cn(
-            'flex h-full w-full data-[panel-group-direction=vertical]:flex-col transition-all duration-200',
+            'flex size-full data-[panel-group-direction=vertical]:flex-col transition-all duration-200',
             className
           )}
           {...props}
@@ -56,7 +56,7 @@ function ResizablePanelGroup({
     <ResizablePrimitive.PanelGroup
       data-slot="resizable-panel-group"
       className={cn(
-        'flex h-full w-full data-[panel-group-direction=vertical]:flex-col',
+        'flex size-full data-[panel-group-direction=vertical]:flex-col',
         className
       )}
       {...props}
@@ -147,7 +147,7 @@ function ResizableContainer({
   animated = true,
 }: ResizableContainerProps) {
   return (
-    <div className={cn('h-full w-full overflow-hidden rounded-lg border', className)}>
+    <div className={cn('size-full overflow-hidden rounded-lg border', className)}>
       <ResizablePanelGroup direction={direction} animated={animated}>
         {children}
       </ResizablePanelGroup>
@@ -192,6 +192,5 @@ export {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
-  ResizableContainer,
-  ResizableSection,
+
 };

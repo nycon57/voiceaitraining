@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link'
 import { Heart, Car, Home, Building, Shield, Users } from "lucide-react";
 
 const insuranceFeatures = [
@@ -49,7 +50,7 @@ export default function InsuranceFeatures() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             Industry-Specific{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Insurance Training
             </span>
           </h2>
@@ -64,10 +65,10 @@ export default function InsuranceFeatures() {
           {insuranceFeatures.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <div key={index} className="rounded-lg border bg-card p-8 shadow-sm hover:shadow-md transition-shadow">
+              <div key={JSON.stringify(feature)} className="rounded-lg border bg-card p-8 shadow-sm hover:shadow-md transition-shadow">
                 <div className="mb-4">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center mb-4">
-                    <Icon className="h-6 w-6 text-white" />
+                  <div className="size-12 rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 flex items-center justify-center mb-4">
+                    <Icon className="size-6 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground mb-4">{feature.description}</p>
@@ -78,7 +79,7 @@ export default function InsuranceFeatures() {
                   <ul className="space-y-1">
                     {feature.benefits.map((benefit, benefitIndex) => (
                       <li key={benefitIndex} className="text-sm text-muted-foreground flex items-center">
-                        <div className="w-1.5 h-1.5 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 rounded-full mr-2"></div>
+                        <div className="size-1.5 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 rounded-full mr-2"></div>
                         {benefit}
                       </li>
                     ))}
@@ -92,7 +93,7 @@ export default function InsuranceFeatures() {
         {/* CTA Section */}
         <div className="mt-20 text-center">
           <div className="rounded-lg border bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 dark:from-chart-1/10 dark:via-chart-2/10 dark:to-chart-3/10 p-8 md:p-12">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4">
               Ready to Build Trusted Insurance Agents?
             </h3>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
@@ -100,18 +101,18 @@ export default function InsuranceFeatures() {
               improve client retention, and build agents who clients trust and recommend.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
+              <Link
                 href="/request-demo"
                 className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white font-semibold hover:opacity-90 transition-colors"
               >
                 Start Free Trial
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/demo-credentials"
                 className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors"
               >
                 Watch Demo
-              </a>
+              </Link>
             </div>
           </div>
         </div>

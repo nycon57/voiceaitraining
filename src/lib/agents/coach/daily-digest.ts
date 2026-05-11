@@ -6,16 +6,6 @@ import {
   extractDimensionAverages,
 } from '@/lib/memory/weakness-profiler'
 
-// Types
-
-export interface DigestSummary {
-  attempts: number
-  avgScore: number | null
-  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data'
-  bestDimension: string | null
-  worstDimension: string | null
-}
-
 export interface TraineeDigest {
   summary: DigestSummary
   topImprovement: string | null
@@ -173,15 +163,11 @@ export async function generateTraineeDigest(
     }
   }
 
-  const scores = currentAttempts
-    .map((a) => a.score)
-    .filter((s): s is number => s != null)
+  const scores = currentAttempts.flatMap((a) => (a.score != null ? [a.score] : []))
   const avgScore =
     scores.length > 0 ? Math.round(average(scores)) : null
 
-  const prevScores = previousAttempts
-    .map((a) => a.score)
-    .filter((s): s is number => s != null)
+  const prevScores = previousAttempts.flatMap((a) => (a.score != null ? [a.score] : []))
   const prevAvg = prevScores.length > 0 ? average(prevScores) : null
 
   let trend: DigestSummary['trend'] = 'insufficient_data'

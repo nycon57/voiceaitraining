@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import {
   Controller,
   FormProvider,
@@ -44,8 +44,8 @@ const FormField = <
 };
 
 const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext);
-  const itemContext = React.useContext(FormItemContext);
+  const fieldContext = React.use(FormFieldContext);
+  const itemContext = React.use(FormItemContext);
   const { getFieldState } = useFormContext();
   const formState = useFormState({ name: fieldContext.name });
   const fieldState = getFieldState(fieldContext.name, formState);
@@ -257,7 +257,7 @@ function FormMessage({ className, animated = true, ...props }: FormMessageProps)
 }
 
 export {
-  useFormField,
+
   Form,
   FormItem,
   FormLabel,

@@ -2,13 +2,6 @@ import { createServiceClient } from '@/lib/memory/supabase'
 import type { ScenarioRubric, ScenarioDifficulty } from '@/types/scenario'
 import type { SkillGap } from './skill-gap-analyzer'
 
-export interface ScenarioRecommendation {
-  scenarioId: string
-  scenarioTitle: string
-  reason: string
-  difficulty: ScenarioDifficulty | null
-}
-
 export interface RecommendationResult {
   recommendation: ScenarioRecommendation | null
   reason: string
@@ -100,9 +93,9 @@ export async function recommendNextScenario(
 
   // Filter out over-practiced scenarios
   const overPracticed = new Set(
-    recentCounts
-      .filter((r) => r.count >= RECENT_ATTEMPT_THRESHOLD)
-      .map((r) => r.scenario_id),
+    recentCounts.flatMap((r) =>
+      r.count >= RECENT_ATTEMPT_THRESHOLD ? [r.scenario_id] : [],
+    ),
   )
 
   const candidates = (scenarios as ScenarioRow[]).filter((s) => !overPracticed.has(s.id))

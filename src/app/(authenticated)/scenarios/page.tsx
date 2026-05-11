@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Scenarios | SpeakStride',
+}
+
 import { getScenarios } from '@/actions/scenarios'
 import { getCurrentUser } from '@/lib/auth'
 import { Suspense } from 'react'
@@ -24,7 +30,7 @@ export default async function ScenariosPage() {
     <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Training Scenarios</h1>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">Training Scenarios</h1>
           <p className="text-muted-foreground">
             Manage your voice training scenarios and content library
           </p>
@@ -33,13 +39,13 @@ export default async function ScenariosPage() {
           <div className="flex gap-2">
             <Button asChild variant="outline">
               <Link href="/scenarios/generate">
-                <Zap className="h-4 w-4 mr-2" />
+                <Zap className="size-4 mr-2" />
                 AI Generate
               </Link>
             </Button>
             <Button asChild>
               <Link href="/scenarios/new">
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="size-4 mr-2" />
                 Create Scenario
               </Link>
             </Button>
@@ -60,13 +66,13 @@ export default async function ScenariosPage() {
               <div className="flex justify-center gap-2 pb-6">
                 <Button asChild variant="outline">
                   <Link href="/scenarios/generate">
-                    <Zap className="h-4 w-4 mr-2" />
+                    <Zap className="size-4 mr-2" />
                     AI Generate
                   </Link>
                 </Button>
                 <Button asChild>
                   <Link href="/scenarios/new">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="size-4 mr-2" />
                     Create Scenario
                   </Link>
                 </Button>

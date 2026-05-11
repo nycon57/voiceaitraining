@@ -111,7 +111,7 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="space-y-2">
-        <h2 className="font-headline text-3xl font-bold tracking-tight">
+        <h2 className="font-headline text-3xl font-semibold tracking-tight">
           <span className="text-gradient">Welcome back</span>, {user.name}
         </h2>
         <p className="text-muted-foreground">
@@ -145,7 +145,7 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
       {/* New Opportunities Section */}
       <section className="space-y-4">
         <div>
-          <h3 className="font-headline text-2xl font-bold tracking-tight">
+          <h3 className="font-headline text-2xl font-semibold tracking-tight">
             New Training Opportunities
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -159,7 +159,7 @@ export async function TraineeOverview({ user }: TraineeOverviewProps) {
       <section className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-headline text-2xl font-bold tracking-tight">
+            <h3 className="font-headline text-2xl font-semibold tracking-tight">
               My Training
             </h3>
             <p className="text-sm text-muted-foreground">

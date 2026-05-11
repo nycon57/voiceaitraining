@@ -135,7 +135,7 @@ function ComponentShowcase({
               onClick={() => setShowCode(!showCode)}
               className="gap-2"
             >
-              {showCode ? <Eye className="h-4 w-4" /> : <Code2 className="h-4 w-4" />}
+              {showCode ? <Eye className="size-4" /> : <Code2 className="size-4" />}
               {showCode ? "Preview" : "Code"}
             </Button>
           </div>
@@ -155,7 +155,7 @@ function ComponentShowcase({
                 className="absolute top-2 right-2 gap-2"
                 onClick={copyCode}
               >
-                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                 {copied ? "Copied" : "Copy"}
               </Button>
             </div>
@@ -174,7 +174,7 @@ function ComponentShowcase({
                   </h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {guidelines.dos.map((item, index) => (
-                      <li key={index}>• {item}</li>
+                      <li key={JSON.stringify(item)}>• {item}</li>
                     ))}
                   </ul>
                 </div>
@@ -184,7 +184,7 @@ function ComponentShowcase({
                   </h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {guidelines.donts.map((item, index) => (
-                      <li key={index}>• {item}</li>
+                      <li key={JSON.stringify(item)}>• {item}</li>
                     ))}
                   </ul>
                 </div>
@@ -247,7 +247,7 @@ function ButtonExamples() {
 <Button size="lg">Large</Button>
 <Button size="xl">Extra Large</Button>
 <Button size="icon">
-  <Settings className="h-4 w-4" />
+  <Settings className="size-4" />
 </Button>
 <Button disabled>Disabled</Button>
 <LoadingSpinner size="sm" />
@@ -262,7 +262,7 @@ function ButtonExamples() {
             <Button size="default">Default</Button>
             <Button size="lg">Large</Button>
             <Button size="icon">
-              <Settings className="h-4 w-4" />
+              <Settings className="size-4" />
             </Button>
           </div>
 
@@ -283,40 +283,40 @@ function ButtonExamples() {
         title="Toggle & Toggle Group"
         usage="Toggle components with enhanced styling and animation"
         code={`<Toggle aria-label="Toggle italic">
-  <Star className="h-4 w-4" />
+  <Star className="size-4" />
 </Toggle>
 
 <ToggleGroup type="multiple">
   <ToggleGroupItem value="bold" aria-label="Toggle bold">
-    <Star className="h-4 w-4" />
+    <Star className="size-4" />
   </ToggleGroupItem>
   <ToggleGroupItem value="italic" aria-label="Toggle italic">
-    <Heart className="h-4 w-4" />
+    <Heart className="size-4" />
   </ToggleGroupItem>
   <ToggleGroupItem value="underline" aria-label="Toggle underline">
-    <Zap className="h-4 w-4" />
+    <Zap className="size-4" />
   </ToggleGroupItem>
 </ToggleGroup>`}
       >
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Toggle aria-label="Toggle favorite">
-              <Star className="h-4 w-4" />
+              <Star className="size-4" />
             </Toggle>
             <Toggle aria-label="Toggle like" variant="outline">
-              <Heart className="h-4 w-4" />
+              <Heart className="size-4" />
             </Toggle>
           </div>
 
           <ToggleGroup type="multiple">
             <ToggleGroupItem value="bold" aria-label="Toggle bold">
-              <Star className="h-4 w-4" />
+              <Star className="size-4" />
             </ToggleGroupItem>
             <ToggleGroupItem value="italic" aria-label="Toggle italic">
-              <Heart className="h-4 w-4" />
+              <Heart className="size-4" />
             </ToggleGroupItem>
             <ToggleGroupItem value="underline" aria-label="Toggle underline">
-              <Zap className="h-4 w-4" />
+              <Zap className="size-4" />
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -424,27 +424,27 @@ function FormExamples() {
           <div className="space-y-3">
             <Label >Radio Group</Label>
             <RadioGroup defaultValue="option1">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <RadioGroupItem value="option1" id="r1" />
                 <Label htmlFor="r1">Option 1</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <RadioGroupItem value="option2" id="r2" />
                 <Label htmlFor="r2">Option 2</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <RadioGroupItem value="option3" id="r3" />
                 <Label htmlFor="r3">Option 3</Label>
               </div>
             </RadioGroup>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox id="terms" />
             <Label htmlFor="terms">Accept terms and conditions</Label>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Switch id="notifications" />
             <Label htmlFor="notifications">Enable notifications</Label>
           </div>
@@ -558,15 +558,15 @@ function LayoutExamples() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 bg-emerald-500 rounded-full" />
+                  <div className="size-2 bg-emerald-500 rounded-full" />
                   <span className="text-sm">Completed "Objection Handling"</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 bg-blue-500 rounded-full" />
+                  <div className="size-2 bg-blue-500 rounded-full" />
                   <span className="text-sm">Started "Cold Calling Basics"</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 bg-amber-500 rounded-full" />
+                  <div className="size-2 bg-amber-500 rounded-full" />
                   <span className="text-sm">Achieved 90% score milestone</span>
                 </div>
               </div>
@@ -629,7 +629,7 @@ function LayoutExamples() {
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="flex w-full justify-between p-4">
                 <span>Advanced Settings</span>
-                {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 px-4 pb-4">
@@ -734,15 +734,7 @@ function LayoutExamples() {
   )
 }
 
-function NavigationExamples() {
-  const [commandOpen, setCommandOpen] = useState(false)
-
-  return (
-    <div className="space-y-8">
-      <ComponentShowcase
-        title="Enhanced Tabs"
-        usage="Tab navigation with improved styling and animations"
-        code={`<Tabs defaultValue="overview">
+const navigationTabsCode = `<Tabs defaultValue="overview">
   <TabsList className="grid w-full grid-cols-3">
     <TabsTrigger value="overview">Overview</TabsTrigger>
     <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -758,21 +750,31 @@ function NavigationExamples() {
       </CardContent>
     </Card>
   </TabsContent>
-</Tabs>`}
-        guidelines={{
-          dos: [
-            "Use prop for smooth transitions",
-            "Keep tab labels concise and clear",
-            "Maintain consistent tab spacing",
-            "Use semantic tab order"
-          ],
-          donts: [
-            "Use too many tabs in one group",
-            "Make tab content drastically different in height",
-            "Skip keyboard navigation support",
-            "Use vague tab labels"
-          ]
-        }}
+</Tabs>`
+
+const navigationTabsGuidelines = {
+  dos: [
+    "Use prop for smooth transitions",
+    "Keep tab labels concise and clear",
+    "Maintain consistent tab spacing",
+    "Use semantic tab order"
+  ],
+  donts: [
+    "Use too many tabs in one group",
+    "Make tab content drastically different in height",
+    "Skip keyboard navigation support",
+    "Use vague tab labels"
+  ]
+}
+
+function NavigationExamples() {
+  return (
+    <div className="space-y-8">
+      <ComponentShowcase
+        title="Enhanced Tabs"
+        usage="Tab navigation with improved styling and animations"
+        code={navigationTabsCode}
+        guidelines={navigationTabsGuidelines}
       >
         <Tabs defaultValue="overview">
           <TabsList className="grid w-full grid-cols-3">
@@ -876,7 +878,7 @@ function NavigationExamples() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/">
-                <Home className="h-4 w-4" />
+                <Home className="size-4" />
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -904,11 +906,11 @@ function NavigationExamples() {
     <CommandEmpty>No results found.</CommandEmpty>
     <CommandGroup heading="Suggestions">
       <CommandItem>
-        <Calendar className="mr-2 h-4 w-4" />
+        <Calendar className="mr-2 size-4" />
         <span>Calendar</span>
       </CommandItem>
       <CommandItem>
-        <User className="mr-2 h-4 w-4" />
+        <User className="mr-2 size-4" />
         <span>Profile</span>
       </CommandItem>
     </CommandGroup>
@@ -918,11 +920,10 @@ function NavigationExamples() {
         <div className="space-y-4">
           <Button
             variant="outline"
-            onClick={() => setCommandOpen(true)}
             className="w-full justify-start text-left"
           >
-            <Search className="mr-2 h-4 w-4" />
-            Search commands...
+            <Search className="mr-2 size-4" />
+            Search commands…
           </Button>
 
           <div className="border rounded-lg">
@@ -932,26 +933,26 @@ function NavigationExamples() {
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup heading="Training">
                   <CommandItem>
-                    <Play className="mr-2 h-4 w-4" />
+                    <Play className="mr-2 size-4" />
                     <span>Start New Scenario</span>
                   </CommandItem>
                   <CommandItem>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 size-4" />
                     <span>View Schedule</span>
                   </CommandItem>
                   <CommandItem>
-                    <Star className="mr-2 h-4 w-4" />
+                    <Star className="mr-2 size-4" />
                     <span>View Progress</span>
                   </CommandItem>
                 </CommandGroup>
                 <CommandSeparator />
                 <CommandGroup heading="Settings">
                   <CommandItem>
-                    <User className="mr-2 h-4 w-4" />
+                    <User className="mr-2 size-4" />
                     <span>Profile</span>
                   </CommandItem>
                   <CommandItem>
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings className="mr-2 size-4" />
                     <span>Preferences</span>
                   </CommandItem>
                 </CommandGroup>
@@ -1060,13 +1061,7 @@ function NavigationExamples() {
   )
 }
 
-function OverlayExamples() {
-  return (
-    <div className="space-y-8">
-      <ComponentShowcase
-        title="Enhanced Dialogs"
-        usage="Modal dialogs with improved styling and animations"
-        code={`<Dialog>
+const overlayDialogCode = `<Dialog>
   <DialogTrigger asChild>
     <Button>Open Dialog</Button>
   </DialogTrigger>
@@ -1082,21 +1077,31 @@ function OverlayExamples() {
       <Button>Confirm</Button>
     </div>
   </DialogContent>
-</Dialog>`}
-        guidelines={{
-          dos: [
-            "Use isHeadline prop for dialog titles",
-            "Enable animations for better UX",
-            "Provide clear action buttons",
-            "Include descriptive content"
-          ],
-          donts: [
-            "Make dialogs too wide or tall",
-            "Skip confirmation for destructive actions",
-            "Use vague button labels",
-            "Nest dialogs too deeply"
-          ]
-        }}
+</Dialog>`
+
+const overlayDialogGuidelines = {
+  dos: [
+    "Use isHeadline prop for dialog titles",
+    "Enable animations for better UX",
+    "Provide clear action buttons",
+    "Include descriptive content"
+  ],
+  donts: [
+    "Make dialogs too wide or tall",
+    "Skip confirmation for destructive actions",
+    "Use vague button labels",
+    "Nest dialogs too deeply"
+  ]
+}
+
+function OverlayExamples() {
+  return (
+    <div className="space-y-8">
+      <ComponentShowcase
+        title="Enhanced Dialogs"
+        usage="Modal dialogs with improved styling and animations"
+        code={overlayDialogCode}
+        guidelines={overlayDialogGuidelines}
       >
         <div className="flex gap-4">
           <Dialog>
@@ -1110,7 +1115,7 @@ function OverlayExamples() {
                   Are you sure you want to delete "Sales Call Simulation"? This action cannot be undone and will remove all associated data.
                 </DialogDescription>
               </DialogHeader>
-              <div className="flex justify-end space-x-2 mt-4">
+              <div className="flex justify-end gap-2 mt-4">
                 <Button variant="outline">Cancel</Button>
                 <Button variant="destructive">Delete</Button>
               </div>
@@ -1181,7 +1186,7 @@ function OverlayExamples() {
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" placeholder="Enter your email" />
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <Switch id="notifications" />
                   <Label htmlFor="notifications">Enable notifications</Label>
                 </div>
@@ -1243,15 +1248,15 @@ function OverlayExamples() {
                   </p>
                 </div>
                 <div className="grid gap-2">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Checkbox id="audio" />
                     <Label htmlFor="audio">Audio feedback</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Checkbox id="visual" />
                     <Label htmlFor="visual">Visual indicators</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Checkbox id="progress" />
                     <Label htmlFor="progress">Progress tracking</Label>
                   </div>
@@ -1265,7 +1270,7 @@ function OverlayExamples() {
               <Button variant="link">@john_doe</Button>
             </HoverCardTrigger>
             <HoverCardContent className="w-80">
-              <div className="flex justify-between space-x-4">
+              <div className="flex justify-between gap-4">
                 <Avatar>
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
@@ -1273,7 +1278,7 @@ function OverlayExamples() {
                   <h4 className="text-sm font-semibold">John Doe</h4>
                   <p className="text-sm">Sales Training Specialist</p>
                   <div className="flex items-center pt-2">
-                    <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                    <CalendarIcon className="mr-2 size-4 opacity-70" />
                     <span className="text-xs text-muted-foreground">
                       Joined December 2023
                     </span>
@@ -1292,7 +1297,7 @@ function OverlayExamples() {
   <Tooltip>
     <TooltipTrigger asChild>
       <Button variant="outline" size="icon">
-        <Info className="h-4 w-4" />
+        <Info className="size-4" />
       </Button>
     </TooltipTrigger>
     <TooltipContent>
@@ -1319,7 +1324,7 @@ function OverlayExamples() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="icon">
-                  <Info className="h-4 w-4" />
+                  <Info className="size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -1332,7 +1337,7 @@ function OverlayExamples() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline">
-                  <Settings className="mr-2 h-4 w-4" />
+                  <Settings className="mr-2 size-4" />
                   Settings
                 </Button>
               </TooltipTrigger>
@@ -1345,24 +1350,24 @@ function OverlayExamples() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                <User className="mr-2 h-4 w-4" />
+                <User className="mr-2 size-4" />
                 Account
-                <ChevronDown className="ml-2 h-4 w-4" />
+                <ChevronDown className="ml-2 size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
+                <User className="mr-2 size-4" />
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
+                <Settings className="mr-2 size-4" />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Mail className="mr-2 h-4 w-4" />
+                <Mail className="mr-2 size-4" />
                 Support
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -1477,7 +1482,7 @@ function DataExamples() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -1514,7 +1519,7 @@ function DataExamples() {
 </div>`}
       >
         <div className="space-y-6">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <Avatar>
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
@@ -1636,8 +1641,8 @@ function DataExamples() {
       >
         <div className="space-y-6">
           <div className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="flex items-center gap-4">
+              <Skeleton className="size-12 rounded-full" />
               <div className="space-y-2">
                 <Skeleton className="h-4 w-[250px]" />
                 <Skeleton className="h-4 w-[200px]" />
@@ -1688,7 +1693,7 @@ function BrandExamples() {
   Start Training
 </Button>
 <Button variant="gradient" size="lg">
-  <Play className="mr-2 h-5 w-5" />
+  <Play className="mr-2 size-5" />
   Large with Icon
 </Button>`}
         guidelines={{
@@ -1714,7 +1719,7 @@ function BrandExamples() {
             Start Training
           </Button>
           <Button variant="gradient" size="lg">
-            <Play className="mr-2 h-5 w-5" />
+            <Play className="mr-2 size-5" />
             Begin Session
           </Button>
         </div>
@@ -1790,7 +1795,7 @@ function BrandExamples() {
         usage="Gradient badge for highlighting premium features and special status"
         code={`<Badge variant="brand">Featured</Badge>
 <Badge variant="brand" size="lg">
-  <Star className="h-3 w-3" />
+  <Star className="size-3" />
   Premium
 </Badge>
 <Badge variant="brand">New</Badge>`}
@@ -1813,7 +1818,7 @@ function BrandExamples() {
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="brand">Featured</Badge>
             <Badge variant="brand">
-              <Star className="h-3 w-3" />
+              <Star className="size-3" />
               Premium
             </Badge>
             <Badge variant="brand" size="lg">
@@ -1895,7 +1900,7 @@ function BrandExamples() {
                   <Progress value={75} />
                 </div>
                 <Button variant="gradient" className="w-full">
-                  <Play className="mr-2 h-4 w-4" />
+                  <Play className="mr-2 size-4" />
                   Continue Training
                 </Button>
               </div>
@@ -1907,7 +1912,7 @@ function BrandExamples() {
               <div className="flex items-center justify-between">
                 <CardTitle isHeadline>Special Offer</CardTitle>
                 <Badge variant="brand">
-                  <Zap className="h-3 w-3" />
+                  <Zap className="size-3" />
                   Limited Time
                 </Badge>
               </div>
@@ -1940,7 +1945,7 @@ function FeedbackExamples() {
         title="Enhanced Alerts"
         usage="Alert components with improved styling and variants"
         code={`<Alert variant="info">
-  <Info className="h-4 w-4" />
+  <Info className="size-4" />
   <AlertTitle>Information</AlertTitle>
   <AlertDescription>
     This is an informational alert with helpful context.
@@ -1948,7 +1953,7 @@ function FeedbackExamples() {
 </Alert>
 
 <Alert variant="success">
-  <Check className="h-4 w-4" />
+  <Check className="size-4" />
   <AlertTitle>Success</AlertTitle>
   <AlertDescription>
     Your training session has been completed successfully.
@@ -1971,7 +1976,7 @@ function FeedbackExamples() {
       >
         <div className="space-y-4">
           <Alert variant="info">
-            <Info className="h-4 w-4" />
+            <Info className="size-4" />
             <AlertTitle>Information</AlertTitle>
             <AlertDescription>
               New training scenarios are now available. Check out the latest additions to improve your skills.
@@ -1979,7 +1984,7 @@ function FeedbackExamples() {
           </Alert>
 
           <Alert variant="success">
-            <Check className="h-4 w-4" />
+            <Check className="size-4" />
             <AlertTitle>Success</AlertTitle>
             <AlertDescription>
               Your training session has been completed successfully. Great job on achieving a 95% score!
@@ -1987,7 +1992,7 @@ function FeedbackExamples() {
           </Alert>
 
           <Alert variant="warning">
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="size-4" />
             <AlertTitle>Warning</AlertTitle>
             <AlertDescription>
               Your training schedule has been updated. Please review the new assignments in your dashboard.
@@ -1995,7 +2000,7 @@ function FeedbackExamples() {
           </Alert>
 
           <Alert variant="destructive">
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="size-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
               Unable to save your progress. Please check your connection and try again.
@@ -2107,29 +2112,6 @@ export function ComponentLibrarySection() {
   const [activeCategory, setActiveCategory] = useState("brand")
   const [searchQuery, setSearchQuery] = useState("")
 
-  const renderCategoryContent = () => {
-    switch (activeCategory) {
-      case "brand":
-        return <BrandExamples />
-      case "buttons":
-        return <ButtonExamples />
-      case "forms":
-        return <FormExamples />
-      case "layout":
-        return <LayoutExamples />
-      case "navigation":
-        return <NavigationExamples />
-      case "overlays":
-        return <OverlayExamples />
-      case "data":
-        return <DataExamples />
-      case "feedback":
-        return <FeedbackExamples />
-      default:
-        return <BrandExamples />
-    }
-  }
-
   const filteredCategories = Object.entries(componentCategories).filter(
     ([key, category]) =>
       category.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -2143,7 +2125,7 @@ export function ComponentLibrarySection() {
       {/* Header */}
       <div className="space-y-6">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight font-headline">
+          <h1 className="text-4xl font-semibold tracking-tight font-headline">
             Enhanced Component Library
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl">
@@ -2156,7 +2138,7 @@ export function ComponentLibrarySection() {
         {/* Search */}
         <div className="max-w-md">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               placeholder="Search components..."
               value={searchQuery}
@@ -2204,7 +2186,7 @@ export function ComponentLibrarySection() {
 
           {/* Component Examples */}
           <div className="space-y-8">
-            {renderCategoryContent()}
+            <CategoryExamples activeCategory={activeCategory} />
           </div>
         </Tabs>
       </section>
@@ -2213,7 +2195,7 @@ export function ComponentLibrarySection() {
       <section className="space-y-8">
         <Separator />
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold font-headline">Peakstride Component Guidelines</h2>
+          <h2 className="text-3xl font-semibold font-headline">Peakstride Component Guidelines</h2>
           <p className="text-lg text-muted-foreground">
             Enhanced principles for using components effectively with Peakstride styling and animations.
           </p>
@@ -2304,7 +2286,7 @@ export function ComponentLibrarySection() {
       <section className="space-y-8">
         <Separator />
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold font-headline">Quick Reference</h2>
+          <h2 className="text-3xl font-semibold font-headline">Quick Reference</h2>
           <p className="text-lg text-muted-foreground">
             Common props and patterns for enhanced components.
           </p>
@@ -2382,4 +2364,27 @@ export function ComponentLibrarySection() {
       </section>
     </div>
   )
+}
+
+function CategoryExamples({ activeCategory }: { activeCategory: string }) {
+  switch (activeCategory) {
+    case "brand":
+      return <BrandExamples />
+    case "buttons":
+      return <ButtonExamples />
+    case "forms":
+      return <FormExamples />
+    case "layout":
+      return <LayoutExamples />
+    case "navigation":
+      return <NavigationExamples />
+    case "overlays":
+      return <OverlayExamples />
+    case "data":
+      return <DataExamples />
+    case "feedback":
+      return <FeedbackExamples />
+    default:
+      return <BrandExamples />
+  }
 }

@@ -148,7 +148,7 @@ export function AdminOverview({ user }: AdminOverviewProps) {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="space-y-2">
-        <h2 className="font-headline text-3xl font-bold tracking-tight">
+        <h2 className="font-headline text-3xl font-semibold tracking-tight">
           Organization <span className="text-gradient">Dashboard</span>
         </h2>
         <p className="text-muted-foreground">
@@ -191,14 +191,14 @@ export function AdminOverview({ user }: AdminOverviewProps) {
 
         {/* Pending Reviews - 3 columns */}
         <Card className="lg:col-span-3">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-center justify-between gap-0">
             <div>
               <CardTitle className="font-headline">Pending Reviews</CardTitle>
               <CardDescription className="text-sm mt-1">
                 Content awaiting approval
               </CardDescription>
             </div>
-            <AlertCircle className="h-5 w-5 text-warning" />
+            <AlertCircle className="size-5 text-warning" />
           </CardHeader>
           <CardContent>
             {mockPendingReviews.length === 0 ? (
@@ -222,7 +222,7 @@ export function AdminOverview({ user }: AdminOverviewProps) {
                     <p className="text-xs text-muted-foreground mb-2">by {item.author}</p>
                     <Button size="sm" className="w-full" asChild>
                       <Link href={`/${item.type.toLowerCase()}s/${item.id}/review`}>
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="size-3 mr-1" />
                         Review
                       </Link>
                     </Button>
@@ -241,25 +241,25 @@ export function AdminOverview({ user }: AdminOverviewProps) {
           <CardContent className="space-y-3">
             <Button className="w-full" asChild>
               <Link href="/scenarios/new">
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="size-4 mr-2" />
                 Create Scenario
               </Link>
             </Button>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/training">
-                <BookOpen className="h-4 w-4 mr-2" />
+                <BookOpen className="size-4 mr-2" />
                 View Tracks
               </Link>
             </Button>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/assignments/new">
-                <Target className="h-4 w-4 mr-2" />
+                <Target className="size-4 mr-2" />
                 New Assignment
               </Link>
             </Button>
             <Button variant="outline" className="w-full" asChild>
               <Link href="/admin/users">
-                <Users className="h-4 w-4 mr-2" />
+                <Users className="size-4 mr-2" />
                 Manage Users
               </Link>
             </Button>
@@ -292,17 +292,17 @@ export function AdminOverview({ user }: AdminOverviewProps) {
 
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <Target className="h-3 w-3" />
+                      <Target className="size-3" />
                       {scenario.attempts} attempts
                     </div>
                     {scenario.avgScore && (
                       <div className="flex items-center gap-1">
-                        <BarChart3 className="h-3 w-3" />
+                        <BarChart3 className="size-3" />
                         Avg: {scenario.avgScore}
                       </div>
                     )}
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
+                      <Calendar className="size-3" />
                       Updated: {scenario.lastUpdated}
                     </div>
                   </div>
@@ -311,12 +311,12 @@ export function AdminOverview({ user }: AdminOverviewProps) {
                 <div className="flex gap-2 ml-4">
                   <Button size="sm" variant="outline" asChild>
                     <Link href={`/training/scenarios/${scenario.id}`}>
-                      <Eye className="h-4 w-4" />
+                      <Eye className="size-4" />
                     </Link>
                   </Button>
                   <Button size="sm" variant="outline" asChild>
                     <Link href={`/scenarios/${scenario.id}`}>
-                      <Settings className="h-4 w-4" />
+                      <Settings className="size-4" />
                     </Link>
                   </Button>
                 </div>
@@ -367,7 +367,7 @@ export function AdminOverview({ user }: AdminOverviewProps) {
               <div className="flex items-center justify-between">
                 <span className="text-sm">API Uptime</span>
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 bg-success rounded-full"></div>
+                  <div className="size-2 bg-success rounded-full"></div>
                   <span className="text-sm font-medium">99.9%</span>
                 </div>
               </div>
@@ -377,7 +377,7 @@ export function AdminOverview({ user }: AdminOverviewProps) {
               <div className="flex items-center justify-between">
                 <span className="text-sm">Voice Sessions</span>
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 bg-success rounded-full"></div>
+                  <div className="size-2 bg-success rounded-full"></div>
                   <span className="text-sm font-medium">Healthy</span>
                 </div>
               </div>

@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Team | SpeakStride',
+}
+
 import { getCurrentUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Header } from "@/components/layout/header"
@@ -237,7 +243,7 @@ export default async function TeamPage() {
       <div className="space-y-6 p-4 md:p-6">
         {/* Page Header */}
         <div className="flex flex-col gap-2">
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Team Management</h1>
+          <h1 className="font-headline text-3xl font-semibold tracking-tight">Team Management</h1>
           <p className="text-muted-foreground">
             {isTrainee
               ? 'View your team members and their performance'
@@ -248,41 +254,41 @@ export default async function TeamPage() {
 
         {/* Statistics Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card animated={false} className="border-l-4 border-l-chart-1">
+          <Card animated={false} className="border border-l-chart-1">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Total Members</CardDescription>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{totalMembers}</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card animated={false} className="border-l-4 border-l-chart-2">
+          <Card animated={false} className="border border-l-chart-2">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Average Team Score</CardDescription>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <TrendingUp className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{avgTeamScore}%</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card animated={false} className="border-l-4 border-l-chart-3">
+          <Card animated={false} className="border border-l-chart-3">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Active This Week</CardDescription>
-                <Activity className="h-4 w-4 text-muted-foreground" />
+                <Activity className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-3xl font-headline">{activeThisWeek}</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card animated={false} className="border-l-4 border-l-success">
+          <Card animated={false} className="border border-l-success">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription>Top Performer</CardDescription>
-                <Award className="h-4 w-4 text-muted-foreground" />
+                <Award className="size-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-lg font-headline truncate">
                 {topPerformer.name.split(' ')[0]}
@@ -299,7 +305,7 @@ export default async function TeamPage() {
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-1 gap-3">
                   <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       placeholder="Search members..."
                       className="pl-9"
@@ -330,7 +336,7 @@ export default async function TeamPage() {
                   </Select>
                 </div>
                 <Button>
-                  <UserPlus className="mr-2 h-4 w-4" />
+                  <UserPlus className="mr-2 size-4" />
                   Invite Member
                 </Button>
               </div>
@@ -361,7 +367,7 @@ export default async function TeamPage() {
                           </AvatarFallback>
                         </Avatar>
                         <div className={cn(
-                          "absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background",
+                          "absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-background",
                           member.status === 'active' ? 'bg-success' : 'bg-muted'
                         )} />
                       </div>
@@ -370,7 +376,7 @@ export default async function TeamPage() {
                           <div className="min-w-0">
                             <h3 className="font-semibold truncate">{member.name}</h3>
                             <p className="text-sm text-muted-foreground truncate flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
+                              <Mail className="size-3" />
                               {member.email}
                             </p>
                           </div>
@@ -395,7 +401,7 @@ export default async function TeamPage() {
                       <div className="flex items-end gap-1 h-12">
                         {member.weeklyTrend.map((score, idx) => (
                           <div
-                            key={idx}
+                            key={JSON.stringify(score)}
                             className="flex-1 bg-gradient-to-t from-chart-1 to-chart-2 rounded-t-sm opacity-70 group-hover:opacity-100 transition-opacity"
                             style={{ height: `${(score / 100) * 100}%` }}
                           />
@@ -411,7 +417,7 @@ export default async function TeamPage() {
                       </div>
                       <div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="size-3" />
                           Last Active
                         </div>
                         <div className="text-sm font-medium">{member.lastActive}</div>
@@ -428,7 +434,7 @@ export default async function TeamPage() {
                           Assign
                         </Button>
                         <Button size="sm" variant="outline">
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical className="size-4" />
                         </Button>
                       </div>
                     )}
@@ -449,16 +455,16 @@ export default async function TeamPage() {
                     <div key={activity.id} className="flex gap-3 pb-4 border-b last:border-0 last:pb-0">
                       <div className="flex-shrink-0 mt-1">
                         {activity.type === 'completion' && (
-                          <CheckCircle2 className="h-5 w-5 text-success" />
+                          <CheckCircle2 className="size-5 text-success" />
                         )}
                         {activity.type === 'achievement' && (
-                          <Award className="h-5 w-5 text-warning" />
+                          <Award className="size-5 text-warning" />
                         )}
                         {activity.type === 'milestone' && (
-                          <TrendingUp className="h-5 w-5 text-info" />
+                          <TrendingUp className="size-5 text-info" />
                         )}
                         {activity.type === 'new_member' && (
-                          <UserPlus className="h-5 w-5 text-primary" />
+                          <UserPlus className="size-5 text-primary" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">

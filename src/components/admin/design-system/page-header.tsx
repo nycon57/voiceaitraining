@@ -18,10 +18,10 @@ export function PageHeader() {
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <div className="size-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <span className="text-sm font-bold text-primary-foreground">S</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">SpeakStride Design System</h1>
+              <h1 className="text-3xl font-semibold tracking-tight">SpeakStride Design System</h1>
               <Badge variant="secondary" className="ml-2">v1.0</Badge>
             </div>
             <p className="text-muted-foreground max-w-2xl">
@@ -38,7 +38,7 @@ export function PageHeader() {
               onClick={handleCopyLink}
               className="gap-2"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="size-4" />
               Copy Link
             </Button>
             <Button
@@ -47,7 +47,7 @@ export function PageHeader() {
               onClick={handleDownloadAssets}
               className="gap-2"
             >
-              <Download className="h-4 w-4" />
+              <Download className="size-4" />
               Brand Assets
             </Button>
             <Button
@@ -61,7 +61,7 @@ export function PageHeader() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="size-4" />
                 GitHub
               </a>
             </Button>

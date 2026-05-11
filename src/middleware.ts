@@ -27,12 +27,12 @@ const isMarketingRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth()
-
   // Always allow webhooks
   if (isWebhookRoute(req)) {
     return NextResponse.next()
   }
+
+  const { userId } = await auth()
 
   // If user is authenticated
   if (userId) {

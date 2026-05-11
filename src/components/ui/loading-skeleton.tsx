@@ -53,9 +53,9 @@ export function SkeletonCard({
 }: SkeletonCardProps) {
   return (
     <Card className={cn("relative overflow-hidden", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-0 pb-2">
         <Skeleton variant={variant} className="h-4 w-24" />
-        {hasIcon && <Skeleton variant={variant} className="h-4 w-4 rounded" />}
+        {hasIcon && <Skeleton variant={variant} className="size-4 rounded" />}
       </CardHeader>
       <CardContent>
         <Skeleton variant={variant} className="h-8 w-16 mb-2" />
@@ -231,7 +231,7 @@ export function SkeletonChart({
       </div>
 
       {/* Chart Visualization Area */}
-      <div className="relative h-full w-full flex items-end justify-between gap-2 px-4 pb-8">
+      <div className="relative size-full flex items-end justify-between gap-2 px-4 pb-8">
         {/* Y-axis labels */}
         <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -240,7 +240,7 @@ export function SkeletonChart({
         </div>
 
         {/* Chart bars/lines placeholder */}
-        <div className="flex-1 flex items-end justify-around gap-1 ml-12">
+        <div suppressHydrationWarning className="flex-1 flex items-end justify-around gap-1 ml-12">
           {Array.from({ length: 8 }).map((_, i) => {
             const height = Math.random() * 60 + 40 // Random height between 40-100%
 
@@ -261,7 +261,7 @@ export function SkeletonChart({
                   <div className="flex-1" />
                   <Skeleton
                     variant={variant}
-                    className="w-2 h-2 rounded-full"
+                    className="size-2 rounded-full"
                     style={{ marginBottom: `${height}%` }}
                   />
                 </div>
@@ -284,7 +284,7 @@ export function SkeletonChart({
       <div className="mt-4 flex items-center justify-center gap-4">
         {Array.from({ length: 2 }).map((_, i) => (
           <div key={i} className="flex items-center gap-2">
-            <Skeleton variant={variant} className="h-3 w-3 rounded-full" />
+            <Skeleton variant={variant} className="size-3 rounded-full" />
             <Skeleton variant={variant} className="h-3 w-16" />
           </div>
         ))}
@@ -348,7 +348,7 @@ export function SkeletonList({
         >
           <div className="flex items-center gap-3 flex-1">
             {hasAvatar && (
-              <Skeleton variant={variant} className="h-10 w-10 rounded-full" />
+              <Skeleton variant={variant} className="size-10 rounded-full" />
             )}
             <div className="flex-1 space-y-2">
               <Skeleton variant={variant} className="h-4 w-3/4" />

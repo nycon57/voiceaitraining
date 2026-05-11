@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
@@ -237,8 +237,7 @@ function AlertDialogCancel({
 
 export {
   AlertDialog,
-  AlertDialogPortal,
-  AlertDialogOverlay,
+
   AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Metadata } from 'next';
 import { Check, Mic, TrendingUp, Users } from 'lucide-react';
 
@@ -142,25 +143,25 @@ export default function ContactPage() {
                 <div className="space-y-6">
                   <div className="space-y-4">
                     <p className="text-sm font-semibold">What you can expect:</p>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-muted-foreground size-5 shrink-0" />
                       <p className="text-sm">
                         Live demo of AI-powered sales training scenarios
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-muted-foreground size-5 shrink-0" />
                       <p className="text-sm">
                         Custom implementation strategy for your team
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-muted-foreground size-5 shrink-0" />
                       <p className="text-sm">
                         Performance analytics and ROI insights
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-muted-foreground size-5 shrink-0" />
                       <p className="text-sm">
                         Answers to all your questions about voice AI training
@@ -170,25 +171,25 @@ export default function ContactPage() {
 
                   <div className="space-y-4 pt-8">
                     <p className="text-sm font-semibold">Why sales teams choose us:</p>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-primary size-5 shrink-0" />
                       <p className="text-sm">
                         40% increase in deal closure rates within 90 days
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-primary size-5 shrink-0" />
                       <p className="text-sm">
                         24/7 AI training - no scheduling conflicts
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-primary size-5 shrink-0" />
                       <p className="text-sm">
                         Real-time performance insights and coaching
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center gap-2.5">
                       <Check className="text-primary size-5 shrink-0" />
                       <p className="text-sm">
                         Enterprise-grade security and compliance
@@ -344,15 +345,15 @@ export default function ContactPage() {
                     </Select>
                   </div>
 
-                  <div className="flex w-full flex-col justify-end space-y-3 pt-2">
+                  <div className="flex w-full flex-col justify-end gap-3 pt-2">
                     <Button type="submit" size="lg" className="w-full">
                       Book Demo
                     </Button>
                     <div className="text-muted-foreground text-xs text-center">
                       We typically respond within 2 hours during business hours. For more information about how we handle your personal information, please visit our{" "}
-                      <a href="/legal/privacy" className="underline hover:text-foreground">
+                      <Link href="/legal/privacy" className="underline hover:text-foreground">
                         privacy policy
-                      </a>
+                      </Link>
                       .
                     </div>
                   </div>

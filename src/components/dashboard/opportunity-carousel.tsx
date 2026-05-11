@@ -21,6 +21,9 @@ interface OpportunityCarouselProps {
   className?: string;
 }
 
+const emptyScenarios: ScenarioCardData[] = []
+const emptyTracks: TrackCardData[] = []
+
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
@@ -43,7 +46,7 @@ function LoadingState() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {[1, 2, 3].map((i) => (
         <div
-          key={i}
+          key={JSON.stringify(i)}
           className="rounded-xl border border-border/50 bg-muted/10 p-6 animate-pulse"
         >
           <div className="h-6 bg-muted rounded mb-2" />
@@ -60,8 +63,8 @@ function LoadingState() {
 }
 
 export function OpportunityCarousel({
-  scenarios = [],
-  tracks = [],
+  scenarios = emptyScenarios,
+  tracks = emptyTracks,
   className,
 }: OpportunityCarouselProps) {
   const autoplayPlugin = React.useRef(

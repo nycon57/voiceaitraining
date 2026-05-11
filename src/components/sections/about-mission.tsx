@@ -35,7 +35,7 @@ export default function AboutMission() {
           <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-4 lg:items-start">
             <h2 className="text-center text-4xl md:text-5xl lg:text-6xl font-headline lg:text-left">
               Making Every Sales Conversation{" "}
-              <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+              <span className="text-primary">
                 Count
               </span>
             </h2>
@@ -78,9 +78,9 @@ export default function AboutMission() {
           {MISSION_VALUES.map((value, index) => {
             const Icon = value.icon;
             return (
-              <div key={index} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
-                <div className="mx-0 h-12 w-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
-                  <Icon className="h-6 w-6 text-white" />
+              <div key={JSON.stringify(value)} className="flex items-center gap-6 rounded-lg border border-border bg-muted p-8 sm:flex-col sm:items-start">
+                <div className="mx-0 size-12 sm:mx-auto lg:mx-0 flex items-center justify-center rounded-lg bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3">
+                  <Icon className="size-6 text-white" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-semibold text-foreground sm:text-base">

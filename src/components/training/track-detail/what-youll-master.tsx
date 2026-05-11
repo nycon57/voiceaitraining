@@ -35,15 +35,15 @@ export function WhatYoullMaster({ scenarios }: WhatYoullMasterProps) {
     <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
-          <Award className="h-5 w-5" />
+          <Award className="size-5" />
           What You'll Master
         </CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
           {outcomes.map((outcome, index) => (
-            <li key={index} className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+            <li key={JSON.stringify(outcome)} className="flex items-start gap-3">
+              <CheckCircle2 className="size-5 text-green-600 mt-0.5 shrink-0" />
               <div>
                 <div className="font-medium mb-1">{outcome.title}</div>
                 <div className="text-sm text-muted-foreground">
@@ -63,7 +63,7 @@ export function WhatYoullMaster({ scenarios }: WhatYoullMasterProps) {
                 key={scenario.id}
                 className="flex items-center gap-2 text-sm text-muted-foreground"
               >
-                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                <div className="flex items-center justify-center size-6 rounded-full bg-primary/10 text-primary text-xs font-semibold">
                   {index + 1}
                 </div>
                 <span>{scenario.title}</span>

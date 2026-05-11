@@ -95,7 +95,7 @@ export function hasRole(userRole?: UserRole, requiredRoles?: UserRole | UserRole
   return roles.includes(userRole)
 }
 
-export function hasPermission(
+function hasPermission(
   userRole?: UserRole,
   permission?: 'read' | 'write' | 'admin'
 ): boolean {
@@ -220,7 +220,7 @@ export async function withRoleGuard<T>(
 /**
  * Check if the current user is in a personal organization
  */
-export async function isPersonalOrgUser(): Promise<boolean> {
+async function isPersonalOrgUser(): Promise<boolean> {
   const user = await getCurrentUser()
   return user?.isPersonalOrg || false
 }
@@ -228,7 +228,7 @@ export async function isPersonalOrgUser(): Promise<boolean> {
 /**
  * Get personal org ID for a user
  */
-export async function getPersonalOrgId(clerkUserId: string): Promise<string | null> {
+async function getPersonalOrgId(clerkUserId: string): Promise<string | null> {
   const supabase = await createAdminClient()
 
   const { data, error } = await supabase
@@ -245,7 +245,7 @@ export async function getPersonalOrgId(clerkUserId: string): Promise<string | nu
 /**
  * Check if an org is a personal org
  */
-export async function isPersonalOrg(orgId: string): Promise<boolean> {
+async function isPersonalOrg(orgId: string): Promise<boolean> {
   const supabase = await createAdminClient()
 
   const { data, error } = await supabase
@@ -265,7 +265,7 @@ export async function isPersonalOrg(orgId: string): Promise<boolean> {
 /**
  * Get org details including personal status
  */
-export async function getOrgDetails(orgId: string) {
+async function getOrgDetails(orgId: string) {
   const supabase = await createAdminClient()
 
   const { data, error } = await supabase
@@ -286,7 +286,7 @@ export async function getOrgDetails(orgId: string) {
  * Check if team features should be shown
  * Returns false for personal orgs, true for team orgs
  */
-export function shouldShowTeamFeatures(user?: AuthUser | null): boolean {
+function shouldShowTeamFeatures(user?: AuthUser | null): boolean {
   if (!user) return false
 
   // Personal org users don't see team features
@@ -299,7 +299,7 @@ export function shouldShowTeamFeatures(user?: AuthUser | null): boolean {
 /**
  * Check if user has access to a specific feature based on plan
  */
-export async function hasFeatureAccess(feature: string): Promise<boolean> {
+async function hasFeatureAccess(feature: string): Promise<boolean> {
   const user = await getCurrentUser()
   if (!user || !user.orgId) return false
 
@@ -328,7 +328,7 @@ export async function hasFeatureAccess(feature: string): Promise<boolean> {
 /**
  * Check if user is within usage limits
  */
-export async function checkUsageLimit(
+async function checkUsageLimit(
   limitType: 'max_users' | 'max_sessions_per_month' | 'max_scenarios',
   currentCount: number
 ): Promise<{ allowed: boolean; limit: number; usage: number }> {

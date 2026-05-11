@@ -112,7 +112,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
       {/* Welcome Header */}
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <h2 className="font-headline text-3xl font-bold tracking-tight">
+          <h2 className="font-headline text-3xl font-semibold tracking-tight">
             <span className="text-gradient">Welcome back</span>, {user.name}
           </h2>
           <p className="text-muted-foreground">
@@ -124,7 +124,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
         {planConfig && (
           <div className="flex flex-col items-end gap-2">
             <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm">
-              <Target className="h-4 w-4 text-muted-foreground" />
+              <Target className="size-4 text-muted-foreground" />
               <span className="font-medium">{planConfig.name} Plan</span>
             </div>
             {user.plan === 'individual_free' && (
@@ -164,7 +164,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
         <Card className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-900 dark:text-amber-100">
-              <Target className="h-5 w-5" />
+              <Target className="size-5" />
               You're running low on sessions
             </CardTitle>
             <CardDescription className="text-amber-800 dark:text-amber-200">
@@ -206,7 +206,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
         <section className="space-y-4">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-headline text-2xl font-bold tracking-tight">
+              <h3 className="font-headline text-2xl font-semibold tracking-tight">
                 My Training
               </h3>
               <p className="text-sm text-muted-foreground">
@@ -229,7 +229,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
       <section className="space-y-4">
         <div className="flex items-end justify-between">
           <div>
-            <h3 className="font-headline text-2xl font-bold tracking-tight">
+            <h3 className="font-headline text-2xl font-semibold tracking-tight">
               {enrollments.length > 0 ? 'More Training Available' : 'Available Scenarios'}
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -245,14 +245,14 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
 
       {/* Quick Actions */}
       <section className="space-y-4">
-        <h3 className="font-headline text-2xl font-bold tracking-tight">
+        <h3 className="font-headline text-2xl font-semibold tracking-tight">
           Quick Actions
         </h3>
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="group hover:border-primary transition-colors cursor-pointer">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 group-hover:text-primary transition-colors">
-                <Trophy className="h-5 w-5" />
+                <Trophy className="size-5" />
                 Start Training
               </CardTitle>
               <CardDescription>
@@ -269,7 +269,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
           <Card className="group hover:border-primary transition-colors cursor-pointer">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 group-hover:text-primary transition-colors">
-                <BarChart3 className="h-5 w-5" />
+                <BarChart3 className="size-5" />
                 View Analytics
               </CardTitle>
               <CardDescription>
@@ -287,7 +287,7 @@ export async function PersonalOverview({ user }: PersonalOverviewProps) {
             <Card className="group hover:border-primary transition-colors cursor-pointer">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 group-hover:text-primary transition-colors">
-                  <Award className="h-5 w-5" />
+                  <Award className="size-5" />
                   Create Scenario
                 </CardTitle>
                 <CardDescription>

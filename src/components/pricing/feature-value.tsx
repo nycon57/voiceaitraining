@@ -52,11 +52,11 @@ export function FeatureValue({ value, className }: FeatureValueProps) {
       {typeof value === 'string'
         ? value.split('\n').map((line, idx) =>
             idx === 0 ? (
-              <span key={idx} className="text-accent-foreground font-medium">
+              <span key={JSON.stringify(line)} className="text-accent-foreground font-medium">
                 {line}
               </span>
             ) : (
-              <span key={idx} className="text-muted-foreground block text-xs">
+              <span key={JSON.stringify(line)} className="text-muted-foreground block text-xs">
                 {line}
               </span>
             ),

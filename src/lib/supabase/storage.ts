@@ -1,6 +1,6 @@
 import { createClient } from "./server"
 
-export async function uploadFile(
+async function uploadFile(
   bucket: string,
   path: string,
   file: File,
@@ -19,7 +19,7 @@ export async function uploadFile(
   return data
 }
 
-export async function getSignedUrl(
+async function getSignedUrl(
   bucket: string,
   path: string,
   expiresIn: number = 3600
@@ -37,7 +37,7 @@ export async function getSignedUrl(
   return data.signedUrl
 }
 
-export async function deleteFile(bucket: string, path: string) {
+async function deleteFile(bucket: string, path: string) {
   const supabase = await createClient()
 
   const { error } = await supabase.storage
@@ -58,5 +58,3 @@ export const STORAGE_BUCKETS = {
   EXPORTS: 'exports',
   TMP: 'tmp'
 } as const
-
-export type StorageBucket = typeof STORAGE_BUCKETS[keyof typeof STORAGE_BUCKETS]

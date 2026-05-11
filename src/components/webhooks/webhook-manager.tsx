@@ -11,8 +11,15 @@ interface WebhookManagerProps {
 export function WebhookManager({ webhook, children }: WebhookManagerProps) {
   const [open, setOpen] = useState(false)
 
-  const handleClick = () => {
+  const openWebhookForm = () => {
     setOpen(true)
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      openWebhookForm()
+    }
   }
 
   const handleSuccess = () => {
@@ -22,7 +29,13 @@ export function WebhookManager({ webhook, children }: WebhookManagerProps) {
 
   return (
     <>
-      <div onClick={handleClick} className="cursor-pointer">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={openWebhookForm}
+        onKeyDown={handleKeyDown}
+        className="cursor-pointer"
+      >
         {children}
       </div>
       <WebhookForm

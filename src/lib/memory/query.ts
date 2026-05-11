@@ -1,16 +1,6 @@
 import { createServiceClient } from './supabase'
 import { getWeaknessProfile, getSkillLevels, type WeaknessEntry, type SkillLevel, type Trend } from './user-memory'
 
-export interface AttemptSummary {
-  id: string
-  scenarioId: string | null
-  scenarioTitle: string
-  score: number | null
-  status: string
-  startedAt: string
-  durationSeconds: number | null
-}
-
 export interface PracticePattern {
   totalAttempts: number
   avgAttemptsPerWeek: number
@@ -63,7 +53,7 @@ function extractScenarioTitle(
  * Fetch recent attempts joined with scenario titles.
  * Uses a single query with an inner join -- no N+1.
  */
-export async function getRecentAttemptSummaries(
+async function getRecentAttemptSummaries(
   orgId: string,
   userId: string,
   limit = 10,
@@ -185,9 +175,7 @@ function calculateStreakDays(timestamps: string[]): number {
  * Compares the last N scores against the previous N to detect improvement.
  */
 function computeTrajectory(attempts: AttemptTimestampRow[]): Trend {
-  const scores = attempts
-    .filter((a) => a.score != null)
-    .map((a) => a.score!)
+  const scores = attempts.flatMap((a) => (a.score != null ? [a.score] : []))
 
   if (scores.length < TREND_RECENT_COUNT) return 'new'
 

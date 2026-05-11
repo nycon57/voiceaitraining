@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m as motion, AnimatePresence } from 'framer-motion';
 import { ChevronDownIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';

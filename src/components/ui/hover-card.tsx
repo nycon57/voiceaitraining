@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as HoverCardPrimitive from '@radix-ui/react-hover-card';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -125,8 +125,13 @@ function HoverCardHeader({
 function HoverCardTitle({
   className,
   isHeadline = true,
+  children,
   ...props
 }: React.ComponentProps<'h3'> & { isHeadline?: boolean }) {
+  if (!children) {
+    return null
+  }
+
   return (
     <h3
       className={cn(
@@ -135,7 +140,9 @@ function HoverCardTitle({
         className
       )}
       {...props}
-    />
+    >
+      {children}
+    </h3>
   );
 }
 
@@ -170,8 +177,5 @@ export {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
-  HoverCardHeader,
-  HoverCardTitle,
-  HoverCardDescription,
-  HoverCardFooter,
+
 };

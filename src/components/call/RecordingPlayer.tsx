@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useReducer, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -16,10 +16,67 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getAttemptRecordingPlayback } from "@/actions/recordings"
 
 interface RecordingPlayerProps {
   attemptId: string
   className?: string
+}
+
+type RecordingPlayerState = {
+  isLoading: boolean
+  error: string | null
+  recordingUrl: string | null
+  isPlaying: boolean
+  currentTime: number
+  duration: number
+  volume: number
+  isMuted: boolean
+}
+
+type RecordingPlayerAction =
+  | { type: "loading" }
+  | { type: "loaded"; recordingUrl: string }
+  | { type: "error"; error: string }
+  | { type: "playing"; isPlaying: boolean }
+  | { type: "time"; currentTime: number }
+  | { type: "duration"; duration: number }
+  | { type: "volume"; volume: number }
+  | { type: "muted"; isMuted: boolean }
+
+const initialRecordingPlayerState: RecordingPlayerState = {
+  isLoading: true,
+  error: null,
+  recordingUrl: null,
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  volume: 1,
+  isMuted: false,
+}
+
+function recordingPlayerReducer(
+  state: RecordingPlayerState,
+  action: RecordingPlayerAction,
+): RecordingPlayerState {
+  switch (action.type) {
+    case "loading":
+      return { ...state, isLoading: true, error: null }
+    case "loaded":
+      return { ...state, isLoading: false, recordingUrl: action.recordingUrl }
+    case "error":
+      return { ...state, isLoading: false, error: action.error }
+    case "playing":
+      return { ...state, isPlaying: action.isPlaying }
+    case "time":
+      return { ...state, currentTime: action.currentTime }
+    case "duration":
+      return { ...state, duration: action.duration }
+    case "volume":
+      return { ...state, volume: action.volume, isMuted: action.volume === 0 }
+    case "muted":
+      return { ...state, isMuted: action.isMuted }
+  }
 }
 
 function formatTime(seconds: number): string {
@@ -29,14 +86,16 @@ function formatTime(seconds: number): string {
 }
 
 export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(1)
-  const [isMuted, setIsMuted] = useState(false)
+  const [{
+    isLoading,
+    error,
+    recordingUrl,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    isMuted,
+  }, dispatch] = useReducer(recordingPlayerReducer, initialRecordingPlayerState)
 
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -44,19 +103,14 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
   useEffect(() => {
     async function fetchRecordingUrl() {
       try {
-        setIsLoading(true)
-        const response = await fetch(`/api/recordings/${attemptId}/playback`)
-
-        if (!response.ok) {
-          throw new Error("Recording not available")
-        }
-
-        const data = await response.json()
-        setRecordingUrl(data.url)
+        dispatch({ type: "loading" })
+        const data = await getAttemptRecordingPlayback(attemptId)
+        dispatch({ type: "loaded", recordingUrl: data.url })
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load recording")
-      } finally {
-        setIsLoading(false)
+        dispatch({
+          type: "error",
+          error: err instanceof Error ? err.message : "Failed to load recording",
+        })
       }
     }
 
@@ -68,12 +122,11 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
     const audio = audioRef.current
     if (!audio) return
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime)
-    const handleDurationChange = () => setDuration(audio.duration)
-    const handleEnded = () => setIsPlaying(false)
+    const handleTimeUpdate = () => dispatch({ type: "time", currentTime: audio.currentTime })
+    const handleDurationChange = () => dispatch({ type: "duration", duration: audio.duration })
+    const handleEnded = () => dispatch({ type: "playing", isPlaying: false })
     const handleError = () => {
-      setError("Error loading audio")
-      setIsLoading(false)
+      dispatch({ type: "error", error: "Error loading audio" })
     }
 
     audio.addEventListener("timeupdate", handleTimeUpdate)
@@ -98,7 +151,7 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
     } else {
       audio.play()
     }
-    setIsPlaying(!isPlaying)
+    dispatch({ type: "playing", isPlaying: !isPlaying })
   }
 
   const handleSeek = (value: number[]) => {
@@ -107,7 +160,7 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
 
     const newTime = value[0]
     audio.currentTime = newTime
-    setCurrentTime(newTime)
+    dispatch({ type: "time", currentTime: newTime })
   }
 
   const handleVolumeChange = (value: number[]) => {
@@ -116,8 +169,7 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
 
     const newVolume = value[0]
     audio.volume = newVolume
-    setVolume(newVolume)
-    setIsMuted(newVolume === 0)
+    dispatch({ type: "volume", volume: newVolume })
   }
 
   const toggleMute = () => {
@@ -126,10 +178,10 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
 
     if (isMuted) {
       audio.volume = volume || 0.5
-      setIsMuted(false)
+      dispatch({ type: "muted", isMuted: false })
     } else {
       audio.volume = 0
-      setIsMuted(true)
+      dispatch({ type: "muted", isMuted: true })
     }
   }
 
@@ -156,8 +208,8 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
       <Card className={className}>
         <CardContent className="p-8">
           <div className="flex flex-col items-center justify-center text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-            <p className="text-sm text-muted-foreground">Loading recording...</p>
+            <Loader2 className="size-8 animate-spin text-primary mb-3" />
+            <p className="text-sm text-muted-foreground">Loading recording…</p>
           </div>
         </CardContent>
       </Card>
@@ -169,7 +221,7 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
       <Card className={className}>
         <CardContent className="p-8">
           <div className="flex flex-col items-center justify-center text-center">
-            <AlertCircle className="h-8 w-8 text-destructive mb-3" />
+            <AlertCircle className="size-8 text-destructive mb-3" />
             <p className="text-sm text-muted-foreground">
               {error || "Recording not available"}
             </p>
@@ -184,11 +236,11 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5" />
+            <Volume2 className="size-5" />
             Call Recording
           </span>
           <Button variant="outline" size="sm" onClick={handleDownload}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="size-4 mr-2" />
             Download
           </Button>
         </CardTitle>
@@ -220,18 +272,18 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
               onClick={() => skip(-10)}
               disabled={currentTime === 0}
             >
-              <SkipBack className="h-4 w-4" />
+              <SkipBack className="size-4" />
             </Button>
 
             <Button
               size="icon"
               onClick={togglePlay}
-              className="h-12 w-12"
+              className="size-12"
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className="size-5" />
               ) : (
-                <Play className="h-5 w-5 ml-0.5" />
+                <Play className="size-5 ml-0.5" />
               )}
             </Button>
 
@@ -241,7 +293,7 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
               onClick={() => skip(10)}
               disabled={currentTime >= duration}
             >
-              <SkipForward className="h-4 w-4" />
+              <SkipForward className="size-4" />
             </Button>
           </div>
 
@@ -254,9 +306,9 @@ export function RecordingPlayer({ attemptId, className }: RecordingPlayerProps) 
               className="flex-shrink-0"
             >
               {isMuted || volume === 0 ? (
-                <VolumeX className="h-4 w-4" />
+                <VolumeX className="size-4" />
               ) : (
-                <Volume2 className="h-4 w-4" />
+                <Volume2 className="size-4" />
               )}
             </Button>
             <Slider

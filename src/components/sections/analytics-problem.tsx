@@ -36,7 +36,7 @@ export default function AnalyticsProblem() {
             <div className="w-full max-w-md">
               <h2 className="my-5 text-4xl md:text-5xl lg:text-6xl font-headline">
                 Sales managers are{" "}
-                <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                <span className="text-primary">
                   flying blind
                 </span>{" "}
                 without proper data
@@ -52,13 +52,13 @@ export default function AnalyticsProblem() {
                 <div className="relative bg-gradient-to-br from-red-600 via-red-500 to-orange-500 rounded-lg p-6 text-white h-full flex flex-col">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-red-300 rounded-full"></div>
+                      <div className="size-3 bg-red-300 rounded-full"></div>
                       <span className="text-base font-semibold">Current State: Manual Chaos</span>
                     </div>
                     <div className="space-y-3 flex-1">
-                      <div className="text-sm opacity-90">Manager: "Let me check 5 different spreadsheets..."</div>
+                      <div className="text-sm opacity-90">Manager: "Let me check 5 different spreadsheets…"</div>
                       <div className="text-sm opacity-90">Sales Rep: "How am I performing this month?"</div>
-                      <div className="text-sm opacity-90">Manager: "I'll get back to you next week..."</div>
+                      <div className="text-sm opacity-90">Manager: "I'll get back to you next week…"</div>
                       <div className="text-sm opacity-90 text-red-200 font-medium">No Real-Time Insights</div>
                     </div>
                     <div className="pt-4 border-t border-white/20">
@@ -75,11 +75,11 @@ export default function AnalyticsProblem() {
                 <div className="relative bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-lg p-6 text-white h-full flex flex-col">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                      <div className="size-3 bg-green-400 rounded-full"></div>
                       <span className="text-base font-semibold">With Analytics: Instant Clarity</span>
                     </div>
                     <div className="space-y-3 flex-1">
-                      <div className="text-sm opacity-90">Manager: "Dashboard shows Sarah needs objection practice..."</div>
+                      <div className="text-sm opacity-90">Manager: "Dashboard shows Sarah needs objection practice…"</div>
                       <div className="text-sm opacity-90">Sales Rep: "My performance score improved 23% this week!"</div>
                       <div className="text-sm opacity-90">Manager: "ROI on training is 340% - let's scale this!"</div>
                       <div className="text-sm opacity-90 text-green-200 font-medium">Data-Driven Decisions</div>
@@ -97,7 +97,7 @@ export default function AnalyticsProblem() {
           <div className="mt-24 grid grid-cols-1 justify-between gap-8 sm:grid-cols-2 md:grid-cols-4">
             {problemStats.map((item) => (
               <div key={item.title} className="text-center md:text-left">
-                <p className="text-4xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                <p className="text-4xl font-bold text-primary">
                   {item.number}{item.suffix}
                 </p>
                 <h6 className="text-lg mt-3 mb-2 font-semibold">{item.title}</h6>

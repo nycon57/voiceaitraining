@@ -20,7 +20,7 @@ import {
 type InngestSendPayload = SendEventPayload<GetEvents<typeof inngest>>
 
 /** Validates payload against its Zod schema, then sends the event via Inngest. */
-export async function emitEvent<K extends keyof EventPayloadMap>(
+async function emitEvent<K extends keyof EventPayloadMap>(
   eventName: K,
   payload: EventPayloadMap[K]
 ): Promise<void> {
@@ -49,7 +49,7 @@ export function emitAssignmentCreated(data: AssignmentCreatedPayload) {
   return emitEvent(EVENT_NAMES.ASSIGNMENT_CREATED, data)
 }
 
-export function emitAssignmentOverdue(data: AssignmentOverduePayload) {
+function emitAssignmentOverdue(data: AssignmentOverduePayload) {
   return emitEvent(EVENT_NAMES.ASSIGNMENT_OVERDUE, data)
 }
 
@@ -57,18 +57,18 @@ export function emitUserJoinedOrg(data: UserJoinedOrgPayload) {
   return emitEvent(EVENT_NAMES.USER_JOINED_ORG, data)
 }
 
-export function emitUserInactive(data: UserInactivePayload) {
+function emitUserInactive(data: UserInactivePayload) {
   return emitEvent(EVENT_NAMES.USER_INACTIVE, data)
 }
 
-export function emitCoachRecommendationReady(data: CoachRecommendationReadyPayload) {
+function emitCoachRecommendationReady(data: CoachRecommendationReadyPayload) {
   return emitEvent(EVENT_NAMES.COACH_RECOMMENDATION_READY, data)
 }
 
-export function emitCoachWeaknessUpdated(data: CoachWeaknessUpdatedPayload) {
+function emitCoachWeaknessUpdated(data: CoachWeaknessUpdatedPayload) {
   return emitEvent(EVENT_NAMES.COACH_WEAKNESS_UPDATED, data)
 }
 
-export function emitRecordingUploaded(data: RecordingUploadedPayload) {
+function emitRecordingUploaded(data: RecordingUploadedPayload) {
   return emitEvent(EVENT_NAMES.RECORDING_UPLOADED, data)
 }

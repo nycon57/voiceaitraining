@@ -127,9 +127,11 @@ function transformEnrollmentsToCardData(
   return { scenarios, tracks }
 }
 
+const emptyAssignments: NonNullable<MyTrainingGridProps['assignments']> = []
+
 export function MyTrainingGrid({
   enrollments,
-  assignments = [],
+  assignments = emptyAssignments,
   showCompleted = false,
   maxItems
 }: MyTrainingGridProps) {
@@ -173,7 +175,7 @@ export function MyTrainingGrid({
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="rounded-full bg-muted p-3 mb-4">
-            <Clock className="h-6 w-6 text-muted-foreground" />
+            <Clock className="size-6 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground text-center">
             No active training sessions yet.

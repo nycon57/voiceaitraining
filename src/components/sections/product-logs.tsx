@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Search } from 'lucide-react';
-import { motion } from 'motion/react';
+import { m as motion } from 'motion/react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -76,7 +76,7 @@ function TerminalWithHeader() {
   return (
     <div className="relative w-full">
       {/* Background card - shows partially from the left */}
-      <Card className="bg-accent absolute top-5 -left-5 h-full w-full overflow-hidden"></Card>
+      <Card className="bg-accent absolute top-5 -left-5 size-full overflow-hidden"></Card>
 
       {/* Main card */}
       <Card className="bg-accent relative z-10 gap-0 overflow-hidden rounded-e-none border-r-0 shadow-xl">
@@ -89,7 +89,7 @@ function TerminalWithHeader() {
           <div className="flex items-center gap-2">
             <Badge variant="info">Running</Badge>
             <span className="text-muted-foreground text-[0.625rem]">
-              Last run: Apr 19, 2025 — 09:08:11
+              Last run: Apr 19, 2025 : 09:08:11
             </span>
           </div>
           <div className="mt-3 flex items-center justify-between gap-10">

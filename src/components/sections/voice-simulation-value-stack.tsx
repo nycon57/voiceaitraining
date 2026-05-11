@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link'
 import { ArrowRight, CheckCircle, TrendingUp, Clock, Users, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -83,12 +84,12 @@ export default function VoiceSimulationValueStack() {
         <div className="text-center mb-16">
           <h2 className="text-4xl mb-6 md:text-5xl lg:text-6xl font-headline">
             The ROI of{" "}
-            <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+            <span className="text-primary">
               Perfect Practice
             </span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Voice simulation doesn't just improve training—it transforms your entire sales operation
+            Voice simulation doesn't just improve training:it transforms your entire sales operation
             with measurable impact on performance, efficiency, and revenue.
           </p>
         </div>
@@ -98,12 +99,12 @@ export default function VoiceSimulationValueStack() {
           {VALUE_METRICS.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <div key={index} className="group relative">
+              <div key={JSON.stringify(metric)} className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all duration-300 group-hover:border-chart-2/30 group-hover:shadow-lg">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-2/20">
-                      <Icon className="h-5 w-5 text-chart-2 dark:text-chart-2" />
+                      <Icon className="size-5 text-chart-2 dark:text-chart-2" />
                     </div>
                     <h3 className="text-sm font-semibold">{metric.title}</h3>
                   </div>
@@ -129,7 +130,7 @@ export default function VoiceSimulationValueStack() {
                   {/* Improvement */}
                   <div className="text-center">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 text-white text-xs font-semibold rounded-full">
-                      <TrendingUp className="h-3 w-3" />
+                      <TrendingUp className="size-3" />
                       {metric.improvement}
                     </span>
                   </div>
@@ -143,7 +144,7 @@ export default function VoiceSimulationValueStack() {
         <div className="bg-card border border-border rounded-2xl p-8 md:p-12 mb-16">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
-              <h3 className="text-2xl font-bold mb-6">Calculate Your Voice Simulation ROI</h3>
+              <h3 className="text-2xl font-semibold mb-6">Calculate Your Voice Simulation ROI</h3>
 
               <div className="space-y-6">
                 <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
@@ -172,8 +173,8 @@ export default function VoiceSimulationValueStack() {
               <h4 className="text-lg font-semibold mb-4">Additional Benefits</h4>
               <ul className="space-y-3">
                 {ROI_BENEFITS.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <li key={JSON.stringify(benefit)} className="flex items-start gap-3">
+                    <CheckCircle className="size-5 text-green-500 flex-shrink-0 mt-0.5" />
                     <span className="text-sm text-muted-foreground">{benefit}</span>
                   </li>
                 ))}
@@ -184,7 +185,7 @@ export default function VoiceSimulationValueStack() {
 
         {/* CTA Section */}
         <div className="bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 text-white rounded-2xl p-8 md:p-12 shadow-xl border border-chart-2/30 text-center">
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">
+          <h3 className="text-2xl md:text-3xl font-semibold mb-4">
             Start Transforming Your Sales Training Today
           </h3>
           <p className="text-chart-3 mb-8 max-w-2xl mx-auto">
@@ -194,15 +195,15 @@ export default function VoiceSimulationValueStack() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-400" />
+              <CheckCircle className="size-5 text-green-400" />
               <span className="font-semibold">14-day free trial</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-400" />
+              <CheckCircle className="size-5 text-green-400" />
               <span className="font-semibold">No setup fees</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-400" />
+              <CheckCircle className="size-5 text-green-400" />
               <span className="font-semibold">Cancel anytime</span>
             </div>
           </div>
@@ -213,10 +214,10 @@ export default function VoiceSimulationValueStack() {
               className="bg-gradient-to-r from-chart-1 to-chart-1 hover:from-orange-600 hover:to-red-600 text-white font-bold px-8 py-4 rounded-full shadow-lg"
               asChild
             >
-              <a href="/request-demo" className="flex items-center">
+              <Link href="/request-demo" className="flex items-center">
                 Try Voice Simulation Free
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </a>
+                <ArrowRight className="ml-2 size-5" />
+              </Link>
             </Button>
 
             <Button
@@ -225,9 +226,9 @@ export default function VoiceSimulationValueStack() {
               className="border-white/30 text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-full"
               asChild
             >
-              <a href="/demo-credentials">
+              <Link href="/demo-credentials">
                 View Demo
-              </a>
+              </Link>
             </Button>
           </div>
         </div>

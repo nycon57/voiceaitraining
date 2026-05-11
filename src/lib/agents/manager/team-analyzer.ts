@@ -2,32 +2,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { createServiceClient } from '@/lib/memory/supabase'
 
-// ── Types ──────────────────────────────────────────────────────────
-
-export interface TeamStats {
-  totalTrainees: number
-  activeTrainees: number
-  avgScore: number | null
-  totalCompletedAttempts: number
-}
-
-export interface SystemicGap {
-  skill: string
-  affectedCount: number
-  avgScore: number
-}
-
-export interface AtRiskRep {
-  userId: string
-  reasons: string[]
-}
-
-export interface TopPerformer {
-  userId: string
-  avgScore: number
-  attemptCount: number
-}
-
 export interface TeamAnalysis {
   teamStats: TeamStats
   systemicGaps: SystemicGap[]

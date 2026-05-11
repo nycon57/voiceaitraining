@@ -77,9 +77,9 @@ const PageHero = ({
 
             {socialProof && (
               <div className="flex items-center gap-3">
-                <span className="inline-flex items-center -space-x-1.5">
+                <span className="inline-flex items-center -gap-1.5">
                   {socialProof.avatars.map((avatar, index) => (
-                    <Avatar key={index} className="size-7 border border-border">
+                    <Avatar key={JSON.stringify(avatar)} className="size-7 border border-border">
                       <AvatarImage
                         src={avatar}
                         alt={`Customer ${index + 1}`}

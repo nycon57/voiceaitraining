@@ -26,7 +26,7 @@ interface TrackSidebarProps {
 }
 
 export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSidebarProps) {
-  const router = useRouter()
+  const { refresh } = useRouter()
   const [isEnrolling, setIsEnrolling] = useState(false)
 
   const totalHours = track.total_duration
@@ -84,7 +84,7 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
                   asChild
                 >
                   <Link href={`/training/tracks/${trackId}`}>
-                    <Play className="h-5 w-5 mr-2" />
+                    <Play className="size-5 mr-2" />
                     Continue Track
                   </Link>
                 </Button>
@@ -107,10 +107,10 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
                   disabled={isEnrolling}
                 >
                   {isEnrolling ? (
-                    <>Enrolling...</>
+                    <>Enrolling…</>
                   ) : (
                     <>
-                      <ArrowRight className="h-5 w-5 mr-2" />
+                      <ArrowRight className="size-5 mr-2" />
                       Enroll Now
                     </>
                   )}
@@ -128,7 +128,7 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
-            <Layers className="h-4 w-4 text-muted-foreground" />
+            <Layers className="size-4 text-muted-foreground" />
             <div className="flex-1">
               <div className="text-sm font-medium">Scenarios</div>
               <div className="text-sm text-muted-foreground">
@@ -138,7 +138,7 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
           </div>
           <Separator />
           <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="size-4 text-muted-foreground" />
             <div className="flex-1">
               <div className="text-sm font-medium">Time to Complete</div>
               <div className="text-sm text-muted-foreground">
@@ -148,7 +148,7 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
           </div>
           <Separator />
           <div className="flex items-center gap-3">
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="size-4 text-muted-foreground" />
             <div className="flex-1">
               <div className="text-sm font-medium">Learners</div>
               <div className="text-sm text-muted-foreground">
@@ -164,7 +164,7 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
         <Card className="border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
           <CardHeader>
             <CardTitle className="font-headline text-lg flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <CheckCircle2 className="size-5 text-green-600" />
               Track Complete!
             </CardTitle>
             <CardDescription>
@@ -175,7 +175,7 @@ export function TrackSidebar({ trackId, track, progress, isEnrolled }: TrackSide
             <Button variant="outline" className="w-full" asChild>
               <Link href={`/certificates/${trackId}`}>
                 View Certificate
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
           </CardContent>

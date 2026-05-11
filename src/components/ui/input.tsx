@@ -1,17 +1,21 @@
 "use client";
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  animated?: boolean;
+type InputProps = React.ComponentProps<'input'> & {
+  animated?: boolean
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, animated = true, ...props }, ref) => {
+function Input({
+  className,
+  type,
+  animated = true,
+  ref,
+  ...props
+}: InputProps & { ref?: React.Ref<HTMLInputElement> }) {
     // Extract animated from props to prevent it from being passed to DOM
     const { animated: _, ...domProps } = { animated, ...props };
     const inputVariants = {
@@ -56,8 +60,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {...domProps}
       />
     );
-  }
-);
-Input.displayName = "Input";
+}
 
 export { Input };

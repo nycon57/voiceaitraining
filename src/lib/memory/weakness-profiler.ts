@@ -286,9 +286,9 @@ export async function generateWeaknessProfile(
   const rows = (attempts as AttemptRow[]).reverse()
   const results: DimensionResult[] = []
 
-  for (const dim of DIMENSIONS) {
+  await Promise.all(DIMENSIONS.map(async (dim) => {
     const result = aggregateDimension(dim, rows)
-    if (!result) continue
+    if (!result) return
 
     results.push(result)
 
@@ -311,7 +311,7 @@ export async function generateWeaknessProfile(
       lastEvidenceAt: result.lastEvidenceAt,
       evidenceCount: result.evidenceCount,
     })
-  }
+  }))
 
   return results
 }

@@ -30,8 +30,11 @@ export async function createAdminClient() {
 
 // User client - respects RLS using Clerk JWT
 export async function createClient() {
-  const cookieStore = await cookies()
-  const { getToken } = await auth()
+  const [cookieStore, authResult] = await Promise.all([
+    cookies(),
+    auth(),
+  ])
+  const { getToken } = authResult
 
   // Get Clerk JWT with custom template
   const clerkToken = await getToken({ template: "supabase" })
@@ -63,12 +66,12 @@ export async function createClient() {
   )
 }
 
-export async function setOrgClaim(orgId: string) {
+async function setOrgClaim(orgId: string) {
   const supabase = await createClient()
   await supabase.rpc('set_org_claim', { org_id: orgId })
 }
 
-export async function withOrgContext<T>(
+async function withOrgContext<T>(
   orgId: string,
   callback: () => Promise<T>
 ): Promise<T> {

@@ -36,7 +36,7 @@ export default function LoanOfficersProblem() {
             <div className="w-full max-w-md">
               <h2 className="my-5 text-4xl md:text-5xl lg:text-6xl font-headline">
                 Loan Officers{" "}
-                <span className="bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                <span className="text-primary">
                   Struggle
                 </span>{" "}
                 With Complex Sales Conversations
@@ -52,12 +52,12 @@ export default function LoanOfficersProblem() {
                 <div className="relative bg-gradient-to-br from-red-600 via-red-500 to-orange-500 rounded-lg p-6 text-white h-full flex flex-col">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-red-300 rounded-full"></div>
+                      <div className="size-3 bg-red-300 rounded-full"></div>
                       <span className="text-base font-semibold">Failed Mortgage Call</span>
                     </div>
                     <div className="space-y-3 flex-1">
                       <div className="text-sm opacity-90">Prospect: "Your rate is 0.5% higher than the other guy."</div>
-                      <div className="text-sm opacity-90">Loan Officer: "Well, um, we have great service..."</div>
+                      <div className="text-sm opacity-90">Loan Officer: "Well, um, we have great service…"</div>
                       <div className="text-sm opacity-90">Prospect: "I'll stick with the lower rate."</div>
                       <div className="text-sm opacity-90 text-red-200 font-medium">Application Lost</div>
                     </div>
@@ -75,7 +75,7 @@ export default function LoanOfficersProblem() {
                 <div className="relative bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 rounded-lg p-6 text-white h-full flex flex-col">
                   <div className="space-y-4 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                      <div className="size-3 bg-green-400 rounded-full"></div>
                       <span className="text-base font-semibold">AI-Trained Loan Officer</span>
                     </div>
                     <div className="space-y-3 flex-1">
@@ -97,7 +97,7 @@ export default function LoanOfficersProblem() {
           <div className="mt-24 grid grid-cols-1 justify-between gap-8 sm:grid-cols-2 md:grid-cols-4">
             {lendingProblemStats.map((item) => (
               <div key={item.title} className="text-center md:text-left">
-                <p className="text-4xl font-bold bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 bg-clip-text text-transparent">
+                <p className="text-4xl font-bold text-primary">
                   {item.number}{item.suffix}
                 </p>
                 <h6 className="text-lg mt-3 mb-2 font-semibold">{item.title}</h6>

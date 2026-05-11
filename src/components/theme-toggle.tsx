@@ -1,6 +1,6 @@
 'use client';
 
-import { motion as m } from 'motion/react';
+import { m } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { useRef } from 'react';
 
@@ -65,7 +65,7 @@ export function ThemeToggle() {
     },
   };
   const toggleTheme = () => {
-    if (document.startViewTransition) {
+    if (typeof document !== 'undefined') {
       // Get the button's position using ref
       const rect = buttonRef.current?.getBoundingClientRect();
 
@@ -90,16 +90,12 @@ export function ThemeToggle() {
       // Add theme-transition class
       document.documentElement.classList.add('theme-transition');
 
-      document.startViewTransition(() => {
-        setTheme(theme === 'dark' ? 'light' : 'dark');
-
-        // Clean up theme-transition class after animation completes
-        setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 600);
-      });
-    } else {
       setTheme(theme === 'dark' ? 'light' : 'dark');
+
+      // Clean up theme-transition class after animation completes
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transition');
+      }, 600);
     }
   };
   const sunPath =

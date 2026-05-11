@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
@@ -14,21 +14,14 @@ interface ResourcesContentProps {
 }
 
 export function ResourcesContent({ initialFeatured, initialArticles }: ResourcesContentProps) {
-  const [featuredArticle] = useState<Article | null>(initialFeatured)
-  const [articles] = useState<Article[]>(initialArticles)
-  const [filteredArticles, setFilteredArticles] = useState<Article[]>(initialArticles)
   const [filters, setFilters] = useState<ArticleFiltersType>({
     sortBy: 'recent',
     sortOrder: 'desc',
     limit: 12
   })
 
-  useEffect(() => {
-    applyFilters()
-  }, [articles, filters])
-
-  const applyFilters = () => {
-    let filtered = [...articles]
+  const filteredArticles = useMemo(() => {
+    let filtered = [...initialArticles]
 
     // Apply search filter
     if (filters.search) {
@@ -75,8 +68,8 @@ export function ResourcesContent({ initialFeatured, initialArticles }: Resources
       filtered = filtered.slice(0, filters.limit)
     }
 
-    setFilteredArticles(filtered)
-  }
+    return filtered
+  }, [filters, initialArticles])
 
   const handleFiltersChange = (newFilters: Partial<ArticleFiltersType>) => {
     setFilters(prev => ({ ...prev, ...newFilters }))
@@ -84,8 +77,8 @@ export function ResourcesContent({ initialFeatured, initialArticles }: Resources
 
   // Get all unique tags from articles for filter options
   const availableTags = Array.from(
-    new Set(articles.flatMap(article => article.tags || []))
-  ).sort()
+    new Set(initialArticles.flatMap(article => article.tags || []))
+  ).toSorted()
 
   return (
     <section className="py-32">
@@ -101,13 +94,13 @@ export function ResourcesContent({ initialFeatured, initialArticles }: Resources
 
         <div className="mx-auto max-w-7xl">
           {/* Featured Article */}
-          {featuredArticle && (
+          {initialFeatured && (
             <div className="my-16 grid grid-cols-1 items-center gap-8 md:grid-cols-2 lg:gap-16">
-              <Link href={`/resources/${featuredArticle.slug}`} className="block">
-                {featuredArticle.featured_image_url || featuredArticle.thumbnail_url ? (
+              <Link href={`/resources/${initialFeatured.slug}`} className="block">
+                {initialFeatured.featured_image_url || initialFeatured.thumbnail_url ? (
                   <Image
-                    src={featuredArticle.featured_image_url || featuredArticle.thumbnail_url!}
-                    alt={featuredArticle.title}
+                    src={initialFeatured.featured_image_url || initialFeatured.thumbnail_url!}
+                    alt={initialFeatured.title}
                     width={600}
                     height={400}
                     className="aspect-video rounded-lg object-cover hover:opacity-90 transition-opacity"
@@ -115,7 +108,7 @@ export function ResourcesContent({ initialFeatured, initialArticles }: Resources
                 ) : (
                   <div className="aspect-video rounded-lg bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
+                      <div className="size-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
                       <span className="text-sm font-medium text-muted-foreground font-headline">
                         Featured Article
                       </span>
@@ -129,31 +122,31 @@ export function ResourcesContent({ initialFeatured, initialArticles }: Resources
                   <Badge variant="secondary" className="shrink">
                     Featured
                   </Badge>
-                  {featuredArticle.tags && featuredArticle.tags[0] && (
+                  {initialFeatured.tags && initialFeatured.tags[0] && (
                     <Badge variant="outline" className="shrink">
-                      {featuredArticle.tags[0]}
+                      {initialFeatured.tags[0]}
                     </Badge>
                   )}
                 </div>
 
-                <Link href={`/resources/${featuredArticle.slug}`}>
+                <Link href={`/resources/${initialFeatured.slug}`}>
                   <h2 className="text-2xl font-semibold text-balance md:max-w-lg lg:text-3xl hover:text-chart-2 transition-colors">
-                    {featuredArticle.title}
+                    {initialFeatured.title}
                   </h2>
                 </Link>
 
                 <p className="text-muted-foreground md:max-w-lg">
-                  {featuredArticle.excerpt}
+                  {initialFeatured.excerpt}
                 </p>
 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  {featuredArticle.author_name && (
-                    <span>{featuredArticle.author_name}</span>
+                  {initialFeatured.author_name && (
+                    <span>{initialFeatured.author_name}</span>
                   )}
-                  <span>{formatPublishDate(featuredArticle.publish_date)}</span>
-                  <span>{formatReadTime(featuredArticle.read_time_minutes)}</span>
-                  {featuredArticle.view_count > 0 && (
-                    <span>{featuredArticle.view_count} views</span>
+                  <span>{formatPublishDate(initialFeatured.publish_date)}</span>
+                  <span>{formatReadTime(initialFeatured.read_time_minutes)}</span>
+                  {initialFeatured.view_count > 0 && (
+                    <span>{initialFeatured.view_count} views</span>
                   )}
                 </div>
               </div>
@@ -186,7 +179,7 @@ export function ResourcesContent({ initialFeatured, initialArticles }: Resources
                   ) : (
                     <div className="aspect-video rounded-lg bg-gradient-to-br from-chart-1/5 via-chart-2/5 to-chart-3/5 flex items-center justify-center w-full">
                       <div className="text-center">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
+                        <div className="size-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-chart-1 via-chart-2 to-chart-3 opacity-20" />
                         <span className="text-xs font-medium text-muted-foreground font-headline">
                           {article.title.slice(0, 20)}...
                         </span>

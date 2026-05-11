@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MoreHorizontal, UserMinus, Shield, Clock, Mail } from 'lucide-react'
+import { formatShortDate } from '@/lib/date-display'
 import { updateUserRole, removeUserFromOrganization, revokeInvitation } from '@/actions/admin'
 
 interface User {
@@ -73,7 +74,7 @@ export function UserManagementTable({
 }: UserManagementTableProps) {
   const [removeDialog, setRemoveDialog] = useState<{ open: boolean; user?: User }>({ open: false })
   const [revokeDialog, setRevokeDialog] = useState<{ open: boolean; invitation?: Invitation }>({ open: false })
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, startUserTransition] = useTransition()
 
   const canManageUsers = currentUserRole === 'admin'
   const canInviteUsers = currentUserRole === 'admin' || currentUserRole === 'manager'
@@ -90,49 +91,46 @@ export function UserManagementTable({
   const handleRoleChange = async (userId: string, newRole: string) => {
     if (!canManageUsers) return
 
-    setIsLoading(true)
-    try {
-      const formData = new FormData()
-      formData.append('userId', userId)
-      formData.append('role', newRole)
-      await updateUserRole(formData)
-    } catch (error) {
-      console.error('Failed to update role:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    startUserTransition(async () => {
+      try {
+        const formData = new FormData()
+        formData.append('userId', userId)
+        formData.append('role', newRole)
+        await updateUserRole(formData)
+      } catch (error) {
+        console.error('Failed to update role:', error)
+      }
+    })
   }
 
   const handleRemoveUser = async () => {
     if (!removeDialog.user || !canManageUsers) return
 
-    setIsLoading(true)
-    try {
-      const formData = new FormData()
-      formData.append('userId', removeDialog.user.user_id)
-      await removeUserFromOrganization(formData)
-      setRemoveDialog({ open: false })
-    } catch (error) {
-      console.error('Failed to remove user:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    startUserTransition(async () => {
+      try {
+        const formData = new FormData()
+        formData.append('userId', removeDialog.user.user_id)
+        await removeUserFromOrganization(formData)
+        setRemoveDialog({ open: false })
+      } catch (error) {
+        console.error('Failed to remove user:', error)
+      }
+    })
   }
 
   const handleRevokeInvitation = async () => {
     if (!revokeDialog.invitation || !canInviteUsers) return
 
-    setIsLoading(true)
-    try {
-      const formData = new FormData()
-      formData.append('invitationId', revokeDialog.invitation.clerk_invitation_id)
-      await revokeInvitation(formData)
-      setRevokeDialog({ open: false })
-    } catch (error) {
-      console.error('Failed to revoke invitation:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    startUserTransition(async () => {
+      try {
+        const formData = new FormData()
+        formData.append('invitationId', revokeDialog.invitation.clerk_invitation_id)
+        await revokeInvitation(formData)
+        setRevokeDialog({ open: false })
+      } catch (error) {
+        console.error('Failed to revoke invitation:', error)
+      }
+    })
   }
 
   return (
@@ -141,7 +139,7 @@ export function UserManagementTable({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+            <Shield className="size-5" />
             Organization Members ({members.length})
           </CardTitle>
           <CardDescription>
@@ -164,7 +162,7 @@ export function UserManagementTable({
                 <TableRow key={member.user_id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="size-8">
                         <AvatarImage src={member.user_profiles.avatar_url} />
                         <AvatarFallback>
                           {member.user_profiles.first_name?.[0]}
@@ -205,15 +203,15 @@ export function UserManagementTable({
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell>
-                    {new Date(member.created_at).toLocaleDateString()}
+                  <TableCell suppressHydrationWarning>
+                    {formatShortDate(member.created_at)}
                   </TableCell>
                   <TableCell className="text-right">
                     {canManageUsers && member.user_id !== currentUserId && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button variant="ghost" className="size-8 p-0">
+                            <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -223,7 +221,7 @@ export function UserManagementTable({
                             className="text-red-600"
                             onClick={() => setRemoveDialog({ open: true, user: member })}
                           >
-                            <UserMinus className="h-4 w-4 mr-2" />
+                            <UserMinus className="size-4 mr-2" />
                             Remove User
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -242,7 +240,7 @@ export function UserManagementTable({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+              <Clock className="size-5" />
               Pending Invitations ({invitations.length})
             </CardTitle>
             <CardDescription>
@@ -266,8 +264,8 @@ export function UserManagementTable({
                   <TableRow key={invitation.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                          <Mail className="h-4 w-4 text-gray-500" />
+                        <div className="size-8 rounded-full bg-zinc-200 flex items-center justify-center">
+                          <Mail className="size-4 text-zinc-500" />
                         </div>
                         <div className="font-medium">
                           {invitation.first_name} {invitation.last_name}
@@ -281,8 +279,8 @@ export function UserManagementTable({
                       </Badge>
                     </TableCell>
                     <TableCell>{invitation.department || '-'}</TableCell>
-                    <TableCell>
-                      {new Date(invitation.created_at).toLocaleDateString()}
+                    <TableCell suppressHydrationWarning>
+                      {formatShortDate(invitation.created_at)}
                     </TableCell>
                     <TableCell className="text-right">
                       {canInviteUsers && (

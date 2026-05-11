@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { EmptyStateSearch } from "@/components/ui/empty-state"
+import { formatShortDate } from "@/lib/date-display"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -131,7 +132,7 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
                 <Input
                   placeholder="Search scenarios..."
                   value={searchTerm}
@@ -211,7 +212,7 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                   <TableCell>
                     {scenario.estimated_duration ? (
                       <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <Clock className="size-4 text-muted-foreground" />
                         <span className="text-sm">
                           {Math.round(scenario.estimated_duration / 60)}m
                         </span>
@@ -221,8 +222,8 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">
-                      {new Date(scenario.created_at).toLocaleDateString()}
+                    <div suppressHydrationWarning className="text-sm">
+                      {formatShortDate(scenario.created_at)}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -231,7 +232,7 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                         <Button asChild size="sm">
                           <Link href={`/play/${scenario.id}/call`}>
                             <div className="flex items-center gap-1">
-                              <Play className="h-4 w-4" />
+                              <Play className="size-4" />
                               Practice
                             </div>
                           </Link>
@@ -241,14 +242,14 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
                               <Link href={`/scenarios/${scenario.id}`}>
-                                <Edit className="h-4 w-4 mr-2" />
+                                <Edit className="size-4 mr-2" />
                                 Edit
                               </Link>
                             </DropdownMenuItem>
@@ -256,7 +257,7 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                               <DropdownMenuItem
                                 onClick={() => handleStatusChange(scenario.id, 'publish')}
                               >
-                                <Target className="h-4 w-4 mr-2" />
+                                <Target className="size-4 mr-2" />
                                 Publish
                               </DropdownMenuItem>
                             )}
@@ -265,7 +266,7 @@ export function ScenarioList({ scenarios, userRole }: ScenarioListProps) {
                               onClick={() => handleStatusChange(scenario.id, 'archive')}
                               className="text-red-600"
                             >
-                              <Archive className="h-4 w-4 mr-2" />
+                              <Archive className="size-4 mr-2" />
                               Archive
                             </DropdownMenuItem>
                           </DropdownMenuContent>

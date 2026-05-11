@@ -99,9 +99,9 @@ export const managerAlerts = inngest.createFunction(
         // Prepend current score (newest) to the prior scores (also newest-first)
         const scores = [
           score,
-          ...recentAttempts
-            .map((a) => a.score)
-            .filter((s): s is number => typeof s === 'number'),
+          ...recentAttempts.flatMap((a) =>
+            typeof a.score === 'number' ? [a.score] : [],
+          ),
         ]
 
         // Scores are newest-first; declining means each older score is higher than the newer one
@@ -174,11 +174,8 @@ export const managerAlerts = inngest.createFunction(
     }
 
     // Continue past individual send failures so one broken notification doesn't block the rest
-    const sendResults = await step.run('send-alerts', async () => {
-      const results: SendResult[] = []
-
-      for (const manager of managers) {
-        for (const alert of alerts) {
+const sendResults = await step.run('send-alerts', async () => {
+      const sendAlert = async (manager: typeof managers[number], alert: typeof alerts[number]): Promise<SendResult> => {
           try {
             const { notificationId } = await sendNotification({
               userId: manager.userId,
@@ -190,28 +187,34 @@ export const managerAlerts = inngest.createFunction(
               recipientName: manager.name,
             })
 
-            results.push({
+            return {
               managerId: manager.userId,
               alertType: alert.type,
               notificationId,
-            })
+            }
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err)
             console.error(
               `[manager-alerts] Failed to send ${alert.type} to manager ${manager.userId}:`,
               message,
             )
-            results.push({
+            return {
               managerId: manager.userId,
               alertType: alert.type,
               notificationId: null,
               error: message,
-            })
+            }
           }
+      }
+
+      const tasks: Promise<SendResult>[] = []
+      for (const manager of managers) {
+        for (const alert of alerts) {
+          tasks.push(sendAlert(manager, alert))
         }
       }
 
-      return results
+      return Promise.all(tasks)
     })
 
     return {

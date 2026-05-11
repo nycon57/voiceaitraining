@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,7 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { CreditCard, Calendar, ArrowRight, ExternalLink, AlertTriangle } from 'lucide-react'
 import { createBillingPortal } from '@/actions/billing'
 import { SUBSCRIPTION_PLANS } from '@/lib/stripe'
-import { useState } from 'react'
+import { useTransition } from 'react'
 
 interface BillingOverviewProps {
   subscription: any
@@ -16,17 +17,16 @@ interface BillingOverviewProps {
 }
 
 export function BillingOverview({ subscription, org, orgId }: BillingOverviewProps) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, startBillingTransition] = useTransition()
 
   const handleManageBilling = async () => {
-    setIsLoading(true)
-    try {
-      await createBillingPortal(orgId)
-    } catch (error) {
-      console.error('Failed to open billing portal:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    startBillingTransition(async () => {
+      try {
+        await createBillingPortal(orgId)
+      } catch (error) {
+        console.error('Failed to open billing portal:', error)
+      }
+    })
   }
 
   const formatDate = (date: Date) => {
@@ -50,26 +50,26 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+              <CreditCard className="size-5" />
               Subscription Status
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-6">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CreditCard className="h-6 w-6 text-gray-400" />
+              <div className="size-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="size-6 text-zinc-400" />
               </div>
               <h3 className="font-headline font-semibold mb-2">No Active Subscription</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Choose a plan to get started with advanced features
               </p>
               <Button asChild>
-                <a href="/billing?tab=plans">
+                <Link href="/billing?tab=plans">
                   <div className="flex items-center gap-2">
                     Choose Plan
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="size-4" />
                   </div>
-                </a>
+                </Link>
               </Button>
             </div>
           </CardContent>
@@ -115,7 +115,7 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
+            <CreditCard className="size-5" />
             Subscription Status
           </CardTitle>
         </CardHeader>
@@ -142,7 +142,7 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
 
           {subscription.cancel_at_period_end && (
             <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+              <AlertTriangle className="size-4 text-yellow-600 mt-0.5" />
               <div className="text-sm">
                 <div className="font-medium text-yellow-800">Subscription Ending</div>
                 <div className="text-yellow-700">
@@ -158,7 +158,7 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
               disabled={isLoading}
               className="w-full"
             >
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className="size-4 mr-2" />
               {isLoading ? 'Opening...' : 'Manage Billing'}
             </Button>
           </div>
@@ -169,7 +169,7 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+            <Calendar className="size-5" />
             Billing Period
           </CardTitle>
         </CardHeader>
@@ -222,8 +222,8 @@ export function BillingOverview({ subscription, org, orgId }: BillingOverviewPro
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {currentPlan.features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <div key={JSON.stringify(feature)} className="flex items-center gap-2">
+                  <div className="size-2 bg-green-500 rounded-full" />
                   <span className="text-sm">{feature}</span>
                 </div>
               ))}

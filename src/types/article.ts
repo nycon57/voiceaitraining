@@ -20,19 +20,6 @@ export interface Article {
   updated_at: string
 }
 
-export interface ArticleView {
-  id: string
-  article_id: string
-  viewed_at: string
-  viewer_ip: string | null
-}
-
-export interface ArticleWithAnalytics extends Article {
-  total_views?: number
-  unique_viewers?: number
-  recent_views?: number
-}
-
 export interface PopularArticle {
   id: string
   title: string
@@ -67,11 +54,6 @@ export interface ArticleCardProps {
   showExcerpt?: boolean
   showAuthor?: boolean
   showReadTime?: boolean
-  className?: string
-}
-
-export interface FeaturedArticleProps {
-  article: Article
   className?: string
 }
 

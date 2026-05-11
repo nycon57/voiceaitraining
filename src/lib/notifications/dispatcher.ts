@@ -99,19 +99,14 @@ function isQuietHours(prefs: NotificationPreferences): boolean {
 
   try {
     const now = new Date()
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const [hourPart, minutePart] = now.toLocaleTimeString('en-US', {
       timeZone: prefs.quiet_hours_timezone,
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-    })
+    }).split(':')
 
-    const parts = formatter.formatToParts(now)
-    const hourPart = parts.find((p) => p.type === 'hour')
-    const minutePart = parts.find((p) => p.type === 'minute')
-    if (!hourPart || !minutePart) return false
-
-    const currentMinutes = parseInt(hourPart.value, 10) * 60 + parseInt(minutePart.value, 10)
+    const currentMinutes = parseInt(hourPart, 10) * 60 + parseInt(minutePart, 10)
 
     // Overnight range (e.g., 22:00 to 08:00)
     if (startMinutes > endMinutes) {
@@ -214,9 +209,10 @@ export async function sendNotification(
 ): Promise<SendNotificationResult> {
   const validated = sendNotificationSchema.parse(params)
 
-  const prefs = await getUserPreferences(validated.orgId, validated.userId)
-
-  const notificationId = await createInAppNotification(validated)
+  const [prefs, notificationId] = await Promise.all([
+    getUserPreferences(validated.orgId, validated.userId),
+    createInAppNotification(validated),
+  ])
 
   let emailSent = false
   let emailSuppressedReason: SendNotificationResult['emailSuppressedReason']

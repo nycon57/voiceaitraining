@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 
-export const NAV_LINKS = [
+const NAV_LINKS = [
   {
     label: 'Product',
     href: '/product',
@@ -104,17 +104,12 @@ const Navbar = () => {
   );
 
   useEffect(() => {
-    if (isMenuOpen) {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
+    document.documentElement.classList.toggle('overflow-hidden', isMenuOpen);
+    document.body.classList.toggle('overflow-hidden', isMenuOpen);
 
     return () => {
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
+      document.documentElement.classList.remove('overflow-hidden');
+      document.body.classList.remove('overflow-hidden');
     };
   }, [isMenuOpen]);
 

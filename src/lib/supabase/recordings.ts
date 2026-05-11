@@ -19,15 +19,6 @@ export interface RecordingUploadOptions {
   fileName?: string
 }
 
-export interface RecordingMetadata {
-  attemptId: string
-  orgId: string
-  fileName: string
-  fileSize: number
-  mimeType: string
-  duration?: number
-}
-
 /**
  * Upload a recording file from Vapi (or any source) to Supabase Storage
  *
@@ -43,7 +34,7 @@ export interface RecordingMetadata {
  * console.log(result.storagePath) // "org-uuid/attempt-uuid.mp3"
  * ```
  */
-export async function uploadRecording(options: RecordingUploadOptions) {
+async function uploadRecording(options: RecordingUploadOptions) {
   const { attemptId, orgId, file, fileName } = options
 
   // Determine file extension
@@ -190,7 +181,7 @@ export async function getRecordingPlaybackUrl(options: {
  * })
  * ```
  */
-export async function getRecordingSignedUrlDirect(options: {
+async function getRecordingSignedUrlDirect(options: {
   storagePath: string
   ttlSeconds?: number
 }) {
@@ -222,7 +213,7 @@ export async function getRecordingSignedUrlDirect(options: {
  * })
  * ```
  */
-export async function deleteRecording(options: {
+async function deleteRecording(options: {
   attemptId: string
   orgId: string
   extension?: string
@@ -257,7 +248,7 @@ export async function deleteRecording(options: {
  * console.log(`File size: ${metadata.size} bytes`)
  * ```
  */
-export async function getRecordingMetadata(options: {
+async function getRecordingMetadata(options: {
   attemptId: string
   orgId: string
   extension?: string
@@ -307,7 +298,7 @@ export async function getRecordingMetadata(options: {
  * }
  * ```
  */
-export async function recordingExists(options: {
+async function recordingExists(options: {
   attemptId: string
   orgId: string
   extension?: string
@@ -333,7 +324,7 @@ export async function recordingExists(options: {
  * console.log(`Found ${recordings.length} recordings`)
  * ```
  */
-export async function listOrgRecordings(options: {
+async function listOrgRecordings(options: {
   orgId: string
   limit?: number
   offset?: number
@@ -367,7 +358,7 @@ export async function listOrgRecordings(options: {
  * // Returns: "org-uuid/attempt-uuid.mp3"
  * ```
  */
-export function buildRecordingPath(
+function buildRecordingPath(
   orgId: string,
   attemptId: string,
   extension: string = 'mp3'
@@ -383,7 +374,7 @@ export function buildRecordingPath(
  * const { orgId, attemptId } = parseRecordingPath('org-uuid/attempt-uuid.mp3')
  * ```
  */
-export function parseRecordingPath(storagePath: string): {
+function parseRecordingPath(storagePath: string): {
   orgId: string
   attemptId: string
   extension: string

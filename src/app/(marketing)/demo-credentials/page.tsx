@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Demo Credentials | SpeakStride',
+}
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -68,7 +74,7 @@ export default function DemoCredentialsPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Demo Environment</h1>
+        <h1 className="text-4xl font-semibold mb-4">Demo Environment</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
           Experience our enterprise AI sales training platform with pre-configured demo accounts.
           Each role demonstrates different capabilities and access levels.
@@ -76,7 +82,7 @@ export default function DemoCredentialsPage() {
       </div>
 
       <Alert className="mb-8 border-amber-200 bg-amber-50">
-        <AlertCircle className="h-4 w-4 text-amber-600" />
+        <AlertCircle className="size-4 text-amber-600" />
         <AlertDescription className="text-amber-800">
           <strong>Demo Environment Notice:</strong> This is a demonstration environment with sample data.
           No real user data or payments are processed. Demo accounts reset periodically.
@@ -90,7 +96,7 @@ export default function DemoCredentialsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
+                    <Shield className="size-5" />
                     {user.name}
                   </CardTitle>
                   <CardDescription className="mt-1">
@@ -111,7 +117,7 @@ export default function DemoCredentialsPage() {
                   <h4 className="font-medium text-sm mb-2">Key Capabilities:</h4>
                   <ul className="text-xs space-y-1">
                     {user.capabilities.map((capability, index) => (
-                      <li key={index} className="flex items-start gap-2">
+                      <li key={JSON.stringify(capability)} className="flex items-start gap-2">
                         <span className="text-green-500 mt-0.5">•</span>
                         <span>{capability}</span>
                       </li>
@@ -121,19 +127,19 @@ export default function DemoCredentialsPage() {
 
                 <div className="pt-2 border-t">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                    <Copy className="h-3 w-3" />
+                    <Copy className="size-3" />
                     <span>Click to copy credentials</span>
                   </div>
                   <div className="space-y-1">
                     <button
                       onClick={() => navigator.clipboard.writeText(user.email)}
-                      className="text-left hover:bg-gray-50 p-1 rounded text-xs font-mono bg-gray-100 w-full"
+                      className="text-left hover:bg-zinc-50 p-1 rounded text-xs font-mono bg-zinc-100 w-full"
                     >
                       {user.email}
                     </button>
                     <button
                       onClick={() => navigator.clipboard.writeText('Demo123!')}
-                      className="text-left hover:bg-gray-50 p-1 rounded text-xs font-mono bg-gray-100 w-full"
+                      className="text-left hover:bg-zinc-50 p-1 rounded text-xs font-mono bg-zinc-100 w-full"
                     >
                       Password: Demo123!
                     </button>
@@ -149,7 +155,7 @@ export default function DemoCredentialsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
+              <Building2 className="size-5" />
               Demo Organization
             </CardTitle>
           </CardHeader>
@@ -166,7 +172,7 @@ export default function DemoCredentialsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+              <TrendingUp className="size-5" />
               Sample Content
             </CardTitle>
           </CardHeader>
@@ -183,7 +189,7 @@ export default function DemoCredentialsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <Users className="size-5" />
               Test Features
             </CardTitle>
           </CardHeader>
@@ -204,7 +210,7 @@ export default function DemoCredentialsPage() {
           <Button size="lg" asChild>
             <Link href="/sign-in">
               <div className="flex items-center gap-2">
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="size-4" />
                 Access Demo Environment
               </div>
             </Link>

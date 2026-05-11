@@ -1,10 +1,5 @@
 import type { TeamAnalysis } from './team-analyzer'
 
-// ── Types ──────────────────────────────────────────────────────────
-
-export type InsightType = 'systemic_gap' | 'at_risk_rep' | 'engagement_drop' | 'milestone'
-export type InsightPriority = 'high' | 'medium' | 'low'
-
 export interface ManagerInsight {
   type: InsightType
   priority: InsightPriority
@@ -107,21 +102,20 @@ function buildEngagementDropInsights(analysis: TeamAnalysis): ManagerInsight[] {
 }
 
 function buildMilestoneInsights(analysis: TeamAnalysis): ManagerInsight[] {
-  return analysis.topPerformers
-    .filter(
-      (p) =>
-        p.avgScore >= MILESTONE_SCORE_THRESHOLD &&
-        p.attemptCount >= MILESTONE_MIN_ATTEMPTS,
-    )
-    .map((performer) => ({
-      type: 'milestone',
-      priority: 'low',
-      title: `Top performer averaging ${performer.avgScore}%`,
-      message: `A rep averaged ${performer.avgScore}% across ${performer.attemptCount} attempts. Recognize their achievement.`,
-      metadata: {
-        userId: performer.userId,
-        avgScore: performer.avgScore,
-        attemptCount: performer.attemptCount,
-      },
-    }))
+  return analysis.topPerformers.flatMap((performer) =>
+    performer.avgScore >= MILESTONE_SCORE_THRESHOLD &&
+    performer.attemptCount >= MILESTONE_MIN_ATTEMPTS
+      ? [{
+          type: 'milestone',
+          priority: 'low',
+          title: `Top performer averaging ${performer.avgScore}%`,
+          message: `A rep averaged ${performer.avgScore}% across ${performer.attemptCount} attempts. Recognize their achievement.`,
+          metadata: {
+            userId: performer.userId,
+            avgScore: performer.avgScore,
+            attemptCount: performer.attemptCount,
+          },
+        }]
+      : [],
+  )
 }

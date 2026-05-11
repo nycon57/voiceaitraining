@@ -40,7 +40,7 @@ export default async function WebhooksPage() {
         </div>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Webhook className="h-12 w-12 text-muted-foreground mb-4" />
+            <Webhook className="size-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
             <p className="text-muted-foreground text-center">
               Webhook management is limited to managers and administrators.
@@ -71,7 +71,7 @@ export default async function WebhooksPage() {
         </div>
         <WebhookManager>
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="size-4 mr-2" />
             Add Webhook
           </Button>
         </WebhookManager>
@@ -81,7 +81,7 @@ export default async function WebhooksPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
+            <Activity className="size-5" />
             About Webhooks
           </CardTitle>
         </CardHeader>
@@ -162,7 +162,7 @@ export default async function WebhooksPage() {
                           size="sm"
                           onClick={() => window.open(webhook.url, '_blank')}
                         >
-                          <ExternalLink className="h-3 w-3" />
+                          <ExternalLink className="size-3" />
                         </Button>
                       </div>
                     </TableCell>
@@ -203,19 +203,19 @@ export default async function WebhooksPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <WebhookManager webhook={webhook}>
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                              <Settings className="h-4 w-4 mr-2" />
+                              <Settings className="size-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
                           </WebhookManager>
                           <DropdownMenuItem asChild>
                             <a href={`/settings/webhooks/${webhook.id}/deliveries`}>
-                              <Activity className="h-4 w-4 mr-2" />
+                              <Activity className="size-4 mr-2" />
                               View Deliveries
                             </a>
                           </DropdownMenuItem>
@@ -232,14 +232,14 @@ export default async function WebhooksPage() {
             </Table>
           ) : (
             <div className="text-center py-12">
-              <Webhook className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <Webhook className="size-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No webhooks configured</h3>
               <p className="text-muted-foreground mb-6">
                 Create your first webhook to start receiving real-time notifications.
               </p>
               <WebhookManager>
                 <Button>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   Create Webhook
                 </Button>
               </WebhookManager>

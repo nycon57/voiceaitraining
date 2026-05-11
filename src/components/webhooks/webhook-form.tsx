@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -64,7 +64,7 @@ const EVENT_DESCRIPTIONS = {
 } as const
 
 export function WebhookForm({ open, onOpenChange, webhook, onSuccess }: WebhookFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, startWebhookTransition] = useTransition()
   const isEditing = !!webhook
 
   const form = useForm<WebhookFormData>({
@@ -89,33 +89,32 @@ export function WebhookForm({ open, onOpenChange, webhook, onSuccess }: WebhookF
   })
 
   const onSubmit = async (data: WebhookFormData) => {
-    setIsLoading(true)
-    try {
-      if (isEditing) {
-        await updateWebhook(webhook.id, data)
+    startWebhookTransition(async () => {
+      try {
+        if (isEditing) {
+          await updateWebhook(webhook.id, data)
+          toast({
+            title: 'Webhook updated',
+            description: 'Your webhook has been updated successfully.',
+          })
+        } else {
+          await createWebhook(data)
+          toast({
+            title: 'Webhook created',
+            description: 'Your webhook has been created successfully.',
+          })
+        }
+        onOpenChange(false)
+        form.reset()
+        onSuccess?.()
+      } catch (error: any) {
         toast({
-          title: 'Webhook updated',
-          description: 'Your webhook has been updated successfully.',
-        })
-      } else {
-        await createWebhook(data)
-        toast({
-          title: 'Webhook created',
-          description: 'Your webhook has been created successfully.',
+          title: 'Error',
+          description: error.message || 'Something went wrong',
+          variant: 'destructive',
         })
       }
-      onOpenChange(false)
-      form.reset()
-      onSuccess?.()
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    })
   }
 
   const selectedEvents = form.watch('events')
@@ -191,7 +190,7 @@ export function WebhookForm({ open, onOpenChange, webhook, onSuccess }: WebhookF
                         onClick={() => window.open(field.value, '_blank')}
                         disabled={!field.value}
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="size-4" />
                       </Button>
                     </div>
                   </FormControl>
@@ -239,7 +238,7 @@ export function WebhookForm({ open, onOpenChange, webhook, onSuccess }: WebhookF
                           return (
                             <FormItem
                               key={event}
-                              className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3"
+                              className="flex flex-row items-start gap-3 gap-0 rounded-md border p-3"
                             >
                               <FormControl>
                                 <Checkbox
@@ -336,8 +335,8 @@ export function WebhookForm({ open, onOpenChange, webhook, onSuccess }: WebhookF
               />
             </div>
 
-            <div className="flex items-start space-x-2 rounded-md border p-3 bg-blue-50">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-2 rounded-md border p-3 bg-blue-50">
+              <Info className="size-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-blue-700">
                 <div className="font-medium mb-1">Webhook Security</div>
                 <div>All webhook requests include HMAC SHA-256 signatures for verification. Use the webhook secret to validate request authenticity.</div>
@@ -353,7 +352,7 @@ export function WebhookForm({ open, onOpenChange, webhook, onSuccess }: WebhookF
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {isEditing ? 'Update Webhook' : 'Create Webhook'}
               </Button>
             </DialogFooter>

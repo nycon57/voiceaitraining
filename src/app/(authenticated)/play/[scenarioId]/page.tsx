@@ -36,7 +36,7 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/training`}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="size-4 mr-2" />
               Back to Training
             </Link>
           </Button>
@@ -78,7 +78,7 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/training">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="size-4 mr-2" />
             Back to Training
           </Link>
         </Button>
@@ -113,7 +113,7 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock className="size-4 text-muted-foreground" />
               <div>
                 <div className="text-sm font-medium">Duration</div>
                 <div className="text-sm text-muted-foreground">
@@ -122,7 +122,7 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-muted-foreground" />
+              <User className="size-4 text-muted-foreground" />
               <div>
                 <div className="text-sm font-medium">Character</div>
                 <div className="text-sm text-muted-foreground">
@@ -131,7 +131,7 @@ export default async function PlayScenarioPage({ params, searchParams }: PlaySce
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-muted-foreground" />
+              <Target className="size-4 text-muted-foreground" />
               <div>
                 <div className="text-sm font-medium">Objective</div>
                 <div className="text-sm text-muted-foreground">

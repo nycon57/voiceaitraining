@@ -76,7 +76,7 @@ export function TranscriptViewer({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <FileText className="size-5" />
             Call Transcript
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -86,9 +86,9 @@ export function TranscriptViewer({
               onClick={handleCopyTranscript}
             >
               {copied ? (
-                <Check className="h-4 w-4 mr-2" />
+                <Check className="size-4 mr-2" />
               ) : (
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className="size-4 mr-2" />
               )}
               {copied ? "Copied!" : "Copy"}
             </Button>
@@ -97,13 +97,13 @@ export function TranscriptViewer({
               size="sm"
               onClick={handleDownloadTranscript}
             >
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="size-4 mr-2" />
               Download
             </Button>
           </div>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search transcript..."
             value={searchQuery}
@@ -116,7 +116,7 @@ export function TranscriptViewer({
         <ScrollArea className="h-[400px] pr-4">
           {filteredTranscript.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-              <FileText className="h-12 w-12 mb-3 opacity-20" />
+              <FileText className="size-12 mb-3 opacity-20" />
               <p className="text-sm">
                 {searchQuery
                   ? "No messages match your search"

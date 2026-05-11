@@ -33,7 +33,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         </div>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
+            <CreditCard className="size-12 text-muted-foreground mb-4" />
             <h3 className="font-headline text-lg font-semibold mb-2">Access Restricted</h3>
             <p className="text-muted-foreground text-center">
               Billing management is limited to organization administrators.
@@ -91,7 +91,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         <Card className="border-green-200 bg-green-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-green-700">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              <div className="size-2 bg-green-500 rounded-full" />
               <span className="font-medium">Subscription activated successfully!</span>
             </div>
             <p className="text-sm text-green-600 mt-1">
@@ -105,7 +105,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-yellow-700">
-              <AlertTriangle className="h-4 w-4" />
+              <AlertTriangle className="size-4" />
               <span className="font-medium">Subscription setup was canceled</span>
             </div>
             <p className="text-sm text-yellow-600 mt-1">
@@ -119,19 +119,19 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
+            <CreditCard className="size-4" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="usage" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
+            <BarChart3 className="size-4" />
             Usage
           </TabsTrigger>
           <TabsTrigger value="plans" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+            <Settings className="size-4" />
             Plans
           </TabsTrigger>
           <TabsTrigger value="invoices" className="flex items-center gap-2">
-            <Receipt className="h-4 w-4" />
+            <Receipt className="size-4" />
             Invoices
           </TabsTrigger>
         </TabsList>

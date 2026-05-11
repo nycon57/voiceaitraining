@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { CheckIcon, MinusIcon } from "lucide-react"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -59,9 +59,9 @@ function Checkbox({
         asChild
       >
         <motion.div
-          initial={{ scale: 0, opacity: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
+          exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
           {indeterminate ? (

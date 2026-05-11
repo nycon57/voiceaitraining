@@ -62,22 +62,22 @@ export function LiveKPIIndicators({
     return (
       <div className={cn("flex items-center gap-4 text-sm", className)}>
         <div className="flex items-center gap-1.5">
-          <Clock className="h-4 w-4 text-muted-foreground" />
+          <Clock className="size-4 text-muted-foreground" />
           <span className="font-mono font-medium">
             {formatDuration(kpis.duration)}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <MessageCircle className="h-4 w-4 text-muted-foreground" />
+          <MessageCircle className="size-4 text-muted-foreground" />
           <span className="font-mono font-medium">{kpis.talkListenRatio}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <HelpCircle className="h-4 w-4 text-primary" />
+          <HelpCircle className="size-4 text-primary" />
           <span className="font-medium">{kpis.questionsAsked}</span>
         </div>
         {kpis.fillerWords > 0 && (
           <div className="flex items-center gap-1.5">
-            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertTriangle className="size-4 text-warning" />
             <span className="font-medium">{kpis.fillerWords}</span>
           </div>
         )}
@@ -92,7 +92,7 @@ export function LiveKPIIndicators({
         <CardContent className="p-4 flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-chart-1/10 p-2.5 flex-shrink-0">
-              <Clock className="h-4 w-4 text-chart-1" />
+              <Clock className="size-4 text-chart-1" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground font-medium mb-1">
@@ -112,7 +112,7 @@ export function LiveKPIIndicators({
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-chart-2/10 p-2.5 flex-shrink-0">
-                <MessageCircle className="h-4 w-4 text-chart-2" />
+                <MessageCircle className="size-4 text-chart-2" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground font-medium mb-1">
@@ -149,7 +149,7 @@ export function LiveKPIIndicators({
         <CardContent className="p-4 flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-chart-3/10 p-2.5 flex-shrink-0">
-              <HelpCircle className="h-4 w-4 text-chart-3" />
+              <HelpCircle className="size-4 text-chart-3" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground font-medium mb-1">
@@ -166,7 +166,7 @@ export function LiveKPIIndicators({
         <CardContent className="p-4 flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-chart-4/10 p-2.5 flex-shrink-0">
-              <AlertTriangle className="h-4 w-4 text-chart-4" />
+              <AlertTriangle className="size-4 text-chart-4" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground font-medium mb-1">

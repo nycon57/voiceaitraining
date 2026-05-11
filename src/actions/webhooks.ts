@@ -1,6 +1,6 @@
 'use server'
 
-import { withOrgGuard, withRoleGuard } from '@/lib/auth'
+import { withOrgGuard, withRoleGuard, requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -20,6 +20,7 @@ const createWebhookSchema = z.object({
 const updateWebhookSchema = createWebhookSchema.partial()
 
 export async function createWebhook(data: z.infer<typeof createWebhookSchema>) {
+  await requireAuth()
   const validatedData = createWebhookSchema.parse(data)
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -50,6 +51,7 @@ export async function updateWebhook(
   webhookId: string,
   data: z.infer<typeof updateWebhookSchema>
 ) {
+  await requireAuth()
   const validatedData = updateWebhookSchema.parse(data)
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -74,7 +76,8 @@ export async function updateWebhook(
   })
 }
 
-export async function deleteWebhook(webhookId: string) {
+async function deleteWebhook(webhookId: string) {
+  await requireAuth()
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { error } = await supabase
@@ -93,6 +96,7 @@ export async function deleteWebhook(webhookId: string) {
 }
 
 export async function getWebhooks() {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     // Check if user has access to webhooks
     if (!['admin', 'manager'].includes(user.role || '')) {
@@ -116,7 +120,8 @@ export async function getWebhooks() {
   })
 }
 
-export async function getWebhook(webhookId: string) {
+async function getWebhook(webhookId: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     // Check if user has access to webhooks
     if (!['admin', 'manager'].includes(user.role || '')) {
@@ -141,7 +146,8 @@ export async function getWebhook(webhookId: string) {
   })
 }
 
-export async function getWebhookDeliveries(webhookId: string, limit = 50) {
+async function getWebhookDeliveries(webhookId: string, limit = 50) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     // Check if user has access to webhooks
     if (!['admin', 'manager'].includes(user.role || '')) {
@@ -175,7 +181,8 @@ export async function getWebhookDeliveries(webhookId: string, limit = 50) {
   })
 }
 
-export async function retryWebhookDelivery(deliveryId: string) {
+async function retryWebhookDelivery(deliveryId: string) {
+  await requireAuth()
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
     // Get delivery with webhook info
     const { data: delivery, error: deliveryError } = await supabase
@@ -213,7 +220,8 @@ export async function retryWebhookDelivery(deliveryId: string) {
   })
 }
 
-export async function regenerateWebhookSecret(webhookId: string) {
+async function regenerateWebhookSecret(webhookId: string) {
+  await requireAuth()
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
     // Generate new secret
     const newSecret = crypto.randomBytes(32).toString('hex')
@@ -239,13 +247,14 @@ export async function regenerateWebhookSecret(webhookId: string) {
 }
 
 // Internal function to dispatch webhooks
-export async function dispatchWebhook(
+async function dispatchWebhook(
   url: string,
   secret: string,
   eventType: string,
   payload: any,
   webhookId: string
 ) {
+  await requireAuth()
   const supabase = await createClient()
 
   try {
@@ -330,6 +339,7 @@ export async function triggerWebhookEvent(
   eventType: WebhookEvent,
   payload: any
 ) {
+  await requireAuth()
   const supabase = await createClient()
 
   try {

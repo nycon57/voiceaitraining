@@ -1,6 +1,6 @@
 'use server'
 
-import { withOrgGuard, withRoleGuard } from '@/lib/auth'
+import { withOrgGuard, withRoleGuard, requireAuth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -31,6 +31,7 @@ const updateAttemptSchema = z.object({
 })
 
 export async function createAttempt(data: z.infer<typeof createAttemptSchema>) {
+  await requireAuth()
   const validatedData = createAttemptSchema.parse(data)
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -76,6 +77,7 @@ export async function updateAttempt(
   attemptId: string,
   data: z.infer<typeof updateAttemptSchema>
 ) {
+  await requireAuth()
   const validatedData = updateAttemptSchema.parse(data)
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -124,6 +126,7 @@ export async function updateAttempt(
 }
 
 export async function scoreAttempt(attemptId: string) {
+  await requireAuth()
   const { calculateGlobalKPIs, calculateScenarioKPIs, calculateOverallScore, generateAIFeedback } = await import('@/lib/ai/scoring')
 
   return withOrgGuard(async (user, orgId, supabase) => {
@@ -222,21 +225,24 @@ export async function scoreAttempt(attemptId: string) {
 
       // Trigger webhooks for scoring events
       try {
-        const { triggerScenarioCompleted, triggerAttemptScoredLow, triggerAttemptScoredHigh } = await import('@/lib/webhooks')
-
-        // Get org and user data for webhooks
-        const { data: org } = await supabase
-          .from('orgs')
-          .select('name')
-          .eq('id', orgId)
-          .single()
-
-        const { data: userData } = await supabase
-          .from('users')
-          .select('clerk_user_id, first_name, last_name, email, role')
-          .eq('org_id', orgId)
-          .eq('clerk_user_id', updatedAttempt.clerk_user_id)
-          .single()
+        const [
+          { triggerScenarioCompleted, triggerAttemptScoredLow, triggerAttemptScoredHigh },
+          { data: org },
+          { data: userData },
+        ] = await Promise.all([
+          import('@/lib/webhooks'),
+          supabase
+            .from('orgs')
+            .select('name')
+            .eq('id', orgId)
+            .single(),
+          supabase
+            .from('users')
+            .select('clerk_user_id, first_name, last_name, email, role')
+            .eq('org_id', orgId)
+            .eq('clerk_user_id', updatedAttempt.clerk_user_id)
+            .single(),
+        ])
 
         const webhookUser = userData ? {
           id: userData.clerk_user_id,
@@ -247,32 +253,35 @@ export async function scoreAttempt(attemptId: string) {
 
         // Trigger scenario completed webhook
         if (webhookUser) {
-          await triggerScenarioCompleted(
-            orgId,
-            org?.name || 'Unknown Organization',
-            webhookUser,
-            attempt.scenarios,
-            updatedAttempt
-          )
+          const webhookTasks = [
+            triggerScenarioCompleted(
+              orgId,
+              org?.name || 'Unknown Organization',
+              webhookUser,
+              attempt.scenarios,
+              updatedAttempt
+            ),
+          ]
 
-          // Trigger score-specific webhooks
           if (scoreResult.total_score < 60) {
-            await triggerAttemptScoredLow(
+            webhookTasks.push(triggerAttemptScoredLow(
               orgId,
               org?.name || 'Unknown Organization',
               webhookUser,
               attempt.scenarios,
               updatedAttempt
-            )
+            ))
           } else if (scoreResult.total_score >= 80) {
-            await triggerAttemptScoredHigh(
+            webhookTasks.push(triggerAttemptScoredHigh(
               orgId,
               org?.name || 'Unknown Organization',
               webhookUser,
               attempt.scenarios,
               updatedAttempt
-            )
+            ))
           }
+
+          await Promise.all(webhookTasks)
         }
       } catch (webhookError) {
         console.error('Failed to trigger webhooks:', webhookError)
@@ -295,6 +304,7 @@ export async function getAttempts(filters?: {
   limit?: number
   offset?: number
 }) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     let query = supabase
@@ -346,6 +356,7 @@ export async function getAttempts(filters?: {
 }
 
 export async function getAttempt(attemptId: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: attempt, error } = await supabase
@@ -377,7 +388,8 @@ export async function getAttempt(attemptId: string) {
   })
 }
 
-export async function deleteAttempt(attemptId: string) {
+async function deleteAttempt(attemptId: string) {
+  await requireAuth()
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { error } = await supabase
@@ -395,7 +407,8 @@ export async function deleteAttempt(attemptId: string) {
   })
 }
 
-export async function addManagerComment(attemptId: string, comment: string) {
+async function addManagerComment(attemptId: string, comment: string) {
+  await requireAuth()
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
 
     const { data: attempt, error } = await supabase
@@ -420,6 +433,7 @@ export async function addManagerComment(attemptId: string, comment: string) {
 
 // Get user's attempt statistics
 export async function getUserAttemptStats(clerkUserId?: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetClerkUserId = clerkUserId || user.id
 
@@ -466,6 +480,7 @@ export async function getUserAttemptStats(clerkUserId?: string) {
 
 // Get user's activity history for training history page
 export async function getUserActivityHistory(clerkUserId?: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetClerkUserId = clerkUserId || user.id
 

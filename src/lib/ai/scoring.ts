@@ -146,7 +146,7 @@ export function calculateGlobalKPIs(
   const averageResponseTime = responseTimes.length > 0 ?
     Math.round(responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length) : 0
 
-  const sortedResponseTimes = [...responseTimes].sort((a, b) => a - b)
+  const sortedResponseTimes = responseTimes.toSorted((a, b) => a - b)
   const medianResponseTime = sortedResponseTimes.length > 0 ?
     sortedResponseTimes[Math.floor(sortedResponseTimes.length / 2)] : 0
 
@@ -203,8 +203,7 @@ export function calculateScenarioKPIs(
   }
 ): ScenarioKPIs {
   const userText = transcript
-    .filter(entry => entry.role === 'user')
-    .map(entry => entry.content.toLowerCase())
+    .flatMap((entry) => entry.role === 'user' ? [entry.content.toLowerCase()] : [])
     .join(' ')
 
   // Required phrases analysis

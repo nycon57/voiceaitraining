@@ -1,14 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  XAxis,
-  YAxis,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { Users } from "lucide-react";
 
 import {
@@ -27,6 +20,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 import type { BaseChartProps, TeamActivityData } from "./types";
+
+const Bar = dynamic(() => import("recharts").then((mod) => mod.Bar), { ssr: false });
+const BarChart = dynamic(() => import("recharts").then((mod) => mod.BarChart), { ssr: false });
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false });
+const Cell = dynamic(() => import("recharts").then((mod) => mod.Cell), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false });
 
 export interface TeamActivityChartProps extends BaseChartProps {
   data: TeamActivityData[];
@@ -67,7 +67,7 @@ function ChartEmptyState() {
   return (
     <div className="flex h-[250px] w-full items-center justify-center rounded-lg border border-dashed">
       <div className="flex flex-col items-center gap-2 text-center">
-        <Users className="h-8 w-8 text-muted-foreground" />
+        <Users className="size-8 text-muted-foreground" />
         <div className="text-sm text-muted-foreground">
           No team activity data available yet
         </div>
@@ -87,7 +87,7 @@ export function TeamActivityChart({
   showValues = false,
 }: TeamActivityChartProps) {
   const sortedData = React.useMemo(() => {
-    return [...data].sort((a, b) => b.value - a.value);
+    return data.toSorted((a, b) => b.value - a.value);
   }, [data]);
 
   const totalActivity = React.useMemo(() => {
@@ -200,9 +200,9 @@ export function TeamActivityChart({
                       : undefined
                   }
                 >
-                  {sortedData.map((entry, index) => (
+                  {sortedData.map((entry) => (
                     <Cell
-                      key={`cell-${index}`}
+                      key={`${entry.label}-${entry.category ?? 'uncategorized'}`}
                       fill={getBarColor(entry.category)}
                     />
                   ))}
@@ -242,11 +242,11 @@ export function TeamActivityChart({
               data.some((item) => item.category) && (
                 <div className="mt-4 flex flex-wrap gap-4 text-xs">
                   {Array.from(
-                    new Set(data.map((item) => item.category).filter(Boolean))
+                    new Set(data.flatMap((item) => (item.category ? [item.category] : [])))
                   ).map((category) => (
                     <div key={category} className="flex items-center gap-2">
                       <div
-                        className="h-3 w-3 rounded-sm"
+                        className="size-3 rounded-sm"
                         style={{
                           backgroundColor: getBarColor(category),
                         }}

@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from '@/components/theme-provider'
 import { StyleGlideProvider } from '@/components/styleglide-provider'
+import { MotionProvider } from '@/components/motion-provider'
 import { ViewTransitions } from 'next-view-transitions'
 import { BotIdClient } from 'botid/client'
 import '@/styles/globals.css'
@@ -66,8 +67,10 @@ export default function RootLayout({
                   background: `url(/images/noise.webp) lightgray 0% 0% / 83.69069695472717px 83.69069695472717px repeat`,
                 }}
               />
-              <StyleGlideProvider />
-              <main className="flex-1">{children}</main>
+              <MotionProvider>
+                <StyleGlideProvider />
+                <main className="flex-1">{children}</main>
+              </MotionProvider>
             </ThemeProvider>
           </ClerkProvider>
         </body>

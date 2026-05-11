@@ -143,5 +143,8 @@
     "overrides": {
       "jsondiffpatch": ">=0.7.2"
     }
+  },
+  "overrides": {
+    "axios": "<1.14.0"
   }
 }

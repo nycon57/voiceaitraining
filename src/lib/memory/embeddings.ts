@@ -23,23 +23,6 @@ export interface StoreEmbeddingParams {
   metadata?: Record<string, unknown>
 }
 
-export interface SearchSimilarParams {
-  orgId: string
-  userId?: string
-  query: string
-  contentType?: ContentType
-  limit?: number
-}
-
-export interface SimilarResult {
-  id: string
-  content: string
-  contentType: ContentType
-  similarity: number
-  sourceId: string | null
-  metadata: Record<string, unknown> | null
-}
-
 /** Row shape returned by the match_memory_embeddings RPC. */
 interface MatchRow {
   id: string
@@ -53,7 +36,7 @@ interface MatchRow {
 // Functions
 
 /** Generate a 1536-dimensional embedding using OpenAI text-embedding-3-small. */
-export async function generateEmbedding(text: string): Promise<number[]> {
+async function generateEmbedding(text: string): Promise<number[]> {
   const { embedding } = await embed({
     model: openai.embedding('text-embedding-3-small'),
     value: text,
@@ -87,7 +70,7 @@ export async function storeEmbedding(params: StoreEmbeddingParams): Promise<stri
 }
 
 /** Vector similarity search scoped by org, with optional user and content type filters. */
-export async function searchSimilar(params: SearchSimilarParams): Promise<SimilarResult[]> {
+async function searchSimilar(params: SearchSimilarParams): Promise<SimilarResult[]> {
   const queryEmbedding = await generateEmbedding(params.query)
 
   const { data, error } = await createServiceClient().rpc('match_memory_embeddings', {

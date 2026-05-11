@@ -1,7 +1,7 @@
 'use server'
 
 import { assertHuman } from '@/lib/botid'
-import { withOrgGuard, withRoleGuard } from '@/lib/auth'
+import { withOrgGuard, withRoleGuard, requireAuth } from '@/lib/auth'
 import { emitAssignmentCreated } from '@/lib/events'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -32,7 +32,8 @@ const updateAssignmentSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
-export async function createAssignment(data: z.infer<typeof createAssignmentSchema>) {
+async function createAssignment(data: z.infer<typeof createAssignmentSchema>) {
+  await requireAuth()
   await assertHuman()
 
   const validatedData = createAssignmentSchema.parse(data)
@@ -121,10 +122,11 @@ export async function createAssignment(data: z.infer<typeof createAssignmentSche
   })
 }
 
-export async function updateAssignment(
+async function updateAssignment(
   assignmentId: string,
   data: z.infer<typeof updateAssignmentSchema>
 ) {
+  await requireAuth()
   await assertHuman()
 
   const validatedData = updateAssignmentSchema.parse(data)
@@ -152,7 +154,8 @@ export async function updateAssignment(
   })
 }
 
-export async function deleteAssignment(assignmentId: string) {
+async function deleteAssignment(assignmentId: string) {
+  await requireAuth()
   await assertHuman()
 
   return withRoleGuard(['admin', 'manager'], async (user, orgId, supabase) => {
@@ -174,6 +177,7 @@ export async function deleteAssignment(assignmentId: string) {
 }
 
 export async function getUserAssignments(userId?: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetUserId = userId || user.id
 
@@ -319,7 +323,8 @@ export async function getUserAssignments(userId?: string) {
   })
 }
 
-export async function getAssignment(assignmentId: string) {
+async function getAssignment(assignmentId: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: assignment, error } = await supabase
@@ -366,6 +371,7 @@ export async function getAssignment(assignmentId: string) {
 }
 
 export async function getRecentAttemptStats(userId?: string) {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetUserId = userId || user.id
 
@@ -403,14 +409,14 @@ export async function getRecentAttemptStats(userId?: string) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const attemptDates = attempts
-        .map((a) => {
+      const attemptDates = [
+        ...new Set(attempts.map((a) => {
           const date = new Date(a.started_at)
           date.setHours(0, 0, 0, 0)
           return date.getTime()
-        })
-        .filter((date, index, self) => self.indexOf(date) === index) // unique dates
-        .sort((a, b) => b - a) // descending order
+        })),
+      ]
+        .toSorted((a, b) => b - a) // descending order
 
       let checkDate = today.getTime()
       for (const attemptDate of attemptDates) {
@@ -484,12 +490,13 @@ export async function getRecentAttemptStats(userId?: string) {
   })
 }
 
-export async function getTeamAssignments(filters?: {
+async function getTeamAssignments(filters?: {
   team_id?: string
   status?: 'pending' | 'in_progress' | 'completed' | 'overdue'
   limit?: number
   offset?: number
 }) {
+  await requireAuth()
   return withRoleGuard(['admin', 'manager', 'hr'], async (user, orgId, supabase) => {
     // Get all team members if team_id is specified
     let teamMemberIds: string[] | undefined
@@ -563,7 +570,8 @@ export async function getTeamAssignments(filters?: {
   })
 }
 
-export async function completeAssignment(assignmentId: string) {
+async function completeAssignment(assignmentId: string) {
+  await requireAuth()
   await assertHuman()
 
   return withOrgGuard(async (user, orgId, supabase) => {

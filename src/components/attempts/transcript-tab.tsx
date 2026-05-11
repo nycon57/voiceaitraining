@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { formatShortTime } from '@/lib/date-display';
 
 import type { TranscriptEntry } from './types';
 
@@ -51,7 +52,7 @@ export function TranscriptTab({ transcript, agentName = 'AI Agent' }: Transcript
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {transcript.map((entry, index) => (
               <TranscriptMessage
-                key={index}
+                key={JSON.stringify(entry)}
                 entry={entry}
                 agentName={agentName}
               />
@@ -88,15 +89,15 @@ function TranscriptMessage({
     >
       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
         {isUser ? (
-          <User className="h-3 w-3" />
+          <User className="size-3" />
         ) : (
-          <Volume2 className="h-3 w-3" />
+          <Volume2 className="size-3" />
         )}
-        <span className="font-medium">
+        <span suppressHydrationWarning className="font-medium">
           {isUser ? 'You' : agentName}
         </span>
         {entry.timestamp && (
-          <span>{new Date(entry.timestamp).toLocaleTimeString()}</span>
+          <span>{formatShortTime(entry.timestamp)}</span>
         )}
       </div>
       <div className="text-sm leading-relaxed">{entry.content}</div>
@@ -110,7 +111,7 @@ function TranscriptMessage({
 function EmptyTranscript() {
   return (
     <div className="text-center py-8 text-muted-foreground">
-      <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+      <MessageSquare className="size-8 mx-auto mb-2 opacity-50" />
       <p>No transcript available</p>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -164,9 +164,9 @@ export {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
+
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
+
 }

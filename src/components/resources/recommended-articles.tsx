@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { m as motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { ArticleCard } from './article-card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -54,15 +54,7 @@ export function RecommendedArticles({
     }
   }
 
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
-
-  if (articles.length === 0) {
+  if (!loading && articles.length === 0) {
     return null
   }
 
@@ -80,7 +72,11 @@ export function RecommendedArticles({
     return 'Stay up to date with our latest insights and expert tips'
   }
 
-  return (
+  return loading ? (
+    <div className="text-center py-12">
+      <LoadingSpinner size="lg" />
+    </div>
+  ) : (
     <section className="space-y-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -90,9 +86,9 @@ export function RecommendedArticles({
       >
         <div className="flex items-center justify-center gap-2 mb-4">
           <div className="p-2 rounded-full bg-gradient-to-br from-chart-1/10 via-chart-2/10 to-chart-3/10">
-            <Sparkles className="w-5 h-5 text-chart-2" />
+            <Sparkles className="size-5 text-chart-2" />
           </div>
-          <h2 className="text-2xl lg:text-3xl font-bold font-headline">
+          <h2 className="text-2xl lg:text-3xl font-semibold font-headline">
             Recommended Reading
           </h2>
         </div>
@@ -137,7 +133,7 @@ export function RecommendedArticles({
         className="text-center"
       >
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-muted/50 rounded-full text-xs text-muted-foreground">
-          <Sparkles className="w-3 h-3" />
+          <Sparkles className="size-3" />
           <span>
             {recommendationType === 'tags'
               ? `Recommended based on shared tags: ${currentArticleTags?.slice(0, 2).join(', ')}`

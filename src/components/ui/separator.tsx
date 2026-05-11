@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
@@ -190,4 +190,4 @@ function SeparatorWithIcon({
   );
 }
 
-export { Separator, SeparatorWithText, SeparatorWithIcon };
+export { Separator };

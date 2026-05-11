@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -226,7 +226,7 @@ export {
   CardHeader,
   CardFooter,
   CardTitle,
-  CardAction,
+
   CardDescription,
   CardContent,
 };

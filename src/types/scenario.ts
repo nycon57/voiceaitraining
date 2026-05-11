@@ -1,4 +1,4 @@
-export type ScenarioStatus = 'draft' | 'active' | 'archived'
+
 export type ScenarioDifficulty = 'easy' | 'medium' | 'hard'
 export type VapiBaseAgent = 'professional' | 'difficult' | 'friendly' | 'neutral'
 
@@ -47,26 +47,6 @@ export interface ScenarioBranching {
   nodes: ScenarioBranchNode[]
   edges: ScenarioBranchEdge[]
   start_node: string
-}
-
-export interface ScenarioBranchNode {
-  id: string
-  type: 'ai_response' | 'condition' | 'end'
-  content?: string
-  conditions?: BranchCondition[]
-}
-
-export interface ScenarioBranchEdge {
-  id: string
-  from: string
-  to: string
-  condition?: string
-}
-
-export interface BranchCondition {
-  type: 'keyword' | 'semantic' | 'sentiment' | 'duration'
-  value: any
-  operator: 'contains' | 'equals' | 'greater_than' | 'less_than'
 }
 
 export interface Scenario {

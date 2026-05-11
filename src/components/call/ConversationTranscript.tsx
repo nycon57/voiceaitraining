@@ -43,7 +43,7 @@ function detectKeyMoment(text: string, role: "user" | "assistant"): {
   ) {
     return {
       type: "objection",
-      icon: <AlertCircle className="h-3.5 w-3.5 text-destructive" />,
+      icon: <AlertCircle className="size-3.5 text-destructive" />,
     }
   }
 
@@ -51,7 +51,7 @@ function detectKeyMoment(text: string, role: "user" | "assistant"): {
   if (role === "user" && text.includes("?")) {
     return {
       type: "question",
-      icon: <HelpCircle className="h-3.5 w-3.5 text-primary" />,
+      icon: <HelpCircle className="size-3.5 text-primary" />,
     }
   }
 
@@ -65,7 +65,7 @@ function detectKeyMoment(text: string, role: "user" | "assistant"): {
   ) {
     return {
       type: "commitment",
-      icon: <CheckCircle2 className="h-3.5 w-3.5 text-success" />,
+      icon: <CheckCircle2 className="size-3.5 text-success" />,
     }
   }
 
@@ -83,7 +83,7 @@ export function ConversationTranscript({
   className,
 }: ConversationTranscriptProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [isUserScrolling, setIsUserScrolling] = useState(false)
+  const isUserScrolling = useRef(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
   const lastMessageCountRef = useRef(messages.length)
 
@@ -101,11 +101,11 @@ export function ConversationTranscript({
 
     // If user scrolled to bottom manually, resume auto-scroll
     if (nearBottom) {
-      setIsUserScrolling(false)
+      isUserScrolling.current = false
       setShowScrollButton(false)
     } else {
       // User scrolled up, pause auto-scroll
-      setIsUserScrolling(true)
+      isUserScrolling.current = true
       setShowScrollButton(true)
     }
   }
@@ -118,13 +118,13 @@ export function ConversationTranscript({
     lastMessageCountRef.current = messages.length
 
     // Only auto-scroll if user hasn't manually scrolled up
-    if (hasNewMessages && !isUserScrolling) {
+    if (hasNewMessages && !isUserScrolling.current) {
       scrollRef.current.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: 'smooth'
       })
     }
-  }, [messages, autoScroll, isUserScrolling])
+  }, [messages, autoScroll])
 
   // Scroll to bottom manually
   const scrollToBottom = () => {
@@ -133,7 +133,7 @@ export function ConversationTranscript({
         top: scrollRef.current.scrollHeight,
         behavior: 'smooth'
       })
-      setIsUserScrolling(false)
+    isUserScrolling.current = false
       setShowScrollButton(false)
     }
   }
@@ -187,7 +187,7 @@ export function ConversationTranscript({
               )}
             >
               {/* Avatar */}
-              <Avatar className="h-8 w-8 flex-shrink-0">
+              <Avatar className="size-8 flex-shrink-0">
                 <AvatarImage
                   src={isUser ? userAvatar : agentAvatar}
                   alt={isUser ? userName : agentName}
@@ -215,7 +215,7 @@ export function ConversationTranscript({
                     {isUser ? userName : agentName}
                   </span>
                   <span className="text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
+                    <Clock className="size-3" />
                     {formatTimestamp(message.timestamp)}
                   </span>
                   {keyMoment.icon && keyMoment.icon}
@@ -268,7 +268,7 @@ export function ConversationTranscript({
             onClick={scrollToBottom}
             className="shadow-lg"
           >
-            <ArrowDown className="h-4 w-4 mr-2" />
+            <ArrowDown className="size-4 mr-2" />
             New messages
           </Button>
         </div>

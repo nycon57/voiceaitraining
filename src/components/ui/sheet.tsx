@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { XIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
@@ -254,11 +254,11 @@ function SheetBody({ className, ...props }: React.ComponentProps<'div'>) {
 export {
   Sheet,
   SheetTrigger,
-  SheetClose,
+
   SheetContent,
   SheetHeader,
-  SheetFooter,
+
   SheetTitle,
   SheetDescription,
-  SheetBody,
+
 };

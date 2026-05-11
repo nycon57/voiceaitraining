@@ -5,9 +5,9 @@ import { z } from 'zod'
 // ============================================================================
 
 /** Expected audio: PCM 16-bit, 16 kHz, mono */
-export const AUDIO_SAMPLE_RATE = 16_000
-export const AUDIO_CHANNELS = 1
-export const AUDIO_BIT_DEPTH = 16
+const AUDIO_SAMPLE_RATE = 16_000
+const AUDIO_CHANNELS = 1
+const AUDIO_BIT_DEPTH = 16
 
 // ============================================================================
 // Session types
@@ -28,28 +28,6 @@ export interface CopilotSession {
   metadata: Record<string, unknown>
 }
 
-// ============================================================================
-// WebSocket message types (server → client)
-// ============================================================================
-
-export interface ConnectedMessage {
-  type: 'connected'
-  sessionId: string
-  sampleRate: number
-  channels: number
-}
-
-export interface ErrorMessage {
-  type: 'error'
-  code: string
-  message: string
-}
-
-export interface AckMessage {
-  type: 'ack'
-  bytesReceived: number
-}
-
 export type ServerMessage = ConnectedMessage | ErrorMessage | AckMessage
 
 // ============================================================================
@@ -67,19 +45,6 @@ export const clientControlSchema = z.discriminatedUnion('type', [
   }),
   z.object({ type: z.literal('end') }),
 ])
-
-export type ClientControlMessage = z.infer<typeof clientControlSchema>
-
-// ============================================================================
-// Audio chunk (internal pipeline representation)
-// ============================================================================
-
-export interface CopilotAudioChunk {
-  sessionId: string
-  timestamp: number
-  data: Buffer
-  sequenceNumber: number
-}
 
 // ============================================================================
 // WebSocket close codes

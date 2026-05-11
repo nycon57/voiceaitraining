@@ -1,43 +1,7 @@
 'use server'
 
-import { withOrgGuard } from '@/lib/auth'
+import { withOrgGuard, requireAuth } from '@/lib/auth'
 import { z } from 'zod'
-
-/**
- * Filters for track queries
- */
-export interface TrackFilters {
-  category?: string
-  industry?: string
-  search?: string
-  featured?: boolean
-  sortBy?: 'newest' | 'popular' | 'title' | 'duration'
-  limit?: number
-  offset?: number
-}
-
-/**
- * Track with enriched data
- */
-export interface EnrichedTrack {
-  id: string
-  org_id: string
-  title: string
-  description?: string
-  status: string
-  category?: string
-  industry?: string
-  featured?: boolean
-  metadata?: Record<string, unknown>
-  created_at: string
-  updated_at: string
-  scenario_count: number
-  total_duration?: number
-  enrollment_count?: number
-  avg_completion_rate?: number
-  user_enrolled?: boolean
-  user_progress?: number
-}
 
 /**
  * Track with full scenario details
@@ -84,7 +48,8 @@ export interface TrackProgress {
  * @param filters - Optional filters for category, industry, search, featured, sort, pagination
  * @returns Array of enriched tracks
  */
-export async function getPublishedTracks(filters?: TrackFilters): Promise<EnrichedTrack[]> {
+async function getPublishedTracks(filters?: TrackFilters): Promise<EnrichedTrack[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Start building query
@@ -182,19 +147,21 @@ export async function getPublishedTracks(filters?: TrackFilters): Promise<Enrich
         const scenarioCount = track.track_scenarios?.length || 0
         const enrollment = enrollmentMap.get(track.id)
 
-        // Get enrollment count for popularity
-        const { count: enrollmentCount } = await supabase
-          .from('enrollments')
-          .select('*', { count: 'exact', head: true })
-          .eq('org_id', orgId)
-          .eq('track_id', track.id)
-
-        // Calculate average completion rate
-        const { data: completedEnrollments, count: totalEnrollments } = await supabase
-          .from('enrollments')
-          .select('status', { count: 'exact' })
-          .eq('org_id', orgId)
-          .eq('track_id', track.id)
+        const [
+          { count: enrollmentCount },
+          { data: completedEnrollments, count: totalEnrollments },
+        ] = await Promise.all([
+          supabase
+            .from('enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('org_id', orgId)
+            .eq('track_id', track.id),
+          supabase
+            .from('enrollments')
+            .select('status', { count: 'exact' })
+            .eq('org_id', orgId)
+            .eq('track_id', track.id),
+        ])
 
         const completedCount = completedEnrollments?.filter((e) => e.status === 'completed').length || 0
         const avgCompletionRate = totalEnrollments && totalEnrollments > 0
@@ -239,6 +206,7 @@ export async function getPublishedTracks(filters?: TrackFilters): Promise<Enrich
  * @throws Error if track not found
  */
 export async function getTrackDetails(trackId: string): Promise<TrackWithScenarios> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     // Get track with scenarios
@@ -267,29 +235,30 @@ export async function getTrackDetails(trackId: string): Promise<TrackWithScenari
       throw new Error('Track not found')
     }
 
-    // Check if user is enrolled
-    const { data: enrollment } = await supabase
-      .from('enrollments')
-      .select('track_id, progress, status')
-      .eq('org_id', orgId)
-      .eq('clerk_user_id', user.id)
-      .eq('track_id', trackId)
-      .eq('status', 'active')
-      .maybeSingle()
-
-    // Get enrollment statistics
-    const { count: enrollmentCount } = await supabase
-      .from('enrollments')
-      .select('*', { count: 'exact', head: true })
-      .eq('org_id', orgId)
-      .eq('track_id', trackId)
-
-    // Calculate completion rate
-    const { data: enrollments, count: totalEnrollments } = await supabase
-      .from('enrollments')
-      .select('status', { count: 'exact' })
-      .eq('org_id', orgId)
-      .eq('track_id', trackId)
+    const [
+      { data: enrollment },
+      { count: enrollmentCount },
+      { data: enrollments, count: totalEnrollments },
+    ] = await Promise.all([
+      supabase
+        .from('enrollments')
+        .select('track_id, progress, status')
+        .eq('org_id', orgId)
+        .eq('clerk_user_id', user.id)
+        .eq('track_id', trackId)
+        .eq('status', 'active')
+        .maybeSingle(),
+      supabase
+        .from('enrollments')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', orgId)
+        .eq('track_id', trackId),
+      supabase
+        .from('enrollments')
+        .select('status', { count: 'exact' })
+        .eq('org_id', orgId)
+        .eq('track_id', trackId),
+    ])
 
     const completedCount = enrollments?.filter((e) => e.status === 'completed').length || 0
     const avgCompletionRate = totalEnrollments && totalEnrollments > 0
@@ -347,6 +316,7 @@ export async function getTrackDetails(trackId: string): Promise<TrackWithScenari
  * @throws Error if track not found or permission denied
  */
 export async function getTrackProgress(trackId: string, userId?: string): Promise<TrackProgress> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
     const targetUserId = userId || user.id
 
@@ -477,7 +447,8 @@ export async function getTrackProgress(trackId: string, userId?: string): Promis
  *
  * @returns Array of unique categories
  */
-export async function getTrackCategories(): Promise<string[]> {
+async function getTrackCategories(): Promise<string[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: tracks, error } = await supabase
@@ -491,7 +462,9 @@ export async function getTrackCategories(): Promise<string[]> {
       throw new Error(`Failed to get categories: ${error.message}`)
     }
 
-    const categories = [...new Set(tracks.map((t) => t.category).filter(Boolean))] as string[]
+    const categories = [
+      ...new Set(tracks.flatMap((t) => (t.category ? [t.category] : []))),
+    ]
     return categories.sort()
   })
 }
@@ -501,7 +474,8 @@ export async function getTrackCategories(): Promise<string[]> {
  *
  * @returns Array of unique industries
  */
-export async function getTrackIndustries(): Promise<string[]> {
+async function getTrackIndustries(): Promise<string[]> {
+  await requireAuth()
   return withOrgGuard(async (user, orgId, supabase) => {
 
     const { data: tracks, error } = await supabase
@@ -515,7 +489,9 @@ export async function getTrackIndustries(): Promise<string[]> {
       throw new Error(`Failed to get industries: ${error.message}`)
     }
 
-    const industries = [...new Set(tracks.map((t) => t.industry).filter(Boolean))] as string[]
+    const industries = [
+      ...new Set(tracks.flatMap((t) => (t.industry ? [t.industry] : []))),
+    ]
     return industries.sort()
   })
 }

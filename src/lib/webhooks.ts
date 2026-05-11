@@ -41,7 +41,7 @@ export interface WebhookPayload {
   signature?: string
 }
 
-export function buildWebhookPayload(
+function buildWebhookPayload(
   event: WebhookEvent,
   data: {
     orgId: string
@@ -112,7 +112,7 @@ export function buildWebhookPayload(
 
 // Convenience functions for triggering specific webhook events
 
-export async function triggerScenarioAssigned(
+async function triggerScenarioAssigned(
   orgId: string,
   orgName: string,
   user: any,
@@ -184,7 +184,7 @@ export async function triggerAttemptScoredHigh(
   await triggerWebhookEvent(orgId, 'attempt.scored.high', payload)
 }
 
-export async function triggerTrackCompleted(
+async function triggerTrackCompleted(
   orgId: string,
   orgName: string,
   user: any,
@@ -200,7 +200,7 @@ export async function triggerTrackCompleted(
   await triggerWebhookEvent(orgId, 'track.completed', payload)
 }
 
-export async function triggerUserAdded(
+async function triggerUserAdded(
   orgId: string,
   orgName: string,
   user: any
@@ -214,7 +214,7 @@ export async function triggerUserAdded(
   await triggerWebhookEvent(orgId, 'user.added', payload)
 }
 
-export async function triggerUserRemoved(
+async function triggerUserRemoved(
   orgId: string,
   orgName: string,
   user: any
@@ -228,7 +228,7 @@ export async function triggerUserRemoved(
   await triggerWebhookEvent(orgId, 'user.removed', payload)
 }
 
-export async function triggerAssignmentOverdue(
+async function triggerAssignmentOverdue(
   orgId: string,
   orgName: string,
   user: any,
@@ -246,7 +246,7 @@ export async function triggerAssignmentOverdue(
   await triggerWebhookEvent(orgId, 'assignment.overdue', payload)
 }
 
-export async function triggerPerformanceMilestone(
+async function triggerPerformanceMilestone(
   orgId: string,
   orgName: string,
   user: any,
@@ -263,7 +263,7 @@ export async function triggerPerformanceMilestone(
 }
 
 // Webhook signature verification utility
-export function verifyWebhookSignature(
+function verifyWebhookSignature(
   payload: string,
   signature: string,
   secret: string,

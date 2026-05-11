@@ -21,6 +21,7 @@ import { Progress } from '@/components/ui/progress'
 import Link from 'next/link'
 import { Calendar, UserCheck, AlertCircle, Mic, BookOpen } from 'lucide-react'
 import type { EnrichedEnrollment } from '@/actions/enrollments'
+import { formatMonthDay } from '@/lib/date-display'
 
 interface Assignment {
   id: string
@@ -113,9 +114,11 @@ function combineTrainingData(
   return items
 }
 
+const emptyAssignments: NonNullable<MyTrainingTableProps['assignments']> = []
+
 export function MyTrainingTable({
   enrollments,
-  assignments = [],
+  assignments = emptyAssignments,
   showCompleted = false,
   maxItems
 }: MyTrainingTableProps) {
@@ -149,7 +152,7 @@ export function MyTrainingTable({
     return (
       <div className="border border-dashed rounded-lg p-12 flex flex-col items-center justify-center">
         <div className="rounded-full bg-muted p-3 mb-4">
-          <Mic className="h-6 w-6 text-muted-foreground" />
+          <Mic className="size-6 text-muted-foreground" />
         </div>
         <p className="text-sm text-muted-foreground text-center">
           No active training sessions yet.
@@ -188,9 +191,9 @@ export function MyTrainingTable({
                 <TableCell>
                   <div className="flex items-center justify-center">
                     {item.type === 'scenario' ? (
-                      <Mic className="h-4 w-4 text-primary" />
+                      <Mic className="size-4 text-primary" />
                     ) : (
-                      <BookOpen className="h-4 w-4 text-primary" />
+                      <BookOpen className="size-4 text-primary" />
                     )}
                   </div>
                 </TableCell>
@@ -236,7 +239,7 @@ export function MyTrainingTable({
                 <TableCell>
                   {item.assignment ? (
                     <div className="flex items-center gap-1.5">
-                      <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                      <UserCheck className="size-3.5 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground truncate">
                         {item.assignment.assignedBy || 'Assigned'}
                       </span>
@@ -251,13 +254,10 @@ export function MyTrainingTable({
                     <div className={`flex items-center gap-1.5 text-xs ${
                       item.assignment.isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground'
                     }`}>
-                      {item.assignment.isOverdue && <AlertCircle className="h-3 w-3" />}
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {new Date(item.assignment.dueAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                      {item.assignment.isOverdue && <AlertCircle className="size-3" />}
+                      <Calendar className="size-3" />
+                      <span suppressHydrationWarning>
+                        {formatMonthDay(item.assignment.dueAt)}
                       </span>
                     </div>
                   ) : (

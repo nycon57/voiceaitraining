@@ -1,7 +1,7 @@
 import type { AgentDefinition } from '@/lib/agents/base'
 import { registerAgent } from '@/lib/agents/registry'
 
-export const managerAgent: AgentDefinition = {
+const managerAgent: AgentDefinition = {
   id: 'manager-intelligence',
   name: 'Manager Intelligence Agent',
   description:

@@ -11,24 +11,6 @@ import {
 } from '@/lib/memory/user-memory'
 import type { ScenarioDifficulty, ScenarioRubric } from '@/types/scenario'
 
-// ── Types ──────────────────────────────────────────────────────────
-
-export interface PerformanceSummary {
-  overallScore: number | null
-  attemptCount: number
-  trend: 'up' | 'down' | 'stable'
-  recentScores: number[]
-  teamAvgScore: number | null
-  comparedToTeam: 'above' | 'below' | 'at' | null
-}
-
-export interface RecommendedAssignment {
-  scenarioId: string
-  scenarioTitle: string
-  reason: string
-  difficulty: ScenarioDifficulty | null
-}
-
 export interface CoachingBrief {
   traineeId: string
   traineeName: string
@@ -120,7 +102,7 @@ function mean(values: number[]): number {
 }
 
 function extractScores(attempts: AttemptRow[]): number[] {
-  return attempts.map((a) => a.score).filter((s): s is number => s != null)
+  return attempts.flatMap((a) => (a.score != null ? [a.score] : []))
 }
 
 function formatName(trainee: TraineeRow): string {
@@ -147,9 +129,10 @@ function trendSuffix(trend: WeaknessEntry['trend']): string {
 }
 
 function ensureCriticalTalkingPoints(points: string[], areasToDiscuss: string[]): string[] {
-  const normalized = points
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
+  const normalized = points.flatMap((line) => {
+    const trimmed = line.trim()
+    return trimmed.length > 0 ? [trimmed] : []
+  })
   const needsObjectionPoints = areasToDiscuss.some((area) => {
     const lower = area.toLowerCase()
     return lower.includes('objection') && lower.includes('declining')
@@ -197,20 +180,21 @@ export async function generateCoachingBrief(
   const performanceSummary = buildPerformanceSummary(traineeAttempts, teamAttempts)
   const strengthsToReinforce = buildStrengths(strengths)
   const areasToDiscuss = buildAreasToDiscuss(weaknesses)
-  const recommendedAssignments = await buildRecommendedAssignments(
-    supabase,
-    orgId,
-    traineeId,
-    weaknesses,
-    scenarios,
-  )
-
-  const talkingPoints = await generateTalkingPoints(
-    trainee,
-    performanceSummary,
-    areasToDiscuss,
-    strengthsToReinforce,
-  )
+  const [recommendedAssignments, talkingPoints] = await Promise.all([
+    buildRecommendedAssignments(
+      supabase,
+      orgId,
+      traineeId,
+      weaknesses,
+      scenarios,
+    ),
+    generateTalkingPoints(
+      trainee,
+      performanceSummary,
+      areasToDiscuss,
+      strengthsToReinforce,
+    ),
+  ])
 
   return {
     traineeId,
@@ -399,9 +383,9 @@ async function buildRecommendedAssignments(
   const recentCutoff = new Date(Date.now() - RECENT_DAYS * 24 * 60 * 60 * 1000).toISOString()
   const recentCounts = await getRecentAttemptCounts(supabase, orgId, traineeId, recentCutoff)
   const overPracticed = new Set(
-    recentCounts
-      .filter((r) => r.count >= RECENT_ATTEMPT_THRESHOLD)
-      .map((r) => r.scenarioId),
+    recentCounts.flatMap((r) =>
+      r.count >= RECENT_ATTEMPT_THRESHOLD ? [r.scenarioId] : [],
+    ),
   )
 
   const candidates = scenarios.filter((s) => !overPracticed.has(s.id))
@@ -452,9 +436,11 @@ function buildAssignmentReason(
   scenario: ScenarioRow,
   weaknesses: WeaknessEntry[],
 ): string {
-  const matched = weaknesses
-    .filter((w) => rubricMatchesGap(scenario.rubric, w.key))
-    .map((w) => skillLabel(w.key).toLowerCase())
+  const matched = weaknesses.flatMap((w) =>
+    rubricMatchesGap(scenario.rubric, w.key)
+      ? [skillLabel(w.key).toLowerCase()]
+      : [],
+  )
 
   if (matched.length > 0) {
     return `Targets weak areas: ${matched.join(', ')}.`
@@ -526,10 +512,10 @@ Rules:
       prompt,
     })
 
-    const generatedPoints = text
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
+    const generatedPoints = text.split('\n').flatMap((line) => {
+      const trimmed = line.trim()
+      return trimmed.length > 0 ? [trimmed] : []
+    })
 
     return ensureCriticalTalkingPoints(generatedPoints, areasToDiscuss)
   } catch (error) {
@@ -546,10 +532,10 @@ function buildFallbackTalkingPoints(
 
   for (const area of areasToDiscuss) {
     const label = area.split(' at ')[0].toLowerCase()
-    if (label.includes('objection')) {
+    if (/objection/.test(label)) {
       points.push(OBJECTION_POINT_1)
       points.push(OBJECTION_POINT_2)
-    } else if (label.includes('question')) {
+    } else if (/question/.test(label)) {
       points.push('Practice framing open-ended questions that uncover prospect needs.')
     } else {
       points.push(`Discuss strategies to improve ${label}.`)

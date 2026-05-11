@@ -91,7 +91,7 @@ function BreakpointDemo({ name, breakpoint }: { name: string, breakpoint: any })
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Icon className="h-5 w-5 text-muted-foreground" />
+            <Icon className="size-5 text-muted-foreground" />
             <div>
               <CardTitle className="text-lg">{name}</CardTitle>
               <CardDescription className="text-sm">{breakpoint.px}</CardDescription>
@@ -100,10 +100,10 @@ function BreakpointDemo({ name, breakpoint }: { name: string, breakpoint: any })
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={() => copyValue(breakpoint.px)}
           >
-            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
           </Button>
         </div>
       </CardHeader>
@@ -135,7 +135,7 @@ function GridDemo({ template }: { template: any }) {
                      template.classes.includes("grid-cols-2") ? 2 : 6
 
     return Array.from({ length: itemCount }, (_, i) => (
-      <div key={i} className="bg-primary/10 border border-primary/20 rounded-lg p-4 min-h-[80px] flex items-center justify-center">
+      <div key={`${template.id}-grid-item-${i + 1}`} className="bg-primary/10 border border-primary/20 rounded-lg p-4 min-h-[80px] flex items-center justify-center">
         <span className="text-sm font-medium text-primary">Item {i + 1}</span>
       </div>
     ))
@@ -152,10 +152,10 @@ function GridDemo({ template }: { template: any }) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={() => copyValue(template.classes)}
           >
-            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
           </Button>
         </div>
       </CardHeader>
@@ -281,7 +281,7 @@ export function LayoutSystemSection() {
     <div className="space-y-12">
       {/* Header */}
       <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Layout System</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Layout System</h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           A comprehensive layout system built on CSS Grid and Flexbox, providing consistent
           structure and responsive behavior across all screen sizes and devices.
@@ -291,7 +291,7 @@ export function LayoutSystemSection() {
       {/* Grid System */}
       <section id="grid" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Grid System</h2>
+          <h2 className="text-3xl font-semibold">Grid System</h2>
           <p className="text-lg text-muted-foreground">
             Flexible grid layouts that adapt seamlessly from mobile to desktop,
             built with CSS Grid for maximum control and responsiveness.
@@ -340,7 +340,7 @@ export function LayoutSystemSection() {
       {/* Containers */}
       <section id="containers" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Containers</h2>
+          <h2 className="text-3xl font-semibold">Containers</h2>
           <p className="text-lg text-muted-foreground">
             Content containers that provide consistent maximum widths and
             horizontal centering across different screen sizes.
@@ -355,7 +355,7 @@ export function LayoutSystemSection() {
       {/* Responsive Breakpoints */}
       <section id="breakpoints" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Responsive Breakpoints</h2>
+          <h2 className="text-3xl font-semibold">Responsive Breakpoints</h2>
           <p className="text-lg text-muted-foreground">
             Mobile-first breakpoint system that ensures consistent behavior
             across all device types and screen orientations.
@@ -452,7 +452,7 @@ export function LayoutSystemSection() {
       {/* Page Templates */}
       <section id="templates" className="space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Page Templates</h2>
+          <h2 className="text-3xl font-semibold">Page Templates</h2>
           <p className="text-lg text-muted-foreground">
             Common page layouts and structures that provide consistency
             across different types of content and functionality.

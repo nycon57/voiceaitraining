@@ -116,6 +116,8 @@ export function SessionReview({ sessionId, user }: SessionReviewProps) {
   const ratio = getTalkListenRatio()
   const completedObjectives = mockSessionData.objectives.filter(obj => obj.completed).length
 
+  const sectionProps = { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives }
+
   return (
     <div className="min-h-screen bg-background">
 
@@ -124,7 +126,7 @@ export function SessionReview({ sessionId, user }: SessionReviewProps) {
         <div className="flex h-16 items-center px-4">
           <div className="flex items-center gap-4 flex-1">
             <div className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-primary" />
+              <Trophy className="size-5 text-primary" />
               <span className="font-medium">Session Review</span>
             </div>
             <Badge variant="outline">{mockSessionData.scenario.title}</Badge>
@@ -133,11 +135,11 @@ export function SessionReview({ sessionId, user }: SessionReviewProps) {
 
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="size-4 mr-2" />
               Export
             </Button>
             <Button variant="outline" size="sm">
-              <Share className="h-4 w-4 mr-2" />
+              <Share className="size-4 mr-2" />
               Share
             </Button>
             <Button asChild>
@@ -152,46 +154,7 @@ export function SessionReview({ sessionId, user }: SessionReviewProps) {
       <div className="p-6 space-y-6">
 
         {/* Score Overview */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">
-                  {mockSessionData.performance.overallScore}
-                </div>
-                <div className="text-sm text-muted-foreground">Overall Score</div>
-                <div className="flex items-center justify-center gap-1 mt-1">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  <span className="text-xs text-green-500">+12 from last session</span>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-2">
-                  {formatTime(mockSessionData.performance.duration)}
-                </div>
-                <div className="text-sm text-muted-foreground">Duration</div>
-                <div className="text-xs text-muted-foreground mt-1">Target: 8-12 min</div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-2">
-                  {completedObjectives}/{mockSessionData.objectives.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Objectives Met</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {Math.round((completedObjectives / mockSessionData.objectives.length) * 100)}% completion
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-2">{ratio.talk}%</div>
-                <div className="text-sm text-muted-foreground">Talk Time</div>
-                <div className="text-xs text-muted-foreground mt-1">Target: 40-45%</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <SessionReviewSection1 {...sectionProps} />
 
         {/* Detailed Review Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -203,303 +166,393 @@ export function SessionReview({ sessionId, user }: SessionReviewProps) {
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-
-              {/* Objectives */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Scenario Objectives
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {mockSessionData.objectives.map((objective, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className={`h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                        objective.completed
-                          ? 'bg-green-500 text-white'
-                          : 'border-2 border-muted-foreground'
-                      }`}>
-                        {objective.completed && <CheckCircle className="h-3 w-3" />}
-                      </div>
-                      <div className="flex-1">
-                        <span className={`text-sm ${
-                          objective.completed ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          {objective.text}
-                        </span>
-                        {objective.timestamp && (
-                          <div className="text-xs text-muted-foreground">
-                            Completed at {objective.timestamp}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Key Metrics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Key Performance Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Talk/Listen Ratio</span>
-                      <span>{ratio.talk}:{ratio.listen}</span>
-                    </div>
-                    <Progress value={ratio.talk} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Target: 40-45% talk time
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-xl font-bold">{mockSessionData.metrics.wordsPerMinute}</div>
-                      <div className="text-xs text-muted-foreground">Words/Min</div>
-                      <div className="text-xs text-green-500">Optimal pace</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold">{mockSessionData.metrics.fillerWords}</div>
-                      <div className="text-xs text-muted-foreground">Filler Words</div>
-                      <div className="text-xs text-orange-500">Room for improvement</div>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="text-xl font-bold">{mockSessionData.metrics.interruptions}</div>
-                    <div className="text-xs text-muted-foreground">Interruptions</div>
-                    <div className="text-xs text-green-500">Excellent listening</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+          <SessionReviewTabOverview {...sectionProps} />
 
           {/* Metrics Tab */}
-          <TabsContent value="metrics" className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Communication Metrics</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Speaking Pace</span>
-                    <Badge variant="default">{mockSessionData.metrics.pace}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Words per Minute</span>
-                    <span className="font-medium">{mockSessionData.metrics.wordsPerMinute}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Filler Words</span>
-                    <span className="font-medium">{mockSessionData.metrics.fillerWords}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Interruptions</span>
-                    <span className="font-medium">{mockSessionData.metrics.interruptions}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Time Analysis</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Total Duration</span>
-                    <span className="font-medium">{formatTime(mockSessionData.performance.duration)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Talk Time</span>
-                    <span className="font-medium">{formatTime(mockSessionData.metrics.talkTime)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Listen Time</span>
-                    <span className="font-medium">{formatTime(mockSessionData.metrics.listenTime)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Talk Percentage</span>
-                    <span className="font-medium">{ratio.talk}%</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Engagement</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Sentiment Score</span>
-                    <Badge variant="default">
-                      {Math.round(mockSessionData.metrics.sentiment * 100)}% Positive
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Objectives Met</span>
-                    <span className="font-medium">
-                      {completedObjectives}/{mockSessionData.objectives.length}
-                    </span>
-                  </div>
-                  <Progress
-                    value={(completedObjectives / mockSessionData.objectives.length) * 100}
-                    className="h-2"
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+          <SessionReviewTabMetrics {...sectionProps} />
 
           {/* Transcript Tab */}
-          <TabsContent value="transcript">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Conversation Transcript
-                </CardTitle>
-                <CardDescription>
-                  Full transcript of your training session with timestamps
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {mockSessionData.transcript.map((entry, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="text-xs text-muted-foreground font-mono w-16 flex-shrink-0 mt-1">
-                        {entry.timestamp}
-                      </div>
-                      <div className="flex gap-3 flex-1">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          entry.speaker === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        }`}>
-                          {entry.speaker === 'user' ? (
-                            <Mic className="h-4 w-4" />
-                          ) : (
-                            <Volume2 className="h-4 w-4" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-xs text-muted-foreground mb-1">
-                            {entry.speaker === 'user' ? 'You' : 'Sarah (Customer)'}
-                          </div>
-                          <p className="text-sm">{entry.text}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <SessionReviewTabTranscript {...sectionProps} />
 
           {/* Feedback Tab */}
-          <TabsContent value="feedback" className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-600">
-                    <CheckCircle className="h-5 w-5" />
-                    Strengths
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {mockSessionData.feedback.strengths.map((strength, i) => (
-                      <li key={i} className="text-sm flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0" />
-                        {strength}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-orange-600">
-                    <AlertCircle className="h-5 w-5" />
-                    Areas for Improvement
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {mockSessionData.feedback.improvements.map((improvement, i) => (
-                      <li key={i} className="text-sm flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
-                        {improvement}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-blue-600">
-                    <BookOpen className="h-5 w-5" />
-                    Recommended Next Steps
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {mockSessionData.feedback.nextSteps.map((step, i) => (
-                      <li key={i} className="text-sm flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                        {step}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+          <SessionReviewTabFeedback {...sectionProps} />
         </Tabs>
 
         {/* Action Buttons */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button asChild>
-                <Link href="/training/session/new?scenario=1" className="gap-2">
-                  <RotateCcw className="h-4 w-4" />
-                  Retry This Scenario
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/training" className="gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  Back to Training Hub
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/reports" className="gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  View Progress Report
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <SessionReviewSection2 {...sectionProps} />
       </div>
     </div>
+  )
+}
+type SessionReviewSectionProps = {
+  sessionId: string
+  user: AuthUser
+  activeTab: string
+  setActiveTab: (value: string) => void
+  formatTime: (seconds: number) => string
+  ratio: { talk: number; listen: number }
+  completedObjectives: number
+}
+
+function SessionReviewSection1(props: SessionReviewSectionProps) {
+  const { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives } = props
+  return (
+            <Card>
+              <CardContent className="p-6">
+                <div className="grid md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-primary mb-2">
+                      {mockSessionData.performance.overallScore}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Overall Score</div>
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      <TrendingUp className="size-4 text-green-500" />
+                      <span className="text-xs text-green-500">+12 from last session</span>
+                    </div>
+                  </div>
+    
+                  <div className="text-center">
+                    <div className="text-2xl font-bold mb-2">
+                      {formatTime(mockSessionData.performance.duration)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Duration</div>
+                    <div className="text-xs text-muted-foreground mt-1">Target: 8-12 min</div>
+                  </div>
+    
+                  <div className="text-center">
+                    <div className="text-2xl font-bold mb-2">
+                      {completedObjectives}/{mockSessionData.objectives.length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Objectives Met</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {Math.round((completedObjectives / mockSessionData.objectives.length) * 100)}% completion
+                    </div>
+                  </div>
+    
+                  <div className="text-center">
+                    <div className="text-2xl font-bold mb-2">{ratio.talk}%</div>
+                    <div className="text-sm text-muted-foreground">Talk Time</div>
+                    <div className="text-xs text-muted-foreground mt-1">Target: 40-45%</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+  )
+}
+
+function SessionReviewSection2(props: SessionReviewSectionProps) {
+  const { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives } = props
+  return (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Button asChild>
+                    <Link href="/training/session/new?scenario=1" className="gap-2">
+                      <RotateCcw className="size-4" />
+                      Retry This Scenario
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/training" className="gap-2">
+                      <BookOpen className="size-4" />
+                      Back to Training Hub
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/reports" className="gap-2">
+                      <TrendingUp className="size-4" />
+                      View Progress Report
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+  )
+}
+
+function SessionReviewTabOverview(props: SessionReviewSectionProps) {
+  const { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives } = props
+  return (
+              <TabsContent value="overview" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+    
+                  {/* Objectives */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="size-5" />
+                        Scenario Objectives
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {mockSessionData.objectives.map((objective, i) => (
+                        <div key={JSON.stringify(objective)} className="flex items-start gap-3">
+                          <div className={`size-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                            objective.completed
+                              ? 'bg-green-500 text-white'
+                              : 'border-2 border-muted-foreground'
+                          }`}>
+                            {objective.completed && <CheckCircle className="size-3" />}
+                          </div>
+                          <div className="flex-1">
+                            <span className={`text-sm ${
+                              objective.completed ? 'text-foreground' : 'text-muted-foreground'
+                            }`}>
+                              {objective.text}
+                            </span>
+                            {objective.timestamp && (
+                              <div className="text-xs text-muted-foreground">
+                                Completed at {objective.timestamp}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+    
+                  {/* Key Metrics */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="size-5" />
+                        Key Performance Metrics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+    
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Talk/Listen Ratio</span>
+                          <span>{ratio.talk}:{ratio.listen}</span>
+                        </div>
+                        <Progress value={ratio.talk} className="h-2" />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Target: 40-45% talk time
+                        </p>
+                      </div>
+    
+                      <Separator />
+    
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <div className="text-xl font-bold">{mockSessionData.metrics.wordsPerMinute}</div>
+                          <div className="text-xs text-muted-foreground">Words/Min</div>
+                          <div className="text-xs text-green-500">Optimal pace</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold">{mockSessionData.metrics.fillerWords}</div>
+                          <div className="text-xs text-muted-foreground">Filler Words</div>
+                          <div className="text-xs text-orange-500">Room for improvement</div>
+                        </div>
+                      </div>
+    
+                      <div className="text-center">
+                        <div className="text-xl font-bold">{mockSessionData.metrics.interruptions}</div>
+                        <div className="text-xs text-muted-foreground">Interruptions</div>
+                        <div className="text-xs text-green-500">Excellent listening</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+  )
+}
+
+function SessionReviewTabMetrics(props: SessionReviewSectionProps) {
+  const { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives } = props
+  return (
+              <TabsContent value="metrics" className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-6">
+    
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Communication Metrics</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Speaking Pace</span>
+                        <Badge variant="default">{mockSessionData.metrics.pace}</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Words per Minute</span>
+                        <span className="font-medium">{mockSessionData.metrics.wordsPerMinute}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Filler Words</span>
+                        <span className="font-medium">{mockSessionData.metrics.fillerWords}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Interruptions</span>
+                        <span className="font-medium">{mockSessionData.metrics.interruptions}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+    
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Time Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Total Duration</span>
+                        <span className="font-medium">{formatTime(mockSessionData.performance.duration)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Talk Time</span>
+                        <span className="font-medium">{formatTime(mockSessionData.metrics.talkTime)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Listen Time</span>
+                        <span className="font-medium">{formatTime(mockSessionData.metrics.listenTime)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Talk Percentage</span>
+                        <span className="font-medium">{ratio.talk}%</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+    
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Engagement</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Sentiment Score</span>
+                        <Badge variant="default">
+                          {Math.round(mockSessionData.metrics.sentiment * 100)}% Positive
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Objectives Met</span>
+                        <span className="font-medium">
+                          {completedObjectives}/{mockSessionData.objectives.length}
+                        </span>
+                      </div>
+                      <Progress
+                        value={(completedObjectives / mockSessionData.objectives.length) * 100}
+                        className="h-2"
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+  )
+}
+
+function SessionReviewTabTranscript(props: SessionReviewSectionProps) {
+  const { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives } = props
+  return (
+              <TabsContent value="transcript">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="size-5" />
+                      Conversation Transcript
+                    </CardTitle>
+                    <CardDescription>
+                      Full transcript of your training session with timestamps
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {mockSessionData.transcript.map((entry, i) => (
+                        <div key={JSON.stringify(entry)} className="flex gap-4">
+                          <div className="text-xs text-muted-foreground font-mono w-16 flex-shrink-0 mt-1">
+                            {entry.timestamp}
+                          </div>
+                          <div className="flex gap-3 flex-1">
+                            <div className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              entry.speaker === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}>
+                              {entry.speaker === 'user' ? (
+                                <Mic className="size-4" />
+                              ) : (
+                                <Volume2 className="size-4" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-xs text-muted-foreground mb-1">
+                                {entry.speaker === 'user' ? 'You' : 'Sarah (Customer)'}
+                              </div>
+                              <p className="text-sm">{entry.text}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+  )
+}
+
+function SessionReviewTabFeedback(props: SessionReviewSectionProps) {
+  const { sessionId, user, activeTab, setActiveTab, formatTime, ratio, completedObjectives } = props
+  return (
+              <TabsContent value="feedback" className="space-y-6">
+                <div className="grid md:grid-cols-3 gap-6">
+    
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="size-5" />
+                        Strengths
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {mockSessionData.feedback.strengths.map((strength, i) => (
+                          <li key={JSON.stringify(strength)} className="text-sm flex items-start gap-2">
+                            <div className="size-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0" />
+                            {strength}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+    
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-orange-600">
+                        <AlertCircle className="size-5" />
+                        Areas for Improvement
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {mockSessionData.feedback.improvements.map((improvement, i) => (
+                          <li key={JSON.stringify(improvement)} className="text-sm flex items-start gap-2">
+                            <div className="size-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                            {improvement}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+    
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-blue-600">
+                        <BookOpen className="size-5" />
+                        Recommended Next Steps
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {mockSessionData.feedback.nextSteps.map((step, i) => (
+                          <li key={JSON.stringify(step)} className="text-sm flex items-start gap-2">
+                            <div className="size-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                            {step}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
   )
 }

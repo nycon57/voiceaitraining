@@ -22,35 +22,36 @@ export const onUserInactive = inngest.createFunction(
       return getAgentContext({ orgId, userId })
     })
 
-    await step.run('log-activity', async () => {
-      await logAgentActivity({
-        orgId,
-        userId,
-        agentId: AGENT_ID,
-        eventType: EVENT_NAMES.USER_INACTIVE,
-        action: 'send_practice_reminder',
-        details: {
-          daysSinceLastAttempt,
-          weaknessCount: context.weaknesses.length,
-        },
-      })
-    })
+    await Promise.all([
+      step.run('log-activity', async () => {
+        await logAgentActivity({
+          orgId,
+          userId,
+          agentId: AGENT_ID,
+          eventType: EVENT_NAMES.USER_INACTIVE,
+          action: 'send_practice_reminder',
+          details: {
+            daysSinceLastAttempt,
+            weaknessCount: context.weaknesses.length,
+          },
+        })
+      }),
+      step.run('emit-recommendation', async () => {
+        const message = buildReminderMessage(context.weaknesses, daysSinceLastAttempt)
 
-    await step.run('emit-recommendation', async () => {
-      const message = buildReminderMessage(context.weaknesses, daysSinceLastAttempt)
+        const payload: CoachRecommendationReadyPayload = {
+          userId,
+          orgId,
+          recommendationType: 'practice_reminder',
+          message,
+        }
 
-      const payload: CoachRecommendationReadyPayload = {
-        userId,
-        orgId,
-        recommendationType: 'practice_reminder',
-        message,
-      }
-
-      await inngest.send({
-        name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
-        data: payload,
-      })
-    })
+        await inngest.send({
+          name: EVENT_NAMES.COACH_RECOMMENDATION_READY,
+          data: payload,
+        })
+      }),
+    ])
 
     return { reminded: true, daysSinceLastAttempt }
   },

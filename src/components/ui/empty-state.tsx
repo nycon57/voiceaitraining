@@ -2,21 +2,10 @@
 
 import * as React from "react";
 import { type LucideIcon, List, Search, AlertCircle, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-// ============================================================================
-// EmptyState - General purpose empty state component
-// ============================================================================
-
-export interface EmptyStateAction {
-  label: string;
-  onClick: () => void;
-  variant?: "default" | "outline" | "secondary" | "ghost";
-  icon?: LucideIcon;
-}
 
 export interface EmptyStateProps {
   /** Lucide icon component to display */
@@ -79,8 +68,8 @@ export function EmptyState({
 
   const content = (
     <>
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
-        <Icon className="h-8 w-8 text-muted-foreground" />
+      <div className="flex size-16 items-center justify-center rounded-full bg-muted/50">
+        <Icon className="size-8 text-muted-foreground" />
       </div>
       <div className="space-y-2 text-center">
         <h3 className="font-headline text-xl font-semibold tracking-tight">
@@ -97,7 +86,7 @@ export function EmptyState({
           size="default"
           className="mt-2"
         >
-          {action.icon && <action.icon className="h-4 w-4" />}
+          {action.icon && <action.icon className="size-4" />}
           {action.label}
         </Button>
       )}
@@ -116,8 +105,8 @@ export function EmptyState({
           className
         )}
       >
-        <motion.div variants={itemVariants} className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
-          <Icon className="h-8 w-8 text-muted-foreground" />
+        <motion.div variants={itemVariants} className="flex size-16 items-center justify-center rounded-full bg-muted/50">
+          <Icon className="size-8 text-muted-foreground" />
         </motion.div>
         <motion.div variants={itemVariants} className="space-y-2 text-center">
           <h3 className="font-headline text-xl font-semibold tracking-tight">
@@ -135,7 +124,7 @@ export function EmptyState({
               size="default"
               className="mt-2"
             >
-              {action.icon && <action.icon className="h-4 w-4" />}
+              {action.icon && <action.icon className="size-4" />}
               {action.label}
             </Button>
           </motion.div>
@@ -276,25 +265,6 @@ export function EmptyStateSearch({
   );
 }
 
-// ============================================================================
-// EmptyStateError - For error states
-// ============================================================================
-
-export interface EmptyStateErrorProps {
-  /** Error title */
-  title: string;
-  /** Error description */
-  description: string;
-  /** Callback when retry button is clicked */
-  onRetry?: () => void;
-  /** Label for the retry button */
-  retryLabel?: string;
-  /** Additional CSS classes */
-  className?: string;
-  /** Disable animation */
-  animated?: boolean;
-}
-
 /**
  * EmptyStateError - For error states
  *
@@ -307,7 +277,7 @@ export interface EmptyStateErrorProps {
  * />
  * ```
  */
-export function EmptyStateError({
+function EmptyStateError({
   title,
   description,
   onRetry,
@@ -336,8 +306,8 @@ export function EmptyStateError({
 
   const content = (
     <>
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-        <AlertCircle className="h-8 w-8 text-destructive" />
+      <div className="flex size-16 items-center justify-center rounded-full bg-destructive/10">
+        <AlertCircle className="size-8 text-destructive" />
       </div>
       <div className="space-y-2 text-center">
         <h3 className="font-headline text-xl font-semibold tracking-tight text-destructive">
@@ -372,8 +342,8 @@ export function EmptyStateError({
           className
         )}
       >
-        <motion.div variants={itemVariants} className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-          <AlertCircle className="h-8 w-8 text-destructive" />
+        <motion.div variants={itemVariants} className="flex size-16 items-center justify-center rounded-full bg-destructive/10">
+          <AlertCircle className="size-8 text-destructive" />
         </motion.div>
         <motion.div variants={itemVariants} className="space-y-2 text-center">
           <h3 className="font-headline text-xl font-semibold tracking-tight text-destructive">
@@ -410,11 +380,3 @@ export function EmptyStateError({
     </div>
   );
 }
-
-// Export all types for external use
-export type {
-  EmptyStateProps as EmptyStateComponentProps,
-  EmptyStateListProps as EmptyStateListComponentProps,
-  EmptyStateSearchProps as EmptyStateSearchComponentProps,
-  EmptyStateErrorProps as EmptyStateErrorComponentProps,
-};

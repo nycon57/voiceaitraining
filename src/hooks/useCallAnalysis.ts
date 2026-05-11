@@ -3,12 +3,6 @@
 import { useState, useCallback } from "react"
 import type { TranscriptMessage, CallKPIs } from "./useVapiCall"
 
-export interface FeedbackSection {
-  title: string
-  content: string
-  type: "strength" | "improvement" | "neutral"
-}
-
 export interface CallAnalysis {
   score: number
   scoreBreakdown: {
@@ -73,10 +67,10 @@ export function useCallAnalysis({ attemptId, onComplete }: UseCallAnalysisOption
         const decoder = new TextDecoder()
         let buffer = ""
 
-        while (true) {
+        const processStream = async (): Promise<void> => {
           const { done, value } = await reader.read()
 
-          if (done) break
+          if (done) return
 
           const chunk = decoder.decode(value, { stream: true })
           buffer += chunk
@@ -111,7 +105,10 @@ export function useCallAnalysis({ attemptId, onComplete }: UseCallAnalysisOption
               }
             }
           }
+          await processStream()
         }
+
+        await processStream()
 
         setIsAnalyzing(false)
       } catch (err) {

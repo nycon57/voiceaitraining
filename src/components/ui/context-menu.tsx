@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as ContextMenuPrimitive from '@radix-ui/react-context-menu';
 import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -233,7 +233,7 @@ function ContextMenuCheckboxItem({
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
           <motion.div
-            initial={{ scale: 0 }}
+            initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.1 }}
           >
@@ -263,7 +263,7 @@ function ContextMenuRadioItem({
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
           <motion.div
-            initial={{ scale: 0 }}
+            initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.1 }}
           >
@@ -333,15 +333,5 @@ export {
   ContextMenuTrigger,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuCheckboxItem,
-  ContextMenuRadioItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuGroup,
-  ContextMenuPortal,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-  ContextMenuRadioGroup,
+
 };

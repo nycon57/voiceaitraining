@@ -4,7 +4,7 @@ import { registerAgent } from '@/lib/agents/registry'
 import { onAttemptScored } from './on-attempt-scored'
 import { onUserInactive } from './on-user-inactive'
 
-export const coachAgent: AgentDefinition = {
+const coachAgent: AgentDefinition = {
   id: 'coach-agent',
   name: 'Coach Agent',
   description:

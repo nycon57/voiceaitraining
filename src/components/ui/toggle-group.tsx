@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
-import { motion } from "framer-motion"
+import { m as motion } from "framer-motion"
 import { type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -70,7 +70,7 @@ function ToggleGroupItem({
   VariantProps<typeof toggleVariants> & {
     animated?: boolean
   }) {
-  const context = React.useContext(ToggleGroupContext)
+  const context = React.use(ToggleGroupContext)
 
   const itemContent = (
     <ToggleGroupPrimitive.Item

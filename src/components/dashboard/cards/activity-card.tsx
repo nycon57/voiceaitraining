@@ -52,8 +52,8 @@ export function ActivityCard({
               >
                 <div className="flex gap-3 flex-1">
                   {activity.icon && (
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted flex-shrink-0 mt-0.5">
-                      <activity.icon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex items-center justify-center size-8 rounded-full bg-muted flex-shrink-0 mt-0.5">
+                      <activity.icon className="size-4 text-muted-foreground" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
@@ -91,7 +91,7 @@ export function ActivityCard({
 /**
  * Compact activity list without card wrapper
  */
-export function ActivityList({
+function ActivityList({
   activities,
   maxItems = 5,
   emptyMessage = "No recent activity"

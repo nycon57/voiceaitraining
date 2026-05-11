@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -40,19 +40,10 @@ export function TrainingFilters({
   })
   const [searchInput, setSearchInput] = useState("")
 
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters((prev) => ({ ...prev, search: searchInput }))
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [searchInput])
-
-  // Notify parent of filter changes
-  useEffect(() => {
-    onFilterChange(filters)
-  }, [filters, onFilterChange])
+  const updateFilters = (nextFilters: TrainingFiltersState) => {
+    setFilters(nextFilters)
+    onFilterChange(nextFilters)
+  }
 
   const hasActiveFilters =
     filters.search !== "" ||
@@ -62,14 +53,16 @@ export function TrainingFilters({
     filters.sort !== "newest"
 
   const clearFilters = () => {
-    setSearchInput("")
-    setFilters({
+    const clearedFilters = {
       search: "",
       category: "all",
       industry: "all",
       difficulty: "all",
       sort: "newest",
-    })
+    }
+
+    setSearchInput("")
+    updateFilters(clearedFilters)
   }
 
   return (
@@ -77,11 +70,15 @@ export function TrainingFilters({
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search scenarios and tracks..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              const search = e.target.value
+              setSearchInput(search)
+              updateFilters({ ...filters, search })
+            }}
             className="pl-9"
           />
         </div>
@@ -89,9 +86,7 @@ export function TrainingFilters({
         {/* Category Select */}
         <Select
           value={filters.category}
-          onValueChange={(value) =>
-            setFilters((prev) => ({ ...prev, category: value }))
-          }
+          onValueChange={(value) => updateFilters({ ...filters, category: value })}
         >
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Category" />
@@ -109,9 +104,7 @@ export function TrainingFilters({
         {/* Industry Select */}
         <Select
           value={filters.industry}
-          onValueChange={(value) =>
-            setFilters((prev) => ({ ...prev, industry: value }))
-          }
+          onValueChange={(value) => updateFilters({ ...filters, industry: value })}
         >
           <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder="Industry" />
@@ -129,9 +122,7 @@ export function TrainingFilters({
         {/* Difficulty Select */}
         <Select
           value={filters.difficulty}
-          onValueChange={(value) =>
-            setFilters((prev) => ({ ...prev, difficulty: value }))
-          }
+          onValueChange={(value) => updateFilters({ ...filters, difficulty: value })}
         >
           <SelectTrigger className="w-full md:w-[160px]">
             <SelectValue placeholder="Difficulty" />
@@ -147,9 +138,7 @@ export function TrainingFilters({
         {/* Sort Select */}
         <Select
           value={filters.sort}
-          onValueChange={(value) =>
-            setFilters((prev) => ({ ...prev, sort: value }))
-          }
+          onValueChange={(value) => updateFilters({ ...filters, sort: value })}
         >
           <SelectTrigger className="w-full md:w-[160px]">
             <SelectValue placeholder="Sort by" />
@@ -170,7 +159,7 @@ export function TrainingFilters({
             onClick={clearFilters}
             className="flex-shrink-0"
           >
-            <X className="h-4 w-4" />
+            <X className="size-4" />
           </Button>
         )}
       </div>

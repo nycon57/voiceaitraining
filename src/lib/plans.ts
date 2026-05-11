@@ -1,19 +1,5 @@
-/**
- * Plan Configuration and Types
- *
- * Defines all available subscription plans, their limits, and pricing.
- * Supports both individual users and team organizations.
- */
 
-// ============================================================================
-// Plan Type Definitions
-// ============================================================================
-
-export type IndividualPlanType = 'individual_free' | 'individual_pro' | 'individual_ultra'
-export type TeamPlanType = 'starter' | 'professional' | 'enterprise' | 'trial'
 export type PlanType = IndividualPlanType | TeamPlanType
-
-export type BillingInterval = 'monthly' | 'annual'
 
 // ============================================================================
 // Plan Limits Interface
@@ -30,15 +16,6 @@ export interface PlanLimits {
   webhooks?: boolean
   sso?: boolean
   dedicated_support?: boolean
-}
-
-// ============================================================================
-// Plan Pricing Interface
-// ============================================================================
-
-export interface PlanPricing {
-  monthly: number
-  annual: number // Annual price (typically monthly * 10 for 2 months free)
 }
 
 // ============================================================================
@@ -75,7 +52,7 @@ export interface TeamPlan {
 // Individual Plan Configurations
 // ============================================================================
 
-export const INDIVIDUAL_PLANS: Record<IndividualPlanType, IndividualPlan> = {
+const INDIVIDUAL_PLANS: Record<IndividualPlanType, IndividualPlan> = {
   individual_free: {
     type: 'individual_free',
     name: 'Free',
@@ -173,7 +150,7 @@ export const INDIVIDUAL_PLANS: Record<IndividualPlanType, IndividualPlan> = {
 // Team Plan Configurations
 // ============================================================================
 
-export const TEAM_PLANS: Record<TeamPlanType, TeamPlan> = {
+const TEAM_PLANS: Record<TeamPlanType, TeamPlan> = {
   trial: {
     type: 'trial',
     name: 'Trial',
@@ -312,14 +289,14 @@ export const TEAM_PLANS: Record<TeamPlanType, TeamPlan> = {
 /**
  * Check if a plan is an individual plan
  */
-export function isIndividualPlan(plan: PlanType): plan is IndividualPlanType {
+function isIndividualPlan(plan: PlanType): plan is IndividualPlanType {
   return plan.startsWith('individual_')
 }
 
 /**
  * Check if a plan is a team plan
  */
-export function isTeamPlan(plan: PlanType): plan is TeamPlanType {
+function isTeamPlan(plan: PlanType): plan is TeamPlanType {
   return !plan.startsWith('individual_')
 }
 
@@ -344,7 +321,7 @@ export function getPlanLimits(plan: PlanType): PlanLimits {
 /**
  * Check if a plan has a specific feature
  */
-export function planHasFeature(plan: PlanType, feature: keyof PlanLimits): boolean {
+function planHasFeature(plan: PlanType, feature: keyof PlanLimits): boolean {
   const limits = getPlanLimits(plan)
   return !!limits[feature]
 }
@@ -352,7 +329,7 @@ export function planHasFeature(plan: PlanType, feature: keyof PlanLimits): boole
 /**
  * Check if a plan allows unlimited usage for a specific limit
  */
-export function planIsUnlimited(plan: PlanType, limit: keyof Pick<PlanLimits, 'max_users' | 'max_sessions_per_month' | 'max_scenarios'>): boolean {
+function planIsUnlimited(plan: PlanType, limit: keyof Pick<PlanLimits, 'max_users' | 'max_sessions_per_month' | 'max_scenarios'>): boolean {
   const limits = getPlanLimits(plan)
   return limits[limit] === -1
 }
@@ -360,7 +337,7 @@ export function planIsUnlimited(plan: PlanType, limit: keyof Pick<PlanLimits, 'm
 /**
  * Check if usage is within plan limits
  */
-export function isWithinPlanLimit(
+function isWithinPlanLimit(
   plan: PlanType,
   limit: keyof Pick<PlanLimits, 'max_users' | 'max_sessions_per_month' | 'max_scenarios'>,
   currentUsage: number
@@ -377,7 +354,7 @@ export function isWithinPlanLimit(
 /**
  * Calculate usage percentage for a plan limit
  */
-export function calculateUsagePercentage(
+function calculateUsagePercentage(
   plan: PlanType,
   limit: keyof Pick<PlanLimits, 'max_users' | 'max_sessions_per_month' | 'max_scenarios'>,
   currentUsage: number
@@ -396,7 +373,7 @@ export function calculateUsagePercentage(
 /**
  * Get plan display price
  */
-export function getPlanDisplayPrice(plan: TeamPlan | IndividualPlan, interval: BillingInterval = 'monthly'): string {
+function getPlanDisplayPrice(plan: TeamPlan | IndividualPlan, interval: BillingInterval = 'monthly'): string {
   if (plan.price === 'custom') {
     return 'Custom'
   }
@@ -419,7 +396,7 @@ export function getPlanDisplayPrice(plan: TeamPlan | IndividualPlan, interval: B
 /**
  * Get annual savings amount
  */
-export function getAnnualSavings(plan: TeamPlan | IndividualPlan): number {
+function getAnnualSavings(plan: TeamPlan | IndividualPlan): number {
   if (plan.price === 'custom' || plan.price.monthly === 0) {
     return 0
   }
@@ -433,14 +410,14 @@ export function getAnnualSavings(plan: TeamPlan | IndividualPlan): number {
 /**
  * Get all individual plans as array
  */
-export function getIndividualPlans(): IndividualPlan[] {
+function getIndividualPlans(): IndividualPlan[] {
   return Object.values(INDIVIDUAL_PLANS)
 }
 
 /**
  * Get all team plans as array (excluding trial)
  */
-export function getTeamPlans(): TeamPlan[] {
+function getTeamPlans(): TeamPlan[] {
   const { trial, ...publicPlans } = TEAM_PLANS
   return Object.values(publicPlans)
 }
@@ -448,7 +425,7 @@ export function getTeamPlans(): TeamPlan[] {
 /**
  * Get all plans as array
  */
-export function getAllPlans(): (IndividualPlan | TeamPlan)[] {
+function getAllPlans(): (IndividualPlan | TeamPlan)[] {
   return [...getIndividualPlans(), ...getTeamPlans()]
 }
 
@@ -459,7 +436,7 @@ export function getAllPlans(): (IndividualPlan | TeamPlan)[] {
 /**
  * Get available upgrade options for a plan
  */
-export function getUpgradeOptions(currentPlan: PlanType): PlanType[] {
+function getUpgradeOptions(currentPlan: PlanType): PlanType[] {
   if (isIndividualPlan(currentPlan)) {
     // Individual upgrade path
     switch (currentPlan) {
@@ -488,14 +465,14 @@ export function getUpgradeOptions(currentPlan: PlanType): PlanType[] {
 /**
  * Check if an upgrade is available
  */
-export function canUpgrade(currentPlan: PlanType): boolean {
+function canUpgrade(currentPlan: PlanType): boolean {
   return getUpgradeOptions(currentPlan).length > 0
 }
 
 /**
  * Get the recommended upgrade plan
  */
-export function getRecommendedUpgrade(currentPlan: PlanType): PlanType | null {
+function getRecommendedUpgrade(currentPlan: PlanType): PlanType | null {
   const options = getUpgradeOptions(currentPlan)
 
   if (options.length === 0) return null
